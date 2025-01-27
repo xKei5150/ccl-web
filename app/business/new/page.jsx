@@ -21,7 +21,7 @@ export default function NewBusinessRecord() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       businessName: "",
@@ -50,87 +50,86 @@ export default function NewBusinessRecord() {
 
   return (
     <>
-        <PageHeader
-          title="New Business Record"
-          breadcrumbs={[
-            { href: "/records", label: "Records" },
-            { href: "/records/business", label: "Business Records" },
-            { label: "New Record" },
-          ]}
-        />
-        
-        <div className="max-w-2xl mx-auto mt-8">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="businessName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Business Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <PageHeader
+        title="New Business Record"
+        breadcrumbs={[
+          { href: "/business", label: "Business Information" },
+          { label: "New Record" },
+        ]}
+      />
+      
+      <div className="max-w-2xl mx-auto mt-8">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="businessName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Business Address</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Address</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="owner"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Owner Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="owner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Owner Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="businessEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Business Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="businessEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="flex justify-end space-x-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push("/business")}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Create Record</Button>
-              </div>
-            </form>
-          </Form>
-        </div>
-        </>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/business")}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Create Record</Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </>
   );
 }
