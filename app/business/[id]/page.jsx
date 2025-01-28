@@ -6,32 +6,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NotFound } from "@/components/ui/not-found";
 
- const businessData = [
-    {
-      id: "1",
-      businessName: "Tech Solutions Inc",
-      address: "123 Main St, City",
-      registrationDate: "2024-01-15",
-      owner: "John Smith",
-      businessEmail: "contact@techsolutions.com"
-    },
-    {
-      id: "2",
-      businessName: "Green Gardens Co",
-      address: "456 Park Ave, Town",
-      registrationDate: "2024-02-01",
-      owner: "Jane Doe",
-      businessEmail: "info@greengardens.com"
-    },
-    {
-      id: "3",
-      businessName: "Digital Services LLC",
-      address: "789 Oak Rd, Village",
-      registrationDate: "2024-02-15",
-      owner: "Mike Johnson",
-      businessEmail: "support@digitalservices.com"
-    }
-  ];
+const businessData = [
+  {
+    id: "1",
+    businessName: "Tech Solutions Inc",
+    address: "123 Main St, City",
+    registrationDate: "2024-01-15",
+    owner: "John Smith",
+    businessEmail: "contact@techsolutions.com",
+  },
+  {
+    id: "2",
+    businessName: "Green Gardens Co",
+    address: "456 Park Ave, Town",
+    registrationDate: "2024-02-01",
+    owner: "Jane Doe",
+    businessEmail: "info@greengardens.com",
+  },
+  {
+    id: "3",
+    businessName: "Digital Services LLC",
+    address: "789 Oak Rd, Village",
+    registrationDate: "2024-02-15",
+    owner: "Mike Johnson",
+    businessEmail: "support@digitalservices.com",
+  },
+];
 
 export default function ViewBusinessRecord() {
   const params = useParams();

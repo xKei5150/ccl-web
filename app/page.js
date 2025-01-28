@@ -7,7 +7,6 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader
-        title="Barangay Management System"
         breadcrumbs={[
           {
             label: "Dashboard",

@@ -7,6 +7,7 @@ import { Edit2, Trash, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
+
 const BusinessInformation = () => {
   const { toast } = useToast();
 const router = useRouter();

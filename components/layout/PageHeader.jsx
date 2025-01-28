@@ -45,7 +45,7 @@ export const PageHeader = memo(({ title, breadcrumbs }) => {
           ))}
         </BreadcrumbList>
       </Breadcrumb>
-      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      {title && <h1 className="text-3xl font-bold tracking-tight">{title}</h1>}
     </div>
   );
 });
