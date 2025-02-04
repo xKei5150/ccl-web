@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FilePenLine } from "lucide-react";
@@ -46,15 +46,16 @@ async function fetchReport(id) {
   };
 }
 
-const EditReport = ({ reportId }) => {
+const EditReport = () => {
   const router = useRouter();
+  const params = useParams();
   const { toast } = useToast();
   const [defaultValues, setDefaultValues] = React.useState(null);
 
   useEffect(() => {
     async function loadReport() {
       try {
-        const permitData = await fetchReport(reportId);
+        const permitData = await fetchReport(params.id);
         setDefaultValues(permitData);
       } catch (error) {
         toast({
@@ -65,7 +66,7 @@ const EditReport = ({ reportId }) => {
       }
     }
     loadReport();
-  }, [reportId, toast]);
+  }, [params.id, toast]);
 
   const onSubmit = async (data) => {
     try {

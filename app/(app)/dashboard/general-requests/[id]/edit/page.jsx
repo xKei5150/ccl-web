@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FilePenLine } from "lucide-react";
@@ -32,15 +32,16 @@ async function fetchGeneralRequest(id) {
   };
 }
 
-const EditGeneralRequest = ({ requestId }) => {
+const EditGeneralRequest = () => {
   const router = useRouter();
+  const params = useParams();
   const { toast } = useToast();
   const [defaultValues, setDefaultValues] = React.useState(null);
 
   useEffect(() => {
     async function loadPermit() {
       try {
-        const permitData = await fetchGeneralRequest(requestId);
+        const permitData = await fetchGeneralRequest(params.id);
         setDefaultValues(permitData);
       } catch (error) {
         toast({
@@ -51,7 +52,7 @@ const EditGeneralRequest = ({ requestId }) => {
       }
     }
     loadPermit();
-  }, [requestId, toast]);
+  }, [params.id, toast]);
 
   const onSubmit = async (data) => {
     try {

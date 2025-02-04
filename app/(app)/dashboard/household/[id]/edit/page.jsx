@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FilePenLine } from "lucide-react";
@@ -28,15 +28,16 @@ async function fetchHousehold(id) {
   };
 }
 
-const EditHousehold = ({ recordId }) => {
+const EditHousehold = () => {
   const router = useRouter();
+  const params = useParams();
   const { toast } = useToast();
   const [defaultValues, setDefaultValues] = React.useState(null);
 
   useEffect(() => {
     async function loadHousehold() {
       try {
-        const permitData = await fetchHousehold(recordId);
+        const permitData = await fetchHousehold(params.id);
         setDefaultValues(permitData);
       } catch (error) {
         toast({
@@ -47,7 +48,7 @@ const EditHousehold = ({ recordId }) => {
       }
     }
     loadHousehold();
-  }, [recordId, toast]);
+  }, [params.id, toast]);
 
   const onSubmit = async (data) => {
     try {

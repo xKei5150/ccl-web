@@ -3,7 +3,7 @@
 
 import React, { useEffect } from "react";
 import BusinessPermitForm from "@/components/form/BusinessPermitForm";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { FilePenLine } from "lucide-react";
@@ -31,15 +31,16 @@ async function fetchBusinessPermit(id) {
   };
 }
 
-const EditBusinessPermit = ({ permitId }) => {
+const EditBusinessPermit = () => {
   const router = useRouter();
+  const params = useParams();
   const { toast } = useToast();
   const [defaultValues, setDefaultValues] = React.useState(null);
 
   useEffect(() => {
     async function loadPermit() {
       try {
-        const permitData = await fetchBusinessPermit(permitId);
+        const permitData = await fetchBusinessPermit(params.id);
         setDefaultValues(permitData);
       } catch (error) {
         toast({
@@ -50,7 +51,7 @@ const EditBusinessPermit = ({ permitId }) => {
       }
     }
     loadPermit();
-  }, [permitId, toast]);
+  }, [params.id, toast]);
 
   const onSubmit = async (data) => {
     try {
