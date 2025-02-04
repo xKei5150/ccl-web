@@ -8,15 +8,6 @@ import { Button } from "@/components/ui/button";
 import { NotFound } from "@/components/ui/not-found";
 
 import { formatDate, capitalize } from "@/lib/utils";
-
-// --- Supporting Document Schema (for reference) ---
-// You might have this defined elsewhere in your project.
-export const supportingDocumentSchema = {
-  id: "string",
-  name: "string",
-  url: "string",
-};
-
 // --- Extended Business Data ---
 export const businessData = [
   {
