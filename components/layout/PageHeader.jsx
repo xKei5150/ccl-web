@@ -1,53 +1,25 @@
 import React from "react";
-import { memo } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
-const BreadcrumbItemMemo = memo(({ crumb, isLast }) => (
-  <BreadcrumbItem>
-    {isLast ? (
-      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-    ) : (
-      <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-    )}
-  </BreadcrumbItem>
-));
-
-BreadcrumbItemMemo.displayName = "BreadcrumbItemMemo";
-
-export const PageHeader = memo(({ title, breadcrumbs }) => {
+export const PageHeader = ({ title, subtitle, icon }) => {
   return (
-    <div className="space-y-4 mb-8">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            <BreadcrumbSeparator />
-          </BreadcrumbItem>
-          {/* {breadcrumbs.map((crumb, index) => (
-            <BreadcrumbItemMemo
-              key={`${crumb.href}-${index}`}
-              crumb={crumb}
-              isLast={index === breadcrumbs.length - 1}
-            />
-          ))} */}
-          {breadcrumbs.map((crumb, index) => (
-            <React.Fragment key={`${crumb.href}-${index}`}>
-              <BreadcrumbItemMemo crumb={crumb} isLast={index === breadcrumbs.length - 1} />
-              {index !== breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
-      {title && <h1 className="text-3xl font-bold tracking-tight">{title}</h1>}
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+        <div className="flex items-center">
+         {icon && <div className="flex-shrink-0 mr-4">{icon}</div>}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="mt-1 text-base text-gray-500 dark:text-gray-400">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
-});
+};
 
 PageHeader.displayName = "PageHeader";

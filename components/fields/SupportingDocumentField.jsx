@@ -27,7 +27,7 @@ export const SupportingDocumentField = ({
               <span className="sr-only">Remove document</span>
             </Button>
         </div>
-        
+        <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           control={control}
           name={`supportingDocuments.${index}.file`}
@@ -70,6 +70,7 @@ export const SupportingDocumentField = ({
             </FormItem>
           )}
         />
+        </div>
       </CardContent>
     </Card>
   );
