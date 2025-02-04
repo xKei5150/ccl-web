@@ -9,7 +9,7 @@ import { NotFound } from "@/components/ui/not-found";
 
 import { formatDate, capitalize } from "@/lib/utils";
 // --- Extended Business Data ---
-export const businessData = [
+const businessData = [
   {
     id: "1",
     businessName: "Tech Solutions Inc",
