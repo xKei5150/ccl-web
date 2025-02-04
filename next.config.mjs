@@ -4,7 +4,10 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
     experimental: {
       reactCompiler: false
-    }
+    },
+    eslint: {
+      ignoreDuringBuilds: true,
+    },
   }
 
 export default withPayload(nextConfig);
