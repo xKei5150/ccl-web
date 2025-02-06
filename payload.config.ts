@@ -12,6 +12,8 @@ import Households from './collections/Households'
 import Reports from './collections/Reports'
 import ThemeSettings from './globals/ThemeSettings'
 
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+
 export default buildConfig({
   // If you'd like to use Rich Text, pass your editor here
   editor: lexicalEditor(),
@@ -29,6 +31,18 @@ export default buildConfig({
   ],
   globals: [
     ThemeSettings,
+  ],
+  plugins: [
+    vercelBlobStorage({
+      enabled: true, // Optional, defaults to true
+      // Specify which collections should use Vercel Blob
+      collections: {
+        ProfilePhoto: true,
+        SupportingDocuments: true,
+      },
+      // Token provided by Vercel once Blob storage is added to your Vercel project
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    }),
   ],
 
   // Your Payload secret - should be a complex and secure string, unguessable
