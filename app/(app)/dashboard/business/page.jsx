@@ -68,10 +68,6 @@ const BusinessInformation = () => {
     {
       accessorKey: "registrationDate",
       header: "Registration Date",
-      cell: ({ row }) => {
-        const date = new Date(row.getValue("registrationDate"));
-        return date.toLocaleDateString();
-      },
     },
     {
       accessorKey: "owner",

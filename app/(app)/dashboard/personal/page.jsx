@@ -32,13 +32,6 @@ const columns = [
   {
     header: "Photo",
     accessorKey: "photo",
-    cell: ({ row }) => (
-      <img
-        src={row.original.photo}
-        alt={`Photo of ${row.original.fullName}`}
-        className="w-10 h-10 rounded-full object-cover"
-      />
-    ),
   },
   {
     header: "Full Name",

@@ -89,7 +89,7 @@ const BusinessPermits = () => {
             icon={<Tickets className="h-8 w-8" />}
           />
           <Button
-            onClick={() => navigate.push("/dashboard/business-permits/new")}
+            onClick={() => router.push("/dashboard/business-permits/new")}
             className="mb-8"
           >
             <Plus className="mr-2 h-4 w-4" /> New Permit
