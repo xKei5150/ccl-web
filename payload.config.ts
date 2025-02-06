@@ -3,7 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig } from 'payload'
 import PersonalInformation from './collections/PersonalInformation'
-import Media from './collections/Media'
+import ProfilePhoto from './collections/ProfilePhoto'
 import Business from './collections/Business'
 import SupportingDocuments from './collections/SupportingDocuments'
 import BusinessPermits from './collections/BusinessPermits'
@@ -19,7 +19,7 @@ export default buildConfig({
   // Define and configure your collections in this array
   collections: [
     PersonalInformation,
-    Media,
+    ProfilePhoto,
     Business,
     SupportingDocuments,
     BusinessPermits,

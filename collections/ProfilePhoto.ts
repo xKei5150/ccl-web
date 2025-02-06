@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-const Media: CollectionConfig = {
-  slug: 'media',
+const ProfilePhoto: CollectionConfig = {
+  slug: 'profile-photo',
   admin: {
     useAsTitle: 'filename', // Use the filename as the title in the admin UI
   },
@@ -37,6 +37,12 @@ const Media: CollectionConfig = {
       label: 'Alt Text',
     },
   ],
+  access: {
+    read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
+  },
 };
 
-export default Media;
+export default ProfilePhoto;

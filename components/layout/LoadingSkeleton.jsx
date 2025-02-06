@@ -1,79 +1,71 @@
-// components/LoadingSkeleton.js (or .tsx)
-import React from 'react';
+import { Skeleton, SVGSkeleton } from "@/components/ui/skeleton";
+import React from "react";
 
-const LoadingSkeleton = ({ type = 'page' }) => {
-  if (type === 'page') {
-    return (
-      <div className="loading-skeleton">
-        <div className="header-skeleton">
-          <div className="line-skeleton w-1/4" />
-          <div className="line-skeleton w-1/2" />
-        </div>
-        <div className="content-skeleton">
-          <div className="line-skeleton" />
-          <div className="line-skeleton" />
-          <div className="line-skeleton w-3/4" />
-          <div className="line-skeleton" />
-          <div className="line-skeleton w-2/3" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-          <div className="card-skeleton">
-            <div className="image-skeleton" />
-            <div className="line-skeleton" />
-            <div className="line-skeleton w-3/4" />
-          </div>
-          <div className="card-skeleton">
-            <div className="image-skeleton" />
-            <div className="line-skeleton" />
-            <div className="line-skeleton w-3/4" />
-          </div>
-          <div className="card-skeleton">
-            <div className="image-skeleton" />
-            <div className="line-skeleton" />
-            <div className="line-skeleton w-3/4" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (type === 'card') {
-    return (
-      <div className="card-skeleton">
-        <div className="image-skeleton" />
-        <div className="line-skeleton" />
-        <div className="line-skeleton w-3/4" />
-      </div>
-    );
-  }
-  if (type === 'table') {
-    return (
-      <table className="w-full">
-        <thead>
-          <tr>
-            <th className="line-skeleton w-1/4"></th>
-            <th className="line-skeleton w-1/4"></th>
-            <th className="line-skeleton w-1/4"></th>
-            <th className="line-skeleton w-1/4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {[...Array(5)].map((_, index) => (
-            <tr key={index}>
-              <td className="line-skeleton"></td>
-              <td className="line-skeleton"></td>
-              <td className="line-skeleton"></td>
-              <td className="line-skeleton"></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  }
-
+export default function LoadingSkeleton() {
   return (
-    <div className="line-skeleton" />
+    <React.Fragment>
+      <div className="mt-2">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <SVGSkeleton className="text-yellow-500 w-[24px] h-[24px]" />
+            <span>
+              <Skeleton className="w-[96px] max-w-full" />
+            </span>
+          </div>
+          <div className="space-y-4">
+            <div className="p-4">
+              <h4>
+                <Skeleton className="w-[64px] max-w-full" />
+              </h4>
+              <div className="mt-2">
+                <Skeleton className="w-full max-w-full" />
+              </div>
+            </div>
+            <div className="p-4">
+              <h4>
+                <Skeleton className="w-[80px] max-w-full" />
+              </h4>
+              <div className="mt-2">
+                <Skeleton className="w-full max-w-full" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4">
+                <h4>
+                  <Skeleton className="w-[96px] max-w-full" />
+                </h4>
+                <ul className="mt-2 space-y-2">
+                  <li>
+                    <Skeleton className="w-full max-w-full" />
+                  </li>
+                  <li>
+                    <Skeleton className="w-full max-w-full" />
+                  </li>
+                  <li>
+                    <Skeleton className="w-full max-w-full" />
+                  </li>
+                </ul>
+              </div>
+              <div className="p-4">
+                <h4>
+                  <Skeleton className="w-[120px] max-w-full" />
+                </h4>
+                <ul className="mt-2 space-y-2">
+                  <li>
+                    <Skeleton className="w-full max-w-full" />
+                  </li>
+                  <li>
+                    <Skeleton className="w-full max-w-full" />
+                  </li>
+                  <li>
+                    <Skeleton className="w-full max-w-full" />
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>
   );
-};
-
-export default LoadingSkeleton;
+}

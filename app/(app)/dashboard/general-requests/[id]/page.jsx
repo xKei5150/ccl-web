@@ -4,33 +4,31 @@ import { useParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SquareGanttChart } from "lucide-react";
-
-// --- Mock Data ---
-// In a production app, this data might be fetched from a backend.
-const mockRequest = {
-  personalData: {
-    firstName: "John",
-    middleName: "Doe",
-    lastName: "Smith",
-    birthDate: "1990-01-01",
-    sex: "male",
-    maritalStatus: "single",
-    citizenship: "Filipino",
-    localAddress: "123 Main St.",
-  },
-  type: "Indigency Certificate", // Change this to "barangayClearance" or "barangayResidency" to test different conditional views.
-  status: "pending",
-  supportingDocuments: [],
-  purpose: "Medical assistance",
-  indigencyCertificate: {
-    forWhom: "Jane Doe", // For indigency certificate, show the beneficiary.
-  },
-  // You could add barangayClearance or barangayResidency properties if needed.
-};
-
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 export default function ViewGeneralRequest() {
   const params = useParams();
   const id = params.id;
+  const [request, setRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+
+    const fetchRequest = async () => {
+      const response = await fetch(`/api/requests/${id}`);
+      const data = await response.json();
+      setRequest(data);
+      setLoading(false);
+    };
+    fetchRequest();
+  }, [id]);
+
+  if(loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-16 w-16 text-primary-500" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -39,7 +37,7 @@ export default function ViewGeneralRequest() {
         subtitle="View details of a general request"
         icon={<SquareGanttChart className="h-8 w-8" />}
       />
-      <div className="grid gap-6">
+
         {/* Request Details Card */}
         <Card>
           <CardHeader>
@@ -49,37 +47,37 @@ export default function ViewGeneralRequest() {
             <dl className="grid grid-cols-2 gap-4">
               <div>
                 <dt className="font-medium text-gray-500">Type</dt>
-                <dd className="mt-1 capitalize">{mockRequest.type}</dd>
+                <dd className="mt-1 capitalize">{request.type}</dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-500">Status</dt>
-                <dd className="mt-1 capitalize">{mockRequest.status}</dd>
+                <dd className="mt-1 capitalize">{request.status}</dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-500">Purpose</dt>
-                <dd className="mt-1">{mockRequest.purpose}</dd>
+                <dd className="mt-1">{request.purpose}</dd>
               </div>
-              {mockRequest.type === "indigencyCertificate" && (
+              {request.type === "indigencyCertificate" && (
                 <div>
                   <dt className="font-medium text-gray-500">For Whom</dt>
                   <dd className="mt-1">
-                    {mockRequest.indigencyCertificate.forWhom || "N/A"}
+                    {request.forWhom || "N/A"}
                   </dd>
                 </div>
               )}
-              {mockRequest.type === "barangayClearance" && (
+              {request.type === "barangayClearance" && (
                 <div>
                   <dt className="font-medium text-gray-500">Remarks</dt>
                   <dd className="mt-1">
-                    {mockRequest.barangayClearance?.remarks || "N/A"}
+                    {request.remarks || "N/A"}
                   </dd>
                 </div>
               )}
-              {mockRequest.type === "barangayResidency" && (
+              {request.type === "barangayResidency" && (
                 <div>
                   <dt className="font-medium text-gray-500">Duration</dt>
                   <dd className="mt-1">
-                    {mockRequest.barangayResidency?.duration || "N/A"}
+                    {request.duration || "N/A"}
                   </dd>
                 </div>
               )}
@@ -97,32 +95,32 @@ export default function ViewGeneralRequest() {
               <div className="md:col-span-2">
                 <dt className="font-medium text-gray-500">Full Name</dt>
                 <dd className="mt-1">
-                  {`${mockRequest.personalData.firstName} ${mockRequest.personalData.middleName} ${mockRequest.personalData.lastName}`}
+                  {`${request.personalData.firstName} ${request.personalData.middleName} ${request.personalData.lastName}`}
                 </dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-500">Birth Date</dt>
                 <dd className="mt-1">
-                  {new Date(mockRequest.personalData.birthDate).toLocaleDateString()}
+                  {new Date(request.personalData.birthDate).toLocaleDateString()}
                 </dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-500">Sex</dt>
-                <dd className="mt-1 capitalize">{mockRequest.personalData.sex}</dd>
+                <dd className="mt-1 capitalize">{request.personalData.sex}</dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-500">Marital Status</dt>
                 <dd className="mt-1 capitalize">
-                  {mockRequest.personalData.maritalStatus}
+                  {request.personalData.maritalStatus}
                 </dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-500">Citizenship</dt>
-                <dd className="mt-1">{mockRequest.personalData.citizenship}</dd>
+                <dd className="mt-1">{request.personalData.citizenship}</dd>
               </div>
               <div className="md:col-span-2">
                 <dt className="font-medium text-gray-500">Local Address</dt>
-                <dd className="mt-1">{mockRequest.personalData.localAddress}</dd>
+                <dd className="mt-1">{request.personalData.localAddress}</dd>
               </div>
             </dl>
           </CardContent>
@@ -134,11 +132,11 @@ export default function ViewGeneralRequest() {
             <CardTitle>Supporting Documents</CardTitle>
           </CardHeader>
           <CardContent>
-            {mockRequest.supportingDocuments.length === 0 ? (
+            {request.supportingDocuments.length === 0 ? (
               <p className="text-gray-500">No supporting documents attached</p>
             ) : (
               <ul className="space-y-2">
-                {mockRequest.supportingDocuments.map((doc, index) => (
+                {request.supportingDocuments.map((doc, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <span>{doc.file.name}</span>
                     {doc.notes && (
@@ -150,7 +148,6 @@ export default function ViewGeneralRequest() {
             )}
           </CardContent>
         </Card>
-      </div>
     </>
   );
 }

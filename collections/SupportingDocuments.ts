@@ -7,7 +7,7 @@ const SupportingDocuments: CollectionConfig = {
   },
   upload: {
     staticDir: 'uploads/supporting-documents',
-    mimeTypes: ['application/pdf', 'image/*'], // Customize allowed file types
+    mimeTypes: ['application/pdf', 'image/*', 'video/*'], // Customize allowed file types
   },
   fields: [
     {
@@ -16,6 +16,12 @@ const SupportingDocuments: CollectionConfig = {
       label: 'Notes',
     },
   ],
+  access: {
+    read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
+  },
 };  
 
 export default SupportingDocuments;

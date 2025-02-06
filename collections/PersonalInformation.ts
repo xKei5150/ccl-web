@@ -9,7 +9,7 @@ const PersonalInformation: CollectionConfig = {
     {
       name: 'photo',
       type: 'upload',
-      relationTo: 'media', 
+      relationTo: 'profile-photo', 
       label: 'Photo',
     },
     {
@@ -61,7 +61,6 @@ const PersonalInformation: CollectionConfig = {
         {
           name: 'emailAddress',
           type: 'email',
-          required: true,
           unique: true,
           label: 'Email Address',
         },

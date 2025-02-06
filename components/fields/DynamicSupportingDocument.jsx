@@ -8,7 +8,6 @@ const DynamicSupportingDocument = ({ control }) => {
     control,
     name: "supportingDocuments",
   });
-
   return (
     <div className="space-y-4">
       {documentsFields.map((field, index) => (

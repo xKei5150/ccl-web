@@ -1,78 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Area, AreaChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { model } from '@/lib/genAI'; // Import the Gemini model
+import { Spinner } from '@/components/ui/spinner';
 
-// Updated data with separate predictions for each category
-const data = [
-  {
-    month: "Jan",
-    requests: 40,
-    requestsPredicted: 42,
-    reports: 24,
-    reportsPredicted: 26,
-    records: 35,
-    recordsPredicted: 37
-  },
-  {
-    month: "Feb",
-    requests: 30,
-    requestsPredicted: 35,
-    reports: 13,
-    reportsPredicted: 18,
-    records: 45,
-    recordsPredicted: 43
-  },
-  {
-    month: "Mar",
-    requests: 20,
-    requestsPredicted: 25,
-    reports: 38,
-    reportsPredicted: 35,
-    records: 30,
-    recordsPredicted: 32
-  },
-  {
-    month: "Apr",
-    requests: 27,
-    requestsPredicted: 30,
-    reports: 39,
-    reportsPredicted: 40,
-    records: 28,
-    recordsPredicted: 30
-  },
-  {
-    month: "May",
-    requests: 45,
-    requestsPredicted: 48,
-    reports: 48,
-    reportsPredicted: 45,
-    records: 52,
-    recordsPredicted: 50
-  },
-  {
-    month: "Jun",
-    requests: 37,
-    requestsPredicted: 40,
-    reports: 38,
-    reportsPredicted: 42,
-    records: 42,
-    recordsPredicted: 45
-  },
+// Base data (without predictions)
+const baseData = [
+  { month: "Jan", requests: 40, reports: 24, records: 35 },
+  { month: "Feb", requests: 30, reports: 13, records: 45 },
+  { month: "Mar", requests: 20, reports: 38, records: 30 },
+  { month: "Apr", requests: 27, reports: 39, records: 28 },
+  { month: "May", requests: 45, reports: 48, records: 52 },
+  { month: "Jun", requests: 37, reports: 38, records: 42 },
 ];
 
-const Chart = () => {
+const Chart = ({ data }) => {
+  if (!data || data.length === 0) {
+    return <div>No chart data available.</div>;
+  }
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-        <XAxis 
-          dataKey="month" 
+        <XAxis
+          dataKey="month"
           tickLine={false}
           axisLine={false}
-          className="text-sm" 
+          className="text-sm"
         />
-        <YAxis 
+        <YAxis
           tickLine={false}
           axisLine={false}
           className="text-sm"
@@ -85,8 +43,8 @@ const Chart = () => {
                 <div className="font-medium">{label}</div>
                 {payload.map((entry, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <div 
-                      className="h-2 w-2 rounded-full" 
+                    <div
+                      className="h-2 w-2 rounded-full"
                       style={{ backgroundColor: entry.color }}
                     />
                     <span className="text-sm text-muted-foreground">
@@ -99,7 +57,6 @@ const Chart = () => {
           }}
         />
         <Legend />
-        {/* Certificates, Clearances, Assistance */}
         <Area
           type="monotone"
           name="Requests"
@@ -117,7 +74,6 @@ const Chart = () => {
           strokeWidth={2}
           strokeDasharray="4 4"
         />
-        {/* Incidents/Blotter */}
         <Area
           type="monotone"
           name="Reports"
@@ -135,7 +91,6 @@ const Chart = () => {
           strokeWidth={2}
           strokeDasharray="4 4"
         />
-        {/* Personal, Business, Household Info */}
         <Area
           type="monotone"
           name="Records"
@@ -158,94 +113,138 @@ const Chart = () => {
   );
 };
 
-const AIAnalysis = ({ type }) => {
-  const analyses = {
-    requests: {
-      trend: "upward",
-      percentage: "+12.5%",
-      analysis: "Certificate and clearance requests show peak volumes during business permit renewal season. Medical assistance requests increased in residential areas.",
-      prediction: "Expected 15% increase in certificate requests next month due to upcoming school enrollment period.",
-      insights: [
-        "Barangay clearance is most requested (45%)",
-        "Medical assistance peaks on weekends",
-        "Business permits surge quarterly"
-      ],
-      recommendations: [
-        "Add online certificate pre-application",
-        "Schedule additional staff for peak hours",
-        "Prepare medical assistance budget allocation"
-      ]
-    },
-    reports: {
-      trend: "stable",
-      percentage: "+3.2%",
-      analysis: "Incident reports show typical patterns with minor increases during festivities. Most common are noise complaints and minor disputes.",
-      prediction: "Slight increase in reports expected during upcoming local events.",
-      insights: [
-        "70% of cases resolved through mediation",
-        "Peak reporting hours: 6PM - 10PM",
-        "Reduced processing time for blotters"
-      ],
-      recommendations: [
-        "Strengthen night patrol schedules",
-        "Enhance mediation procedures",
-        "Deploy mobile reporting system"
-      ]
-    },
-    records: {
-      trend: "upward",
-      percentage: "+8.3%",
-      analysis: "Household and business records growing steadily with new residential developments. Data completion rate improved to 89%.",
-      prediction: "20% increase in household records expected due to new housing project completion.",
-      insights: [
-        "New business registrations up 15%",
-        "Household data verification improved",
-        "Senior citizen registry updated"
-      ],
-      recommendations: [
-        "Conduct household data validation",
-        "Update zoning records",
-        "Schedule business permit renewals"
-      ]
+
+
+const AIAnalysis = ({ type, data }) => {
+  const [analysisData, setAnalysisData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const generateAnalysis = async (dataType, chartData) => {
+    setLoading(true);
+    setError(null);
+
+      // Filter data based on the selected type (requests, reports, records)
+    const filteredData = chartData.map(item => ({
+        month: item.month,
+        value: item[dataType],
+        predictedValue: item[`${dataType}Predicted`],
+    }));
+
+
+      const prompt = `Analyze the following time-series data for ${dataType}:
+    ${JSON.stringify(filteredData)}
+
+    Provide the analysis in JSON format:
+    \`\`\`json
+    {
+      "trend": "upward|downward|stable",
+      "percentageChange": "+0.0%",
+      "analysis": "Concise analysis (1-2 sentences).",
+      "prediction": "Prediction for next month (1-2 sentences).",
+      "insights": ["Insight 1", "Insight 2", "Insight 3"],
+      "recommendations": ["Recommendation 1", "Recommendation 2", "Recommendation 3"]
+    }
+    \`\`\`
+    `;
+
+    try {
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      const text = response.text();
+
+      // Improved JSON Parsing
+      let parsedAnalysis;
+      try {
+          const jsonStartIndex = text.indexOf('{');
+          const jsonEndIndex = text.lastIndexOf('}') + 1;
+          const jsonString = text.substring(jsonStartIndex, jsonEndIndex);
+          parsedAnalysis = JSON.parse(jsonString);
+      } catch (parseError) {
+          console.error("Error parsing JSON:", parseError);
+          setError("Failed to parse AI response.  Invalid JSON.");
+          return;
+      }
+
+      // Validate the parsed JSON
+      if (
+        !parsedAnalysis ||
+        typeof parsedAnalysis.trend !== 'string' ||
+        typeof parsedAnalysis.percentageChange !== 'string' ||
+        typeof parsedAnalysis.analysis !== 'string' ||
+        typeof parsedAnalysis.prediction !== 'string' ||
+        !Array.isArray(parsedAnalysis.insights) ||
+        !Array.isArray(parsedAnalysis.recommendations)
+      ) {
+        console.error("Invalid JSON structure:", parsedAnalysis);
+        setError("Failed to parse AI response.  Incomplete data.");
+        return;
+      }
+      setAnalysisData(parsedAnalysis);
+
+    } catch (e) {
+      setError(e.message || "An error occurred.");
+      console.error("Error generating analysis:", e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const analysis = analyses[type];
-  
+
+  useEffect(() => {
+      if (data && data.length > 0) {
+        generateAnalysis(type, data);
+    }
+  }, [type, data]);
+
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-full"><Spinner /></div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!analysisData) {
+    return <div>No Data</div>;
+  }
+
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        {analysis.trend === "upward" && <TrendingUp className="text-green-500" />}
-        {analysis.trend === "downward" && <TrendingDown className="text-red-500" />}
-        {analysis.trend === "stable" && <AlertCircle className="text-yellow-500" />}
-        <span className="font-medium">{analysis.percentage} {analysis.trend}</span>
+        {analysisData.trend === "upward" && <TrendingUp className="text-green-500" />}
+        {analysisData.trend === "downward" && <TrendingDown className="text-red-500" />}
+        {analysisData.trend === "stable" && <AlertCircle className="text-yellow-500" />}
+        <span className="font-medium">{analysisData.percentageChange} {analysisData.trend}</span>
       </div>
-      
+
       <div className="space-y-4">
         <div className="rounded-lg bg-muted p-4">
           <h4 className="font-medium">Analysis</h4>
-          <p className="mt-2 text-sm text-muted-foreground">{analysis.analysis}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{analysisData.analysis}</p>
         </div>
-        
+
         <div className="rounded-lg bg-muted p-4">
           <h4 className="font-medium">Prediction</h4>
-          <p className="mt-2 text-sm text-muted-foreground">{analysis.prediction}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{analysisData.prediction}</p>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-lg bg-muted p-4">
             <h4 className="font-medium">Key Insights</h4>
             <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-              {analysis.insights.map((insight, index) => (
+              {analysisData.insights.map((insight, index) => (
                 <li key={index}>• {insight}</li>
               ))}
             </ul>
           </div>
-          
+
           <div className="rounded-lg bg-muted p-4">
             <h4 className="font-medium">Recommendations</h4>
             <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-              {analysis.recommendations.map((rec, index) => (
+              {analysisData.recommendations.map((rec, index) => (
                 <li key={index}>• {rec}</li>
               ))}
             </ul>
@@ -256,7 +255,120 @@ const AIAnalysis = ({ type }) => {
   );
 };
 
+
 const Dashboard = () => {
+  const [data, setData] = useState([]);
+  const [loadingPredictions, setLoadingPredictions] = useState(true);
+  const [predictionError, setPredictionError] = useState(null);
+
+  const generatePredictions = async () => {
+    setLoadingPredictions(true);
+    setPredictionError(null);
+
+    try {
+      // Create an array to store all the promises for the predictions
+      const predictionPromises = [];
+
+        for (const dataType of ["requests", "reports", "records"]) {
+          // Create a separate promise for each data type
+        const prompt = `Predict the values for each of the next 6 months (Jul, Aug, Sep, Oct, Nov, Dec) for ${dataType}, given the following data:
+          ${JSON.stringify(baseData.map(item => ({ month: item.month, value: item[dataType] })))}
+            
+          Provide the output in JSON format, with an array of 6 numbers:
+          \`\`\`json
+          {
+            "predictions": [number, number, number, number, number, number]
+          }
+          \`\`\`
+          Do not include any other text other than the JSON.
+          `;
+
+        // Push the promise to the array
+        predictionPromises.push(
+            model.generateContent(prompt)
+            .then(result => {
+              const response = result.response;
+              const predictionText = response.text();
+              let parsedPrediction;
+              try {
+                const jsonStartIndex = predictionText.indexOf('{');
+                const jsonEndIndex = predictionText.lastIndexOf('}') + 1;
+                const jsonString = predictionText.substring(jsonStartIndex, jsonEndIndex);
+                parsedPrediction = JSON.parse(jsonString);
+              } catch (parseError) {
+                throw new Error(`Failed to parse prediction for ${dataType}. Invalid JSON: ${parseError.message}`); // More specific error
+              }
+
+              if (!parsedPrediction || !Array.isArray(parsedPrediction.predictions) || parsedPrediction.predictions.length !== 6) {
+                  throw new Error(`Invalid prediction format for ${dataType}. Expected an array of 6 numbers.`);
+              }
+              // Ensure all are numbers
+              if (!parsedPrediction.predictions.every(Number.isFinite)) {
+                  throw new Error(`Invalid prediction values for ${dataType}. All predictions must be numbers.`);
+              }
+
+              return { dataType, predictions: parsedPrediction.predictions };
+            })
+            .catch(error => {
+              setPredictionError(error.message);  // Set the specific error
+              console.error("Error generating prediction:", error);
+              return { dataType, predictions: null }; // Return null predictions on error
+            })
+        );
+      }
+
+      // Wait for all promises to resolve
+      const allPredictions = await Promise.all(predictionPromises);
+
+      if (predictionError) {
+          setLoadingPredictions(false); // Ensure loading is set to false even on error.
+          return; // Stop if any error occurred.
+      }
+
+
+      // Combine the base data with the predictions
+      const newData = [...baseData];  // Start with the base data
+
+        // Add 6 months to base data
+      const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      for (let i = 0; i < 6; i++){
+          newData.push({month: months[i]})
+      }
+
+      allPredictions.forEach(({ dataType, predictions }) => {
+        if (predictions) {
+          // Iterate up to the length of newData or predictions, whichever is smaller
+          for (let i = 0; i < newData.length; i++) {
+            // Check if historical value exists, add predicted value to newData
+            if (i < baseData.length) {
+                newData[i][dataType] = baseData[i][dataType]; //Keeps original data point.
+            }
+            newData[i][`${dataType}Predicted`] = predictions[i]; //Correct key
+          }
+        }
+      });
+      setData(newData);
+
+    } catch (error) {
+      setPredictionError(error.message); // Global error handling
+      console.error("Error in generatePredictions:", error);
+    } finally {
+      setLoadingPredictions(false);
+    }
+  };
+
+  useEffect(() => {
+    generatePredictions();
+  }, []);
+
+
+  if (loadingPredictions) {
+    return <div className="flex justify-center items-center h-full"><Spinner /></div>;
+  }
+
+  if (predictionError) {
+    return <div>Error generating predictions: {predictionError}</div>;
+  }
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card className="p-6">
@@ -267,7 +379,7 @@ const Dashboard = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-0">
-          <Chart />
+          <Chart data={data} />
           <div className="mt-4 grid grid-cols-3 gap-4">
             <div className="space-y-1">
               <p className="text-sm font-medium">Certificate Requests</p>
@@ -303,13 +415,13 @@ const Dashboard = () => {
               <TabsTrigger value="records">Records</TabsTrigger>
             </TabsList>
             <TabsContent value="requests">
-              <AIAnalysis type="requests" />
+              <AIAnalysis type="requests" data={data} />
             </TabsContent>
             <TabsContent value="reports">
-              <AIAnalysis type="reports" />
+              <AIAnalysis type="reports" data={data} />
             </TabsContent>
             <TabsContent value="records">
-              <AIAnalysis type="records" />
+              <AIAnalysis type="records" data={data} />
             </TabsContent>
           </Tabs>
         </CardContent>

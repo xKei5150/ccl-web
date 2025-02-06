@@ -1,8 +1,13 @@
-// app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { Toaster } from "@/components/ui/toaster";
+import { Suspense } from "react";
+import LoadingSkeleton from "@/components/layout/LoadingSkeleton";
+import Loading from "./loading"
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { ErrorFallback } from "@/components/ui/error";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,24 +26,32 @@ export const metadata = {
 
 export default function DashboardLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} h-screen`}>
-        <div className="flex h-full">
-          {/* Sidebar remains fixed */}
-          <aside className=" bg-gray-100 border-r border-gray-200">
+    <div className="flex h-screen overflow-hidden">
+      <aside className="sticky top-0 h-screen w-64 bg-gray-100 border-r border-gray-200 overflow-hidden">
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Suspense fallback={<Loading />}>
             <Sidebar />
-          </aside>
-          {/* Main content scrolls independently */}
-          <main className="flex-1 overflow-y-auto">
-            <div className="p-4">
+          </Suspense>
+        </ErrorBoundary>
+      </aside>
+      
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-4">
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Suspense fallback={<Loading/>}>
               <Breadcrumbs />
-            </div>
-            <div className="p-4">
-              {children}
-            </div>
-          </main>
+            </Suspense>
+          </ErrorBoundary>
         </div>
-      </body>
-    </html>
+        <div className="p-4">
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Suspense fallback={<Loading />}>
+              {children}
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </main>
+      <Toaster />
+    </div>
   );
 }

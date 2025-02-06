@@ -110,8 +110,8 @@ export function DataTable({
                 </TableHead>
               )}
               {columns.map((column) => (
-                <TableHead key={String(column.accessorKey)}>
-                  {column.header}
+                <TableHead key={String(column.header || column.accessorKey)}>
+                  {column.header || column.accessorKey}
                 </TableHead>
               ))}
               {actions && <TableHead>Actions</TableHead>}
@@ -136,8 +136,12 @@ export function DataTable({
                   </TableCell>
                 )}
                 {columns.map((column) => (
-                  <TableCell key={String(column.accessorKey)}>
-                    {String(row[column.accessorKey])}
+                  <TableCell key={String(column.header || column.accessorKey)}>
+                    {column.cell ? (
+                      column.cell(row)
+                    ) : column.accessorKey ? (
+                      String(row[column.accessorKey])
+                    ) : null}
                   </TableCell>
                 ))}
                 {actions && (

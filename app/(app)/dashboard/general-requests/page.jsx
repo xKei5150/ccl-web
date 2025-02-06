@@ -5,50 +5,74 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit2, Trash, ScrollText } from "lucide-react";
 import { useRouter } from "next/navigation";
-// Mock data for demonstration
-const mockRequests = [
-  {
-    id: 1,
-    requestType: "Certificate of Residency",
-    fullName: "Juan Dela Cruz",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    requestType: "Barangay Clearance",
-    fullName: "Maria Santos",
-    status: "Approved",
-  },
-  {
-    id: 3,
-    requestType: "Business Permit",
-    fullName: "Pedro Reyes",
-    status: "Rejected",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+
 
 const columns = [
   {
-    header: "Request Type",
-    accessorKey: "requestType",
+    header: "Name",
+    cell: (row) => {
+      const { firstName, middleName, lastName } = row.personalData;
+      return (
+        <div className="font-medium">
+          {firstName}
+          {middleName && ` ${middleName.charAt(0)}.`} 
+          {` ${lastName}`}
+        </div>
+      );
+    },
   },
   {
-    header: "Full Name",
-    accessorKey: "fullName",
+    header: "Type",
+    accessorKey: "type",
+    cell: (row) => {
+      const typeMap = {
+        indigencyCertificate: "Indigency Certificate",
+        barangayClearance: "Barangay Clearance",
+        barangayResidency: "Barangay Residency",
+      };
+      return typeMap[row.type] || row.type;
+    },
   },
   {
     header: "Status",
     accessorKey: "status",
+    cell: (row) => (
+      <div className={`capitalize ${
+        row.status === "pending" ? "text-yellow-600" :
+        row.status === "approved" ? "text-green-600" :
+        row.status === "rejected" ? "text-red-600" : ""
+      }`}>
+        {row.status}
+      </div>
+    ),
+  },
+  {
+    header: "Date",
+    accessorKey: "createdAt",
+    cell: (row) => new Date(row.createdAt).toLocaleDateString(),
   },
 ];
 
 const GeneralRequests = () => {
   const router = useRouter();
+  const { toast } = useToast();
+  const [requests, setRequests] = useState([]);
+  useEffect( () => {
+    const loadRequests = async () => {
+      const response = await fetch('/api/requests');
+      const data = await response.json();
+      setRequests(data.docs);
+    };
+    loadRequests();
+  }, []);
 
   const handleDelete = (rows) => {
     toast({
       title: "Deleting records",
       description: `Deleting ${rows.length} record(s)`,
+      variant: "destructive",
     });
     // Implement actual delete logic here
   };
@@ -82,7 +106,7 @@ const GeneralRequests = () => {
         </Button>
       </div>
         <DataTable
-          data={mockRequests}
+          data={requests}
           columns={columns}
           pageSize={10}
           actions={actions}

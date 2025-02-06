@@ -1,39 +1,35 @@
-"use client";
+// @app/(app)/dashboard/reports/[id]/page.jsx (Server Component)
 import React from "react";
-import { useParams } from 'next/navigation'; 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SquareGanttChart } from "lucide-react";
+import { getItemById } from "@/lib/actions/actions";
+import DocumentPreview from "@/components/layout/DocumentPreview"; //Import it anyway
+import { Suspense } from "react"; // Import Suspense
+import Loading from "./loading"; // Assuming you have a loading.jsx in the same folder
 
-// Mock data - replace with actual data fetching
-const mockReport = {
-  title: "Sample Incident Report",
-  description: "Description of the incident...",
-  date: new Date(),
-  location: "Main Street",
-  reportType: "incident",
-  status: "investigating",
-  involvedPersons: [
-    {
-      name: "John Doe",
-      role: "complainant",
-      statement: "Statement from complainant...",
-    },
-    {
-      name: "Jane Smith",
-      role: "respondent",
-      statement: "Statement from respondent...",
-    },
-  ],
-  supportingDocuments: [],
-};
+export default async function ViewReport({ params }) {
+  const { id } = await params;
+  const reportData = await getItemById('reports', id);
 
-export default function ViewReport() {
-    const params = useParams();
-    const id = params.id;
 
+    if (!reportData) {
+        // Handle case where report is null (e.g., error fetching, report not found)
+        return (
+            <>
+                <PageHeader
+                    title="Report Details"
+                    subtitle="Error loading report"
+                    icon={<SquareGanttChart className="h-8 w-8" />}
+                />
+                <div className="text-center mt-8 text-red-500">Failed to load report details. Please check the report ID or try again later.</div>
+            </>
+        );
+    }
+  //Added the report variable.
+  const report = reportData;
   return (
-    <>
+      <Suspense fallback={<Loading/>}>
         <PageHeader
           title="Report Details"
           subtitle="View details of a report"
@@ -45,26 +41,26 @@ export default function ViewReport() {
               <CardTitle>Report Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <dt className="font-medium text-gray-500">Title</dt>
-                  <dd className="mt-1">{mockReport.title}</dd>
-                </div>
-                <div>
-                  <dt className="font-medium text-gray-500">Type</dt>
-                  <dd className="mt-1">{mockReport.reportType}</dd>
+                  <dd className="mt-1">{report.title}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1">{mockReport.status}</dd>
+                  <dd className="mt-1">{report.reportStatus}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-gray-500">Date</dt>
+                  <dd className="mt-1">{new Date(report.date).toLocaleDateString()}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-500">Location</dt>
-                  <dd className="mt-1">{mockReport.location}</dd>
+                  <dd className="mt-1">{report.location}</dd>
                 </div>
                 <div className="col-span-2">
                   <dt className="font-medium text-gray-500">Description</dt>
-                  <dd className="mt-1">{mockReport.description}</dd>
+                  <dd className="mt-1">{report.description}</dd>
                 </div>
               </dl>
             </CardContent>
@@ -72,18 +68,22 @@ export default function ViewReport() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Involved Persons</CardTitle>
+              <CardTitle>Involved People</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {mockReport.involvedPersons.map((person, index) => (
-                  <div key={index} className="border-b pb-4 last:border-0">
-                    <h4 className="font-medium">{person.name}</h4>
-                    <p className="text-sm text-gray-500 mt-1">Role: {person.role}</p>
-                    <p className="mt-2">{person.statement}</p>
-                  </div>
-                ))}
-              </div>
+              {!report.involvedPersons?.length ? (
+                <p className="text-gray-500">No persons involved in this report</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {report.involvedPersons.map((person, index) => (
+                    <div key={index} className="border-b pb-4 last:border-0">
+                      <h4 className="font-medium">{person.name}</h4>
+                      <p className="text-sm text-gray-500 mt-1">Role: {person.role}</p>
+                      <p className="mt-2">{person.statement}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -92,21 +92,18 @@ export default function ViewReport() {
               <CardTitle>Supporting Documents</CardTitle>
             </CardHeader>
             <CardContent>
-              {mockReport.supportingDocuments.length === 0 ? (
+              {report.supportingDocuments.length === 0 ? (
                 <p className="text-gray-500">No supporting documents attached</p>
               ) : (
-                <div className="space-y-2">
-                  {mockReport.supportingDocuments.map((doc, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <span>{doc.file.name}</span>
-                      {doc.notes && <span className="text-gray-500">- {doc.notes}</span>}
-                    </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {report.supportingDocuments.map((doc) => (
+                    <DocumentPreview key={doc.id} document={doc} />
                   ))}
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
-        </>
+    </Suspense>
   );
 }
