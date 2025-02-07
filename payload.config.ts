@@ -37,8 +37,8 @@ export default buildConfig({
       enabled: true, // Optional, defaults to true
       // Specify which collections should use Vercel Blob
       collections: {
-        ProfilePhoto: true,
-        SupportingDocuments: true,
+        'profile-photo': true,
+        'supporting-documents': true,
       },
       // Token provided by Vercel once Blob storage is added to your Vercel project
       token: process.env.BLOB_READ_WRITE_TOKEN,
