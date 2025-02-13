@@ -45,12 +45,20 @@ const BusinessPermits: CollectionConfig = {
       hasMany: true,
       label: 'Supporting Documents',
     },
-    // Potentially, you could add a field for the payment date:
-    // {
-    //   name: 'paymentDate',
-    //   type: 'date',
-    //   label: 'Payment Date',
-    // },
+    {
+      name: 'paymentDate',
+      type: 'date',
+      label: 'Payment Date',
+    },
+    {
+      name: 'status',
+      type: 'select',
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+    }
   ],
 };
 

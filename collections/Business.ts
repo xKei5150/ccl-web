@@ -25,16 +25,11 @@ const Business: CollectionConfig = {
       label: 'Registration Date',
     },
     {
-      name: 'eligibility',
-      type: 'date',
-      label: 'Eligibility Date', // You might want to clarify what this date represents
-    },
-    {
       name: 'typeOfOwnership',
       type: 'select',
       required: true,
       options: [
-        { label: 'Sole Proprietorship', value: 'sole-proprietorship' },
+        { label: 'Sole Proprietorship', value: 'sole proprietorship' },
         { label: 'Partnership', value: 'partnership' },
         { label: 'Corporation', value: 'corporation' },
         { label: 'LLC', value: 'llc' },
@@ -84,12 +79,15 @@ const Business: CollectionConfig = {
       label: 'Supporting Documents',
     },
     {
-        name: 'permits',
-        type: 'relationship',
-        relationTo: 'business-permits',
-        hasMany: true,
-        label: 'Permits'
-    }
+      name: 'status',
+      type: 'select',
+      options: [
+        { label: 'Actice', value: 'active' },
+        { label: 'Inactive', value: 'inactive' },
+        { label: 'Pending', value: 'pending' },
+      ],
+      label: 'Status',
+    },
   ],
 };
 

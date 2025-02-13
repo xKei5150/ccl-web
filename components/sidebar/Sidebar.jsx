@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { ChevronLeft, Home, LogOut, User } from "lucide-react";
 import { navigation } from './SidebarNavigation';
@@ -14,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function Sidebar() {
+export function Sidebar({ settings }) {
   const [collapsed, setCollapsed] = useState(false);
 
   const user = {
@@ -25,16 +26,42 @@ export default function Sidebar() {
 
   return (
     <div className={cn(
-      "relative h-screen bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col",
+      "relative h-screen border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col",
       collapsed ? "w-20" : "w-64"
     )}>
       {/* Header */}
       <div className="flex-none p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          {!collapsed && (
-            <Link href="/" className="flex items-center space-x-2">
-              <Home className="w-6 h-6 text-gray-700" />
-              <span className="font-semibold text-gray-900">Barangay MS</span>
+        <div className="flex items-center">
+          {!collapsed ? (
+            <Link href="/" className="flex items-center mx-auto space-x-2">
+              {settings?.logo?.url ? (
+                <Image
+                  src={settings.logo.url}
+                  alt={settings.siteName}
+                  width={50}
+                  height={50}
+                  className="w-10 h-10 object-contain mx-auto"
+                />
+              ) : (
+                <>
+                  <Home className="w-6 h-6 text-gray-700" />
+                  <span className="font-semibold text-gray-900">{settings?.siteName || 'Barangay MS'}</span>
+                </>
+              )}
+            </Link>
+          ) : (
+            <Link href="/" className="mx-auto">
+              {settings?.logo?.url ? (
+                <Image
+                  src={settings.logo.url}
+                  alt={settings.siteName}
+                  width={50}
+                  height={50}
+                  className="w-8 h-8 object-contain mx-auto"
+                />
+              ) : (
+                <Home className="w-6 h-6 text-gray-700" />
+              )}
             </Link>
           )}
           <button

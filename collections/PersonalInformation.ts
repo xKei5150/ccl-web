@@ -2,14 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 const PersonalInformation: CollectionConfig = {
   slug: 'personal-information',
-  admin: {
-    useAsTitle: 'name', // Use a computed field for a more informative title
-  },
   fields: [
     {
       name: 'photo',
       type: 'upload',
-      relationTo: 'profile-photo', 
+      relationTo: 'profile-photo',
       label: 'Photo',
     },
     {
@@ -37,19 +34,18 @@ const PersonalInformation: CollectionConfig = {
         {
           name: 'fullName',
           type: 'text',
-          admin: {
-            hidden: true, // Hide this field from the admin UI
-          },
           hooks: {
-            beforeValidate: [
-              ({ siblingData }) => {
-                const { firstName, middleName, lastName } = siblingData;
-                const middleInitial = middleName ? `${middleName.charAt(0)}.` : '';
-                return `${firstName} ${middleInitial} ${lastName}`;
+            beforeChange: [
+              ({ data }) => {
+                if (data.name) {
+                  const { firstName, middleName, lastName } = data.name;
+                  const middleInitial = middleName ? ` ${middleName.charAt(0)}.` : '';
+                  return `${firstName}${middleInitial} ${lastName}`.trim();
+                }
+                return '';
               },
             ],
           },
-          label: 'Full Name'
         },
       ],
     },

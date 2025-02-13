@@ -15,14 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 
 export const SupportingDocumentField = ({ control, index, onRemove }) => {
-  const getDocumentData = (fieldValue) => {
-    if (fieldValue instanceof File) {
-      return null; // For FilePreview, we handle it separately
-    }
-    // If it's not a File object, we *assume* it's the full document
-    // from the database.  This handles the initial load and after-submission states.
-    return fieldValue;
-  };
   return (
     <Card className="shadow-sm">
       <CardContent className="space-y-4 p-4">
@@ -80,6 +72,7 @@ export const SupportingDocumentField = ({ control, index, onRemove }) => {
                   <Textarea
                     placeholder="Add any additional notes about this document..."
                     className="resize-none"
+                    value = {field.value || ""}
                     {...field}
                   />
                 </FormControl>

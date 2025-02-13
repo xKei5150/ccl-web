@@ -1,3 +1,4 @@
+"use client";
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
@@ -19,7 +20,7 @@ export const FileUpload = ({ onFileSelect, value, accept, onRemove = () => {} })
   });
   return (
     <div>
-      {value === null && (
+
         <div
           {...getRootProps()}
           className={cn(
@@ -38,7 +39,6 @@ export const FileUpload = ({ onFileSelect, value, accept, onRemove = () => {} })
             )}
           </div>
         </div>
-      )}
 
       {value && (
         <div className="relative">
@@ -50,8 +50,6 @@ export const FileUpload = ({ onFileSelect, value, accept, onRemove = () => {} })
             <Trash className="h-4 w-4" />
             <span className="sr-only">Remove file</span>
           </button>
-          {console.log(value + ' File or Document instance: ' + (Array.isArray(value) ? value[0] instanceof File : value instanceof File))}
-          {console.log('Constructor of value:', Array.isArray(value) ? value[0].constructor.name : value.constructor.name)}
           {Array.isArray(value) ? (
             value[0] instanceof File ? (
               <FilePreview file={value[0]} />

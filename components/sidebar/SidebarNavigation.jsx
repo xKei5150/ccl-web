@@ -43,12 +43,13 @@ import {
         icon: Users,
         path: "/dashboard/staff"
       },
-    {
-      title: "Settings",
-      icon: Settings,
-      path: "/settings",
-      children: [
-        { title: "Theme Manager", path: "/dashboard/theme" }
-      ]
-    }
+      {
+        title: "Settings",
+        icon: Settings,
+        path: "/settings",
+        children: [
+          { title: "Theme Manager", path: "/dashboard/theme" },
+          { title: "Site Settings", path: "/dashboard/site-settings" }
+        ]
+      },
   ];

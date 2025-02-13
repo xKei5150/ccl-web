@@ -20,46 +20,60 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Edit2, Trash, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 
+const getNestedValue = (obj, path) => {
+  if (!obj || !path) return '';
+  
+  const value = path.split('.').reduce((curr, key) => curr?.[key], obj);
+  return value ?? '';
+};
+
+const formatCellValue = (value) => {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+};
 
 export function DataTable({
-  data,
+  data: {
+    docs,
+    totalPages,
+    page,
+    hasNextPage,
+    hasPrevPage,
+    nextPage,
+    prevPage,
+  },
   columns,
-  pageSize = 10,
+  onPageChange,
   onRowClick,
   actions,
   enableMultiSelect = false,
   onSelectionChange,
   baseUrl,
 }) {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [currentPage, setCurrentPage] = React.useState(1);
   const [selectedRows, setSelectedRows] = React.useState([]);
 
   // Filter data based on search query
   const filteredData = React.useMemo(() => {
-    if (!searchQuery) return data;
-    
-    return data.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [data, searchQuery]);
+    if (!searchQuery) return docs;
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredData.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
+    return docs.filter((item) =>
+      columns.some((column) => {
+        const value = getNestedValue(item, column.accessorKey);
+        return formatCellValue(value)
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+      })
+    );
+  }, [docs, searchQuery, columns]);
 
   const handleRowClick = (row) => {
     if (onRowClick) {
       onRowClick(row);
     } else if (baseUrl && row.id) {
-      router.push(`${baseUrl}/${row.id}`);
+      window.location.href = `${baseUrl}/${row.id}`;
     }
   };
 
@@ -72,30 +86,33 @@ export function DataTable({
   };
 
   const handleSelectAll = (checked) => {
-    const newSelection = checked ? paginatedData : [];
+    const newSelection = checked ? filteredData : [];
     setSelectedRows(newSelection);
     onSelectionChange?.(newSelection);
   };
 
+  const renderCell = (row, column) => {
+    if (column.cell) {
+      return column.cell(row);
+    }
+
+    if (column.accessorKey) {
+      const value = getNestedValue(row, column.accessorKey);
+      return formatCellValue(value);
+    }
+
+    return null;
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between py-2">
         <Input
           placeholder="Search all columns..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
-        {enableMultiSelect && selectedRows.length > 0 && (
-          <Button
-            variant="destructive"
-            onClick={() => onSelectionChange?.(selectedRows)}
-            className="ml-2"
-          >
-            <Trash className="mr-2 h-4 w-4" />
-            Delete Selected ({selectedRows.length})
-          </Button>
-        )}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -104,7 +121,7 @@ export function DataTable({
               {enableMultiSelect && (
                 <TableHead className="w-[50px]">
                   <Checkbox
-                    checked={selectedRows.length === paginatedData.length}
+                    checked={selectedRows.length === filteredData.length}
                     onCheckedChange={(checked) => handleSelectAll(checked)}
                   />
                 </TableHead>
@@ -118,10 +135,10 @@ export function DataTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((row, rowIndex) => (
+            {filteredData.map((row, rowIndex) => (
               <TableRow
                 key={rowIndex}
-                className={onRowClick || baseUrl ? "cursor-pointer" : ""}
+                className={onRowClick || baseUrl ? "cursor-pointer hover:bg-muted/50" : ""}
                 onClick={() => handleRowClick(row)}
               >
                 {enableMultiSelect && (
@@ -137,11 +154,7 @@ export function DataTable({
                 )}
                 {columns.map((column) => (
                   <TableCell key={String(column.header || column.accessorKey)}>
-                    {column.cell ? (
-                      column.cell(row)
-                    ) : column.accessorKey ? (
-                      String(row[column.accessorKey])
-                    ) : null}
+                    {renderCell(row, column)}
                   </TableCell>
                 ))}
                 {actions && (
@@ -171,24 +184,24 @@ export function DataTable({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                onClick={() => onPageChange?.(prevPage)}
+                className={!hasPrevPage ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <PaginationItem key={pageNum}>
                 <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
+                  onClick={() => onPageChange?.(pageNum)}
+                  isActive={page === pageNum}
                 >
-                  {page}
+                  {pageNum}
                 </PaginationLink>
               </PaginationItem>
             ))}
             <PaginationItem>
               <PaginationNext
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                onClick={() => onPageChange?.(nextPage)}
+                className={!hasNextPage ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>

@@ -1,30 +1,33 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { ThemeRegistry } from "@/components/theme/ThemeRegistry";
+import { getSiteSettings } from "./dashboard/site-settings/actions";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+  fallback: ["sans-serif"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata = {
-  title: "Candelaria Civic Link",
-  description: "Barangay Management System",
-};
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
+  return {
+    title: settings?.siteName || "Candelaria Civic Link",
+    description: settings?.description || "Barangay Management System",
+    icons: settings?.favicon?.url ? [{ rel: 'icon', url: settings.favicon.url }] : undefined,
+  };
+}
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`antialiased ${poppins.variable}`}>
         <ThemeProvider>
-        {children}
+          <ThemeRegistry>
+            {children}
+          </ThemeRegistry>
         </ThemeProvider>
       </body>
     </html>

@@ -2,23 +2,23 @@ import React from "react";
 
 export const PageHeader = ({ title, subtitle, icon }) => {
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
-        <div className="flex items-center">
-         {icon && <div className="flex-shrink-0 mr-4">{icon}</div>}
+    <header className="mb-2 max-w-6xl">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="p-2 bg-white rounded-lg shadow-sm">
+         {React.cloneElement(icon, { className: "h-6 w-6 text-gray-600" })}
+         </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-medium text-gray-900">
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-1 text-base text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-600">
                 {subtitle}
               </p>
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </header>
   );
 };
 

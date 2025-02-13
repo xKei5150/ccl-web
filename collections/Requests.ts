@@ -18,57 +18,11 @@ const Requests: CollectionConfig = {
       label: 'Request Type',
     },
     {
-      name: 'personalData',
-      type: 'group',
+      name: 'person',
+      type: 'relationship',
       label: 'Personal Information',
-      fields: [
-        {
-          name: 'firstName',
-          type: 'text',
-          required: true,
-          label: 'First Name',
-        },
-        {
-          name: 'middleName',
-          type: 'text',
-          label: 'Middle Name',
-        },
-        {
-          name: 'lastName',
-          type: 'text',
-          required: true,
-          label: 'Last Name',
-        },
-        {
-          name: 'birthDate',
-          type: 'date',
-          label: 'Birth Date',
-        },
-        {
-          name: 'sex',
-          type: 'select',
-          options: [
-            { label: 'Male', value: 'male' },
-            { label: 'Female', value: 'female' },
-          ],
-          label: 'Sex',
-        },
-        {
-          name: 'maritalStatus',
-          type: 'text', // Consider using a 'select' field with predefined options (Single, Married, etc.)
-          label: 'Marital Status',
-        },
-        {
-          name: 'citizenship',
-          type: 'text',
-          label: 'Citizenship',
-        },
-        {
-          name: 'localAddress',
-          type: 'text', // Consider using an 'address' field or a separate collection for addresses
-          label: 'Local Address',
-        },
-      ],
+      required: true,
+      relationTo: 'personal-information',
     },
     {
       name: 'purpose',
@@ -77,7 +31,7 @@ const Requests: CollectionConfig = {
     },
     // Conditional Fields (using a group to keep them organized)
     {
-      name: 'conditionalFields',
+      name: 'additionalInformation',
       type: 'group',
       label: 'Additional Information',
       fields: [
