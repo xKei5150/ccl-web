@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
 import { ChevronLeft, Home, LogOut, User } from "lucide-react";
-import { navigation } from './SidebarNavigation';
+import { getNavigation } from './SidebarNavigation';
 import { SidebarItem } from './SidebarItem';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -14,14 +14,37 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 export function Sidebar({ settings }) {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+  async function handleLogout() {
+    try {
+      const response = await fetch(`/api/users/logout`, {
+        method: 'POST',
+      });
+      console.log('Logout response:', response);
+      if (!response?.ok) {
+        throw new Error(response?.error || 'Logout failed');
+      }
+      // Redirect to login page
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  }
 
+  const { user: authUser, permissions } = useAuth();
+  console.log('Auth user:', authUser);
+  console.log('Permissions:', permissions);
+  const filteredNavigation = getNavigation(permissions);
+  // Update user data from auth context
   const user = {
-    name: "John Doe",
-    email: "john@example.com",
-    avatar: ""
+    name: authUser?.personalInfo.name.fullName || 'Guest User',
+    email: authUser?.email || '',
+    avatar: authUser?.personalInfo?.photo.url || ''
   };
 
   return (
@@ -78,7 +101,7 @@ export function Sidebar({ settings }) {
 
       {/* Navigation - Scrollable Area */}
       <nav className="flex-1 overflow-y-auto p-2 space-y-1">
-        {navigation.map((item) => (
+        {filteredNavigation.map((item) => (
           <SidebarItem
             key={item.path}
             item={item}
@@ -114,12 +137,10 @@ export function Sidebar({ settings }) {
                 View Profile
               </DropdownMenuItem>
             </Link>
-            <Link href="/auth/login" passHref legacyBehavior>
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

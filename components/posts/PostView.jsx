@@ -6,8 +6,11 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { serialize } from "@/lib/utils";
 import { PostStatusIndicator } from "./PostStatusIndicator";
+import { RichText} from "@payloadcms/richtext-lexical/react" 
 
 export function PostView({ post }) {
+  // const serializedContent = serialize(post.content);
+  // console.log('serializedContent', serializedContent);
 
   return (
     <article className="prose prose-zinc dark:prose-invert max-w-none">

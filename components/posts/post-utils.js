@@ -28,3 +28,17 @@ export const initialContent = [
     content: [{ type: 'text', text: '' }],
   },
 ];
+
+export function generateSlugFromTitle(title) {
+  if (!title) return '';
+  
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Remove consecutive hyphens
+    .trim()
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+}

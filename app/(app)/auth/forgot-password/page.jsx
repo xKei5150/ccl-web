@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,37 +14,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
-import { login } from "../actions";
-import Link from "next/link";
+import { Mail } from "lucide-react";
+import { forgotPassword } from "../actions";
 
-const Login = () => {
+export default function ForgotPassword() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
-  const returnTo = searchParams.get("from") || "/dashboard";
 
-  async function handleLogin(formData) {
+  async function handleForgotPassword(formData) {
     try {
       setIsLoading(true);
-      const result = await login(formData);
-
+      const result = await forgotPassword(formData);
+      
       if (result.success) {
         toast({
-          title: "Welcome back!",
-          description: "Login successful",
+          title: "Email sent",
+          description: "Check your email for password reset instructions",
         });
-        
-        // Force a router refresh to update auth state
-        router.refresh();
-        // Use replace to prevent going back to login page
-        router.replace(returnTo);
+        router.push("/auth/login");
       } else {
         toast({
           variant: "destructive",
-          title: "Login failed",
+          title: "Failed to send email",
           description: result.error,
         });
       }
@@ -63,12 +55,12 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
           <CardDescription>
-            Sign in to access the Barangay Management System
+            Enter your email address to receive password reset instructions
           </CardDescription>
         </CardHeader>
-        <form action={handleLogin}>
+        <form action={handleForgotPassword}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -80,34 +72,22 @@ const Login = () => {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                required
-              />
-              <div className="text-right">
-                <Button variant="link" className="p-0 h-auto" asChild>
-                  <Link href="/auth/forgot-password">
-                    Forgot password?
-                  </Link>
-                </Button>
-              </div>
-            </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              <LogIn className="mr-2 h-4 w-4" />
-              {isLoading ? "Signing in..." : "Sign In"}
+              <Mail className="mr-2 h-4 w-4" />
+              {isLoading ? "Sending..." : "Send Reset Instructions"}
+            </Button>
+            <Button
+              type="button"
+              variant="link"
+              onClick={() => router.push("/auth/login")}
+            >
+              Back to Login
             </Button>
           </CardFooter>
         </form>
       </Card>
     </div>
   );
-};
-
-export default Login;
+}

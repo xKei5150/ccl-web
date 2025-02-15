@@ -1,181 +1,163 @@
-import { memo } from "react";
-import { Area, AreaChart, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from "recharts";
-import { ChartLoadingSkeleton } from "./ChartLoadingSkeleton";
-import { motion, AnimatePresence } from "framer-motion";
+'use client';
 
-const chartCategories = [
-  { key: "requests", color: "#2563eb", label: "Requests" },
-  { key: "reports", color: "#dc2626", label: "Reports" },
-  { key: "records", color: "#16a34a", label: "Records" }
-];
+import { memo } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { cn } from '@/lib/utils';
+
+function ChartSkeleton() {
+  return (
+    <div className="h-full w-full flex items-center justify-center">
+      <div className="w-full h-[350px] rounded-lg bg-gradient-to-r from-muted/20 via-muted/50 to-muted/20 animate-shimmer" />
+    </div>
+  );
+}
+
+const DashboardChart = memo(({ data }) => {
+  if (!data) return <ChartSkeleton />;
+
+  const chartData = data.map(item => ({
+    ...item,
+    requestsGradient: item.requests,
+    permitsGradient: item.permits,
+    householdsGradient: item.households,
+  }));
+
+  return (
+    <div className="relative">
+      <ResponsiveContainer width="100%" height={350}>
+        <AreaChart
+          data={chartData}
+          margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="requestsGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="permitsGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="householdsGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid 
+            vertical={false}
+            stroke="hsl(var(--muted-foreground))"
+            strokeOpacity={0.1}
+            strokeDasharray="3 3"
+          />
+          <XAxis
+            dataKey="name"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            dy={10}
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            dx={-10}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="requests"
+            stroke="hsl(var(--primary))"
+            strokeWidth={2}
+            fill="url(#requestsGradient)"
+            fillOpacity={1}
+            activeDot={{ r: 6, fill: "hsl(var(--primary))", strokeWidth: 0 }}
+          />
+          <Area
+            type="monotone"
+            dataKey="permits"
+            stroke="hsl(var(--secondary))"
+            strokeWidth={2}
+            fill="url(#permitsGradient)"
+            fillOpacity={1}
+            activeDot={{ r: 6, fill: "hsl(var(--secondary))", strokeWidth: 0 }}
+          />
+          <Area
+            type="monotone"
+            dataKey="households"
+            stroke="hsl(var(--warning))"
+            strokeWidth={2}
+            fill="url(#householdsGradient)"
+            fillOpacity={1}
+            activeDot={{ r: 6, fill: "hsl(var(--warning))", strokeWidth: 0 }}
+          />
+          <Legend 
+            verticalAlign="top"
+            height={36}
+            content={<CustomLegend />}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+});
+
+const CustomLegend = memo(({ payload }) => {
+  if (!payload) return null;
+
+  return (
+    <div className="flex gap-6 justify-center mb-6">
+      {payload.map((entry) => (
+        <div 
+          key={entry.value}
+          className={cn(
+            "flex items-center gap-2",
+            entry.value === "requests" && "text-primary",
+            entry.value === "permits" && "text-secondary",
+            entry.value === "households" && "text-warning"
+          )}
+        >
+          <div className="h-3 w-3 rounded-full bg-current" />
+          <span className="text-sm font-medium capitalize">
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+});
 
 const CustomTooltip = memo(({ active, payload, label }) => {
-  if (!active || !payload) return null;
-  
+  if (!active || !payload?.length) return null;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 5 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 p-3 shadow-xl"
-      role="tooltip"
-    >
-      <div className="font-medium mb-1">{label}</div>
-      <div className="space-y-1">
-        {payload.map((entry, index) => (
-          <div key={index} className="flex items-center gap-2 min-w-[150px]">
-            <div
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: entry.color }}
-              aria-hidden="true"
-            />
-            <span className="text-sm text-muted-foreground flex-1">
-              {entry.name}:
-            </span>
-            <span className="text-sm font-medium">
-              {entry.value || 0}
-            </span>
-          </div>
-        ))}
+    <div className="rounded-lg border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 shadow-xl">
+      <div className="space-y-2">
+        <div className="font-medium text-sm text-muted-foreground border-b pb-1">
+          {label}
+        </div>
+        <div className="grid gap-1.5">
+          {payload.map((entry) => (
+            <div 
+              key={entry.dataKey}
+              className={cn(
+                "flex items-center justify-between gap-3",
+                entry.dataKey === "requests" && "text-primary",
+                entry.dataKey === "permits" && "text-secondary",
+                entry.dataKey === "households" && "text-warning"
+              )}
+            >
+              <span className="text-[13px] capitalize">{entry.dataKey}</span>
+              <span className="font-medium tabular-nums">{entry.value}</span>
+            </div>
+          ))}
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
-CustomTooltip.displayName = "CustomTooltip";
+DashboardChart.displayName = 'DashboardChart';
+CustomLegend.displayName = 'CustomLegend';
+CustomTooltip.displayName = 'CustomTooltip';
 
-const EmptyState = memo(() => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="flex flex-col items-center justify-center h-[300px] text-muted-foreground"
-  >
-    <p className="text-sm">No data available for selected year</p>
-  </motion.div>
-));
-
-EmptyState.displayName = "EmptyState";
-
-export const DashboardChart = memo(({ data, year, isLoading }) => {
-  // Filter and validate data
-  const yearData = data?.filter(item => item.year === year) || [];
-  
-  if (isLoading) {
-    return <ChartLoadingSkeleton />;
-  }
-
-  if (!yearData?.length) {
-    return <EmptyState />;
-  }
-
-  // Calculate Y-axis domain
-  const allValues = yearData.flatMap(item => [
-    item.requests || 0,
-    item.reports || 0,
-    item.records || 0,
-    item.requestsPredicted || 0,
-    item.reportsPredicted || 0,
-    item.recordsPredicted || 0
-  ]);
-
-  const maxValue = Math.max(...allValues);
-  const minValue = Math.min(...allValues);
-  const padding = Math.ceil(maxValue * 0.1); // 10% padding
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={year}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="w-full h-[300px]"
-        role="figure"
-        aria-label="Monthly trends chart"
-      >
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart 
-            data={yearData} 
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-          >
-            <defs>
-              {chartCategories.map(({ key, color }) => (
-                <linearGradient key={key} id={`gradient-${key}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={color} stopOpacity={0} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              className="stroke-muted/30"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              className="text-sm fill-muted-foreground"
-              dy={8}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              className="text-sm fill-muted-foreground"
-              width={45}
-              domain={[Math.max(0, minValue - padding), maxValue + padding]}
-              dx={-8}
-              tick={{ fontSize: 12 }}
-            />
-            <Tooltip 
-              content={<CustomTooltip />}
-              animationDuration={200}
-              animationEasing="ease-out"
-              cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeDasharray: '3 3' }}
-            />
-            <Legend 
-              verticalAlign="top"
-              height={36}
-              iconSize={8}
-              iconType="circle"
-              wrapperClassName="text-sm fill-muted-foreground"
-            />
-            {chartCategories.map(({ key, color, label }) => (
-              <g key={key}>
-                <Area
-                  type="monotone"
-                  name={label}
-                  dataKey={key}
-                  stroke={color}
-                  fill={`url(#gradient-${key})`}
-                  strokeWidth={2}
-                  activeDot={{ r: 6, strokeWidth: 1 }}
-                  isAnimationActive={true}
-                  animationDuration={1000}
-                  animationEasing="ease-out"
-                />
-                <Area
-                  type="monotone"
-                  name={`${label} (Predicted)`}
-                  dataKey={`${key}Predicted`}
-                  stroke={color}
-                  fill="none"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  activeDot={{ r: 4, strokeWidth: 1 }}
-                  isAnimationActive={true}
-                  animationDuration={1000}
-                  animationEasing="ease-out"
-                  animationBegin={300}
-                />
-              </g>
-            ))}
-          </AreaChart>
-        </ResponsiveContainer>
-      </motion.div>
-    </AnimatePresence>
-  );
-});
-
-DashboardChart.displayName = "DashboardChart";
+export default DashboardChart;

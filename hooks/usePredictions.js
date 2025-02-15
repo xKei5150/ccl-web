@@ -1,4 +1,40 @@
-import { useState, useEffect } from "react";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { generatePrediction } from '@/app/(app)/dashboard/actions';
+
+export function usePredictions(data) {
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [predictions, setPredictions] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchPredictions() {
+      if (!data) return;
+      
+      try {
+        setIsPredicting(true);
+        setError(null);
+        const result = await generatePrediction(data);
+        setPredictions(result);
+      } catch (err) {
+        setError(err.message);
+        console.error('Prediction error:', err);
+      } finally {
+        setIsPredicting(false);
+      }
+    }
+
+    fetchPredictions();
+  }, [data]);
+
+  return {
+    isPredicting,
+    predictions,
+    error
+  };
+}
+
 import { model } from "../lib/genAI";
 import { useCallback } from "react";
 

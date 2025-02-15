@@ -79,7 +79,7 @@ export function StaffCard({ staff, onEdit, onDelete }) {
           
           {staff.personalInfo && (
             <div className="text-sm text-muted-foreground">
-              <p>Personal Information ID: {staff.personalInfo}</p>
+              <p>Personal Information ID: {staff.personalInfo.id}</p>
             </div>
           )}
         </div>

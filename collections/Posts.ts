@@ -10,10 +10,10 @@ const Posts: CollectionConfig = {
     defaultColumns: ['title', 'author', 'publishedDate', 'status'],
   },
   access: {
-    read: () => true,
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+    read: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
   },
   fields: [
     {

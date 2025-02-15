@@ -38,10 +38,10 @@ const ProfilePhoto: CollectionConfig = {
     },
   ],
   access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    read: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
   },
 };
 

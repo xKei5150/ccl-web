@@ -5,6 +5,12 @@ const SupportingDocuments: CollectionConfig = {
   admin: {
     useAsTitle: 'id',
   },
+  access: {
+    read: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+  },
   upload: {
     staticDir: 'uploads/supporting-documents',
     mimeTypes: ['application/pdf', 'image/*', 'video/*'], // Customize allowed file types
@@ -16,12 +22,6 @@ const SupportingDocuments: CollectionConfig = {
       label: 'Notes',
     },
   ],
-  access: {
-    read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
-  },
 };  
 
 export default SupportingDocuments;

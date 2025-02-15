@@ -5,7 +5,7 @@ import LoadingSkeleton from "@/components/layout/LoadingSkeleton";
 import { getPost } from "../../actions";
 
 export async function generateMetadata({ params }) {
-    const { slug } = params;
+    const { slug } = await params;
   const post = await getPost(slug);
   if (!post) return { title: "Post Not Found" };
   

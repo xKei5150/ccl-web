@@ -43,16 +43,17 @@ const Users: CollectionConfig = {
   access: {
     read: () => true,
     create: () => true,
-    // update: () => true,
-    update: ({ req: { user } }) => {
-      if (user?.role === 'admin') return true;
-      if (user?.role === 'staff') return true;
-      return false;
+    update: ({ req: { user }, id }) => {
+      if (!user) return false;
+      if (user.role === 'admin') return true;
+      if (user.role === 'staff') return true;
+      return user.id === id;
     },
     delete: ({ req: { user } }) => {
       if (user?.role === 'admin') return true;
       return false;
     },
+    admin: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
   },
 };
 

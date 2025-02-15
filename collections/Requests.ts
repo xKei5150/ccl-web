@@ -5,6 +5,12 @@ const Requests: CollectionConfig = {
   admin: {
     useAsTitle: 'id', // Consider using a more descriptive field if you add one later (e.g., 'requestNumber')
   },
+  access: {
+    read: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+  },
   fields: [
     {
       name: 'type',

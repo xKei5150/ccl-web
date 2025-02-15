@@ -1,49 +1,51 @@
 // middleware.js
 import { NextResponse } from 'next/server';
-import { payload } from '@/lib/payload';
-import { hasRole } from '@/lib/utils';
+import { cookies } from 'next/headers';
+
+// Paths that don't require authentication
+const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'];
+
+// Paths that require specific roles
+const roleProtectedPaths = {
+  '/dashboard/staff': ['admin', 'staff'],
+  '/dashboard/admin': ['admin'],
+};
 
 export const config = {
-    matcher: '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  };
-  
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
+
 export async function middleware(request) {
-  const token = request.cookies.get('payload-token');
+  const { pathname } = request.nextUrl;
 
-  // Protect staff routes
-  if (request.nextUrl.pathname.startsWith('/dashboard/staff')) {
-    if (!token) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-
-    try {
-      const { user } = await payload.verifyToken(token.value);
-      
-      if (!hasRole(user, ['admin', 'staff'])) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
-    } catch (error) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
+  // Check if the path is public
+  if (publicPaths.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
-    
+  // Get auth token from cookies
+  const token = request.cookies.get('payload-token');
+  // If no token and trying to access protected route, redirect to login
+  if (!token && !publicPaths.includes(pathname)) {
+    const loginUrl = new URL('/auth/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   // Add routes that should exclude the sidebar
-  const excludedRoutes = [
-    '/auth',
-    '/auth/register',
-    '/404',
-    '/500',
-  ];
+  const excludedRoutes = ['/auth', '/auth/register', '/404', '/500'];
 
-  // Add a custom header that our layout can read
+  // Add custom headers for layout decisions
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-exclude-sidebar', excludedRoutes.includes(pathname));
+  requestHeaders.set('x-exclude-sidebar', excludedRoutes.some(route => pathname.startsWith(route)));
+  requestHeaders.set('x-auth-token', token?.value || '');
 
-  return NextResponse.next({
+  // Clone the request with new headers
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  return response;
 }

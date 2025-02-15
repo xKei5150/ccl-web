@@ -2,6 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 const PersonalInformation: CollectionConfig = {
   slug: 'personal-information',
+  access: {
+    read: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+  },
   fields: [
     {
       name: 'photo',

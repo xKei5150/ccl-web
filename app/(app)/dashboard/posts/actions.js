@@ -2,7 +2,8 @@
 
 import { payload } from "@/lib/payload";
 import { revalidatePath } from "next/cache";
-import { validatePostData } from "@/components/posts/post-utils";
+import { generateSlugFromTitle, validatePostData } from "@/components/posts/post-utils";
+import { getUser } from "../../auth/actions";
 
 export async function getPostsAction() {
   try {
@@ -40,8 +41,11 @@ export async function getPost(slug) {
 
 export async function createPost(data) {
   try {
-    validatePostData(data);
-    
+    // validatePostData(data);
+    console.log("data in createPost", data);
+    const user = await getUser();
+    data.slug = generateSlugFromTitle(data.title);
+    data.author = user.id;
     const post = await payload.create({
       collection: 'posts',
       data: data
@@ -56,8 +60,9 @@ export async function createPost(data) {
 
 export async function updatePost(slug, data) {
   try {
-    validatePostData(data);
-    
+    console.log("data in createPost", data);
+    const user = await getUser();
+    data.author = user.id;
     const post = await payload.find({
       collection: 'posts',
       where: {

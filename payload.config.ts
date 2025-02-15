@@ -20,7 +20,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 
 export default buildConfig({
   // If you'd like to use Rich Text, pass your editor here
-  editor: lexicalEditor(),
+  editor: lexicalEditor({}),
 
   // Define and configure your collections in this array
   collections: [

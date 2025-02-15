@@ -11,17 +11,32 @@ import {
   Code,
   Undo,
   Redo,
+  Image,
 } from 'lucide-react';
+import UploadImage from 'tiptap-extension-upload-image';
+import 'tiptap-extension-upload-image/dist/upload-image.min.css';
 
 const extensions = [
-  StarterKit.configure({
-    bulletList: {
-      keepMarks: true,
-      keepAttributes: false,
-    },
-    orderedList: {
-      keepMarks: true,
-      keepAttributes: false,
+  StarterKit,
+  UploadImage.configure({
+    uploadFn: async (file) => {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/media', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error('Upload failed');
+
+        const data = await response.json();
+        return data.doc.url; // Return the URL from PayloadCMS media response
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        return null;
+      }
     },
   }),
 ];
@@ -32,7 +47,7 @@ const Tiptap = ({ content, onChange, disabled, editable = true }) => {
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange(editor.getJSON().content);
+      onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
@@ -69,6 +84,7 @@ const Tiptap = ({ content, onChange, disabled, editable = true }) => {
             pressed={editor.isActive('heading')}
             onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           >
+            
             <Heading2 className="h-4 w-4" />
           </Toggle>
           <Toggle
@@ -110,6 +126,12 @@ const Tiptap = ({ content, onChange, disabled, editable = true }) => {
             onPressedChange={() => editor.chain().focus().redo().run()}
           >
             <Redo className="h-4 w-4" />
+          </Toggle>
+          <Toggle
+            size="sm"
+            onPressedChange={() => editor.chain().focus().addImage().run()}
+          >
+            <Image className="h-4 w-4" />
           </Toggle>
         </div>
       )}

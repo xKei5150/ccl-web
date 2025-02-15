@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,37 +14,49 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
-import { login } from "../actions";
-import Link from "next/link";
+import { KeyRound } from "lucide-react";
+import { resetPassword } from "../actions";
 
-const Login = () => {
+export default function ResetPassword() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
-  const returnTo = searchParams.get("from") || "/dashboard";
+  const token = searchParams.get("token");
 
-  async function handleLogin(formData) {
+  useEffect(() => {
+    if (!token) {
+      router.push("/auth/login");
+    }
+  }, [token, router]);
+
+  async function handleResetPassword(formData) {
     try {
       setIsLoading(true);
-      const result = await login(formData);
+      const password = formData.get("password");
+      const confirmPassword = formData.get("confirmPassword");
 
+      if (password !== confirmPassword) {
+        toast({
+          variant: "destructive",
+          title: "Passwords do not match",
+          description: "Please ensure both passwords are the same",
+        });
+        return;
+      }
+
+      const result = await resetPassword({ token, password });
+      
       if (result.success) {
         toast({
-          title: "Welcome back!",
-          description: "Login successful",
+          title: "Password reset successful",
+          description: "You can now login with your new password",
         });
-        
-        // Force a router refresh to update auth state
-        router.refresh();
-        // Use replace to prevent going back to login page
-        router.replace(returnTo);
+        router.push("/auth/login");
       } else {
         toast({
           variant: "destructive",
-          title: "Login failed",
+          title: "Failed to reset password",
           description: result.error,
         });
       }
@@ -59,49 +71,44 @@ const Login = () => {
     }
   }
 
+  if (!token) return null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
           <CardDescription>
-            Sign in to access the Barangay Management System
+            Enter your new password
           </CardDescription>
         </CardHeader>
-        <form action={handleLogin}>
+        <form action={handleResetPassword}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">New Password</Label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Enter new password"
                 required
               />
-              <div className="text-right">
-                <Button variant="link" className="p-0 h-auto" asChild>
-                  <Link href="/auth/forgot-password">
-                    Forgot password?
-                  </Link>
-                </Button>
-              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="Confirm new password"
+                required
+              />
             </div>
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              <LogIn className="mr-2 h-4 w-4" />
-              {isLoading ? "Signing in..." : "Sign In"}
+              <KeyRound className="mr-2 h-4 w-4" />
+              {isLoading ? "Resetting..." : "Reset Password"}
             </Button>
           </CardFooter>
         </form>
@@ -109,5 +116,3 @@ const Login = () => {
     </div>
   );
 };
-
-export default Login;

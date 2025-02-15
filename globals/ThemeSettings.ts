@@ -3,6 +3,10 @@ import { GlobalConfig } from 'payload';
 const ThemeSettings: GlobalConfig = {
   slug: 'theme-settings',
   label: 'Theme Settings',
+  access: {
+    read: () => true,
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+  },
   fields: [
     { name: 'background', type: 'text', label: 'Background' },
     { name: 'foreground', type: 'text', label: 'Foreground' },

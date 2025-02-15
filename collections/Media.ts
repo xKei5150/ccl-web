@@ -2,6 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 const Media: CollectionConfig = {
   slug: 'media',
+  access: {
+    read: () => true,
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+  },
   upload: {
     imageSizes: [
       {

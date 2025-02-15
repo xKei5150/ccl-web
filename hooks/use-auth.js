@@ -1,36 +1,67 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { hasRole } from '@/lib/utils';
+import { getUser } from '@/app/(app)/auth/actions';
 
-export function useAuth(requiredRoles) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+const AuthContext = createContext({});
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    async function checkAuth() {
+    const initAuth = async () => {
       try {
-        const response = await fetch('/api/users/me');
-        const data = await response.json();
-
-        if (!data.user || !hasRole(data.user, requiredRoles)) {
-          router.push('/auth/login');
-          return;
+        const userData = await getUser();
+        if (userData) {
+          // Ensure we have the full user data with permissions
+          setUser(userData);
+          // If we're on a login-related page, redirect to dashboard
+          if (window.location.pathname.startsWith('/auth')) {
+            router.replace('/dashboard');
+          }
+        } else if (!window.location.pathname.startsWith('/auth')) {
+          // If no user and not on auth page, redirect to login
+          router.replace('/auth/login');
         }
-
-        setIsAuthorized(true);
       } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/auth/login');
+        console.error('Auth initialization error:', error);
+        router.replace('/auth/login');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
-    }
+    };
 
-    checkAuth();
-  }, [requiredRoles, router]);
+    initAuth();
+  }, [router]);
 
-  return { isLoading, isAuthorized };
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    isAdmin: user?.role === 'admin',
+    isStaff: user?.role === 'staff',
+    isCitizen: user?.role === 'citizen',
+    permissions: user?.permissions || {},
+  };
+
+  if (loading) {
+    return null; // Or a loading spinner
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

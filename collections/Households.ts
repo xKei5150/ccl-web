@@ -5,6 +5,12 @@ const Households: CollectionConfig = {
   admin: {
     useAsTitle: 'familyName', // Use the family name as the title in the admin UI
   },
+  access: {
+    read: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+  },
   fields: [
     {
       name: 'familyName',

@@ -1,55 +1,153 @@
 "use client";
 
 import {
-    LayoutDashboard,
-    FileText,
-    FolderOpen,
-    Settings,
-    AlertCircle,
-    Users
-  } from "lucide-react";
-  export const navigation = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      path: "/dashboard"
-    },
-    {
-      title: "Requests",
-      icon: FileText,
-      path: "/requests",
-      children: [
-        { title: "General Requests", path: "/dashboard/general-requests" },
-        { title: "Business Permits", path: "/dashboard/business-permits" }
-      ]
-    },
-    {
-      title: "Reports",
-      icon: AlertCircle,
-      path: "/dashboard/reports"
-    },
-    {
-      title: "Records",
-      icon: FolderOpen,
-      path: "/records",
-      children: [
-        { title: "Personal Information", path: "/dashboard/personal" },
-        { title: "Household Information", path: "/dashboard/household" },
-        { title: "Business Information", path: "/dashboard/business" }
-      ]
-    },
-    {
-        title: "Staff",
-        icon: Users,
-        path: "/dashboard/staff"
+  LayoutDashboard,
+  FileText,
+  FolderOpen,
+  Settings,
+  AlertCircle,
+  Users,
+  Megaphone
+} from "lucide-react";
+const navigationWithPermissions = [
+  {
+    title: "Dashboard",
+    icon: LayoutDashboard,
+    path: "/dashboard",
+    requiredPermissions: ["globals.site-settings.update"]
+  },
+  {
+    title: "Announcements",
+    icon: Megaphone,
+    path: "/dashboard/posts",
+    requiredPermissions: ["collections.posts.read"]
+  },
+  {
+    title: "Requests",
+    icon: FileText,
+    path: "/requests",
+    requiredPermissions: ["collections.requests.read || collections.business-permits.read"],
+    children: [
+      {
+        title: "General Requests",
+        path: "/dashboard/general-requests",
+        requiredPermissions: ["collections.requests.read"]
       },
       {
-        title: "Settings",
-        icon: Settings,
-        path: "/settings",
-        children: [
-          { title: "Theme Manager", path: "/dashboard/theme" },
-          { title: "Site Settings", path: "/dashboard/site-settings" }
-        ]
+        title: "Business Permits",
+        path: "/dashboard/business-permits",
+        requiredPermissions: ["collections.business-permits.read"]
+      }
+    ]
+  },
+  {
+    title: "Reports",
+    icon: AlertCircle,
+    path: "/dashboard/reports",
+    requiredPermissions: ["collections.reports.read"]
+  },
+  {
+    title: "Records",
+    icon: FolderOpen,
+    path: "/records",
+    requiredPermissions: [
+      "collections.personal-information.read || collections.households.read || collections.business.read"
+  ],
+    children: [
+      {
+        title: "Personal Information",
+        path: "/dashboard/personal",
+        requiredPermissions: ["collections.personal-information.read"]
       },
-  ];
+      {
+        title: "Household Information",
+        path: "/dashboard/household",
+        requiredPermissions: ["collections.households.read"]
+      },
+      {
+        title: "Business Information",
+        path: "/dashboard/business",
+        requiredPermissions: ["collections.business.read"]
+      }
+    ]
+  },
+  {
+    title: "Staff",
+    icon: Users,
+    path: "/dashboard/staff",
+    requiredPermissions: ["globals.site-settings.update"]
+  },
+  {
+    title: "Settings",
+    icon: Settings,
+    path: "/settings",
+    requiredPermissions: ["globals.site-settings.update"],
+    children: [
+      {
+        title: "Theme Manager",
+        path: "/dashboard/theme",
+        requiredPermissions: ["globals.site-settings.update"]
+      },
+      {
+        title: "Site Settings",
+        path: "/dashboard/site-settings",
+        requiredPermissions: ["globals.site-settings.update"]
+      }
+    ]
+  },
+];
+
+function evaluatePermission(permissions, permissionPath) {
+  if (permissionPath.includes('||')) {
+    return permissionPath.split('||').some(path => 
+      evaluatePermission(permissions, path.trim())
+    );
+  }
+
+  const parts = permissionPath.split('.');
+  let current = permissions;
+  
+  for (const part of parts) {
+    if (!current || current[part] === undefined) return false;
+    current = current[part];
+  }
+  
+  return current === true || (typeof current === 'object' && current.read === true);
+}
+
+function hasPermission(permissions, requiredPermissions) {
+  if (!Array.isArray(requiredPermissions)) return false;
+  return requiredPermissions.some(permissionPath => {
+    return evaluatePermission(permissions, permissionPath);
+  });
+}
+
+function filterNavigationByPermissions(items, permissions) {
+  return items.filter(item => {
+    const hasRequiredPermission = hasPermission(permissions, item.requiredPermissions);
+
+    if (!hasRequiredPermission) {
+      return false;
+    }
+
+    if (item.children) {
+      const filteredChildren = item.children.filter(child => 
+        hasPermission(permissions, child.requiredPermissions)
+      );
+
+      if (filteredChildren.length > 0) {
+        item.children = filteredChildren;
+        return true;
+      }
+      return false;
+    }
+
+    return true;
+  });
+}
+
+export function getNavigation(permissions) {
+  return filterNavigationByPermissions(navigationWithPermissions, permissions);
+}
+
+export const navigation = navigationWithPermissions;
