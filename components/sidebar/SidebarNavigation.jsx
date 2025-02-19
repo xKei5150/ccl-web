@@ -26,12 +26,12 @@ const navigationWithPermissions = [
     title: "Requests",
     icon: FileText,
     path: "/requests",
-    requiredPermissions: ["collections.requests.read || collections.business-permits.read"],
+    requiredPermissions: ["collections.requests.read || collections.business-permits.read || collections.requests.read.permission"],
     children: [
       {
         title: "General Requests",
         path: "/dashboard/general-requests",
-        requiredPermissions: ["collections.requests.read"]
+        requiredPermissions: ["collections.requests.read || collections.requests.read.permission"]
       },
       {
         title: "Business Permits",
@@ -44,7 +44,7 @@ const navigationWithPermissions = [
     title: "Reports",
     icon: AlertCircle,
     path: "/dashboard/reports",
-    requiredPermissions: ["collections.reports.read"]
+    requiredPermissions: ["collections.reports.read || collections.reports.read.permission"]
   },
   {
     title: "Records",
@@ -57,7 +57,7 @@ const navigationWithPermissions = [
       {
         title: "Personal Information",
         path: "/dashboard/personal",
-        requiredPermissions: ["collections.personal-information.read"]
+        requiredPermissions: ["collections.personal-information.create"]
       },
       {
         title: "Household Information",

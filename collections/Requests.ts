@@ -3,11 +3,23 @@ import type { CollectionConfig } from 'payload'
 const Requests: CollectionConfig = {
   slug: 'requests',
   admin: {
-    useAsTitle: 'id', // Consider using a more descriptive field if you add one later (e.g., 'requestNumber')
+    // Consider using a more descriptive field if you add one later (e.g., 'requestNumber')
   },
   access: {
-    read: ({ req: { user } }) => Boolean(user),
-    create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    read: ({ req: { user } }) => {
+      if (!user) return false;
+      if (['admin', 'staff'].includes(user.role)) return true;
+      return {
+        'person': {
+          equals: user.personalInfo
+        }
+      };
+    },
+    create: ({ req: { user } }) => {
+      if (!user) return false;
+      if (['admin', 'staff'].includes(user.role)) return true;
+      return true; // Allow citizens to create their own requests
+    },
     update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
     delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
   },

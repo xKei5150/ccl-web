@@ -74,7 +74,7 @@ export default function ViewHouseholdPage({ data }) {
                   <div key={index} className="p-4 rounded-lg border">
                     <InfoItem 
                       label="Member" 
-                      value={member.member?.fullName || 'Not specified'}
+                      value={member.member?.name?.fullName || 'Not specified'}
                       valueClassName="font-medium"
                     />
                   </div>

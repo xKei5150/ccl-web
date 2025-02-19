@@ -172,7 +172,7 @@ export default function ReportForm({
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Involved Persons</h3>
+                <h3 className="text-lg font-semibold">Involved Party</h3>
                 <Button
                   type="button"
                   variant="outline"

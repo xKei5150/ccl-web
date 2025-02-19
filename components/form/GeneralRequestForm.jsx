@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -23,7 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PersonalInfoSelect } from "./PersonalInfoSelect";
 import DynamicSupportingDocument from "@/components/fields/DynamicSupportingDocument";
+import { z } from "zod";
 
 const requestTypeMap = {
   indigencyCertificate: "Indigency Certificate",
@@ -31,21 +32,19 @@ const requestTypeMap = {
   barangayResidency: "Barangay Residency",
 };
 
+const requestSchema = z.object({
+  type: z.enum(['indigencyCertificate', 'barangayClearance', 'barangayResidency']),
+  person: z.number(),
+  purpose: z.string().min(1, 'Purpose is required'),
+  supportingDocuments: z.array(z.any()),
+  status: z.enum(['pending', 'processing', 'approved', 'rejected', 'completed'])
+    .default('pending')
+});
+
 export default function GeneralRequestForm({
   defaultValues = {
     type: "",
-    person: {
-      name: {
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        fullName: "",
-      },
-      contact: {
-        contactNumber: "",
-        localAddress: "",
-      }
-    },
+    person: "",
     purpose: "",
     supportingDocuments: [],
     status: "pending",
@@ -54,12 +53,35 @@ export default function GeneralRequestForm({
   submitText = "Submit Request",
   cancelRoute,
 }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [userPersonalInfo, setUserPersonalInfo] = useState(null);
   const form = useForm({
-    resolver: zodResolver(generalRequestSchema),
+    resolver: zodResolver(requestSchema),
     defaultValues,
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    async function getUserInfo() {
+      try {
+        const response = await fetch('/api/users/me');
+        const data = await response.json();
+        setUserRole(data.user.role);
+        
+        // If user is a citizen, get their personal info and set form value
+        if (!['admin', 'staff'].includes(data.user.role)) {
+          const personalInfoResponse = await fetch(`/api/personal-information/${data.user.personalInfo.id}`);
+          const personalInfo = await personalInfoResponse.json();
+          setUserPersonalInfo(personalInfo);
+          // Set the person field value with the ID
+          form.setValue('person', data.user.personalInfo.id);
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    }
+    getUserInfo();
+  }, [form]);
 
   const handleSubmit = async (data) => {
     setIsSubmitting(true);
@@ -75,7 +97,7 @@ export default function GeneralRequestForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <FormField
                 control={form.control}
                 name="type"
@@ -103,68 +125,25 @@ export default function GeneralRequestForm({
 
               <FormField
                 control={form.control}
-                name="person.name.firstName"
+                name="person"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name</FormLabel>
+                    <FormLabel>Personal Information</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter first name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="person.name.middleName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Middle Name (Optional)</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter middle name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="person.name.lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter last name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="person.contact.contactNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contact Number</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter contact number" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="person.contact.localAddress"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} placeholder="Enter complete address" />
+                      {['admin', 'staff'].includes(userRole) ? (
+                        <PersonalInfoSelect 
+                          onSelect={field.onChange} 
+                          defaultValue={field.value} 
+                        />
+                      ) : (
+                        <div className="w-full p-2 border rounded-md bg-muted">
+                          <input 
+                            type="hidden" 
+                            {...field} 
+                          />
+                          {userPersonalInfo ? userPersonalInfo.name.fullName : 'Loading...'}
+                        </div>
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -175,7 +154,7 @@ export default function GeneralRequestForm({
                 control={form.control}
                 name="purpose"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem>
                     <FormLabel>Purpose</FormLabel>
                     <FormControl>
                       <Textarea 

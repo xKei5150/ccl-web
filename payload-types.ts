@@ -274,8 +274,29 @@ export interface Report {
     | null;
   supportingDocuments?: (number | SupportingDocument)[] | null;
   reportStatus?: ('open' | 'inProgress' | 'closed') | null;
+  submittedBy: number | User;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  role: 'admin' | 'staff' | 'citizen';
+  personalInfo?: (number | null) | PersonalInformation;
+  isActive?: ('active' | 'inactive') | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -321,26 +342,6 @@ export interface Media {
       filename?: string | null;
     };
   };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  role: 'admin' | 'staff' | 'citizen';
-  personalInfo?: (number | null) | PersonalInformation;
-  isActive?: ('active' | 'inactive') | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -653,6 +654,7 @@ export interface ReportsSelect<T extends boolean = true> {
       };
   supportingDocuments?: T;
   reportStatus?: T;
+  submittedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

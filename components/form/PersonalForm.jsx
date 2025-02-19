@@ -1,33 +1,18 @@
-"use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Save } from "lucide-react";
-import CustomDatePicker from "@/components/fields/CustomDatePicker";
+import { Save, User, Mail, Home, HeartPulse, Building } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   photo: z.any().optional(),
@@ -53,9 +38,6 @@ const formSchema = z.object({
   status: z.object({
     residencyStatus: z.enum(["renting", "own-mortgage", "own-outright"], {
       required_error: "Please select a residency status",
-    }),
-    lifeStatus: z.enum(["alive", "deceased"], {
-      required_error: "Please select a life status",
     }),
   }),
 });
@@ -101,6 +83,10 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
       }
 
       await onSubmit(formData);
+      toast({
+        title: "Success",
+        description: "Form submitted successfully",
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -115,14 +101,51 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="mx-auto space-y-8">
+        {/* Photo Upload Section */}
+        <Card className="border-none shadow-md bg-gradient-to-br from-white to-gray-50">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center space-y-4">
+              <FormField
+                control={form.control}
+                name="photo"
+                render={({ field }) => (
+                  <FormItem className="space-y-4 flex">
+                    <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
+                      {field.value?.url ? (
+                        <AvatarImage src={field.value.url} alt="Profile photo" />
+                      ) : (
+                        <AvatarFallback className="bg-primary/10">
+                          <User className="w-12 h-12 text-primary/80" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <FileUpload
+                      onFileSelect={(file) => field.onChange(file)}
+                      value={field.value}
+                      accept={{
+                        "image/*": [".png", ".jpg", ".jpeg", ".gif"],
+                      }}
+                      maxSize={5 * 1024 * 1024}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Basic Information */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-none shadow-md">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" />
+              Basic Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
                 control={form.control}
                 name="name.firstName"
@@ -130,7 +153,7 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter first name" />
+                      <Input {...field} className="bg-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,9 +165,9 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                 name="name.middleName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Middle Name (Optional)</FormLabel>
+                    <FormLabel>Middle Name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter middle name" />
+                      <Input {...field} className="bg-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -158,13 +181,15 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter last name" />
+                      <Input {...field} className="bg-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="demographics.sex"
@@ -173,7 +198,7 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                     <FormLabel>Sex</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select sex" />
                         </SelectTrigger>
                       </FormControl>
@@ -187,73 +212,34 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="demographics.birthDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Birth Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-
-            <FormField
-              control={form.control}
-              name="demographics.birthDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Birth Date</FormLabel>
-                  <FormControl>
-                    <CustomDatePicker
-                      date={field.value}
-                      setDate={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Photo Upload */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Profile Photo</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="photo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Profile Photo</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-24 h-24">
-                        {field.value?.url ? (
-                          <AvatarImage src={field.value.url} alt="Profile photo" />
-                        ) : (
-                          <AvatarFallback>
-                            {defaultValues?.name?.firstName?.[0]?.toUpperCase() || "?"}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <FileUpload
-                        onFileSelect={(file) => field.onChange(file)}
-                        value={field.value}
-                        accept={{
-                          "image/*": [".png", ".jpg", ".jpeg", ".gif"],
-                        }}
-                        maxSize={5 * 1024 * 1024} // 5MB
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </CardContent>
         </Card>
 
         {/* Contact Information */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-none shadow-md">
           <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-primary" />
+              Contact Information
+            </CardTitle>
+            <CardDescription></CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <FormField
               control={form.control}
               name="contact.emailAddress"
@@ -261,7 +247,7 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input {...field} type="email" placeholder="Enter email address" />
+                    <Input {...field} type="email" className="bg-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -275,7 +261,7 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                 <FormItem>
                   <FormLabel>Local Address</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter complete address" />
+                    <Input {...field} className="bg-white" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -285,12 +271,15 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
         </Card>
 
         {/* Status Information */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <Card className="border-none shadow-md">
           <CardHeader>
-            <CardTitle>Status Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <HeartPulse className="w-5 h-5 text-primary" />
+              Status Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="demographics.maritalStatus"
@@ -299,7 +288,7 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                     <FormLabel>Marital Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select marital status" />
                         </SelectTrigger>
                       </FormControl>
@@ -323,7 +312,7 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                     <FormLabel>Residency Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select residency status" />
                         </SelectTrigger>
                       </FormControl>
@@ -337,51 +326,34 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="status.lifeStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Life Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select life status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="alive">Alive</SelectItem>
-                        <SelectItem value="deceased">Deceased</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-end gap-4 pt-4">
           <Button
             type="button"
             variant="outline"
             onClick={cancelRoute}
+            className="w-32"
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-32"
+          >
             {isSubmitting ? (
-              <>
-                <span className="mr-2">Submitting...</span>
+              <div className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              </>
+                <span>Saving...</span>
+              </div>
             ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                {submitText}
-              </>
+              <div className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                <span>Save</span>
+              </div>
             )}
           </Button>
         </div>

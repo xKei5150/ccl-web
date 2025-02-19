@@ -84,7 +84,7 @@ function ViewReportPage({ data }) {
         {data.involvedPersons?.length > 0 && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Involved Persons</CardTitle>
+              <CardTitle>Involved Party</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4">

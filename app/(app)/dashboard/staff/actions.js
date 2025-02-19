@@ -11,8 +11,11 @@ import {
 export async function getStaffMembers(page = 1, limit = 10) {
   return genericFind("users", page, limit, {
     where: {
-      role: { equals: 'staff' },
-    },
+      or: [
+        { role: { equals: 'staff' } },
+        { role: { equals: 'admin' } }
+      ]
+    }
   });
 }
 
@@ -34,4 +37,23 @@ export async function updateStaffMember(newData, id) {
 
 export async function deleteStaffMember(ids) {
   return genericDelete("users", ids, `/dashboard/staff`);
+}
+
+export async function getAvailableUsers() {
+  return genericFind("users", 1, 100, {
+    where: {
+      and: [
+        {
+          role: {
+            not_equals: 'staff'
+          }
+        },
+        {
+          role: {
+            not_equals: 'admin'
+          }
+        }
+      ]
+    },
+  });
 }

@@ -16,23 +16,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import { logout } from "@/app/(app)/auth/actions";
 
 export function Sidebar({ settings }) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   async function handleLogout() {
     try {
-      const response = await fetch(`/api/users/logout`, {
-        method: 'POST',
-      });
-      console.log('Logout response:', response);
-      if (!response?.ok) {
-        throw new Error(response?.error || 'Logout failed');
-      }
-      // Redirect to login page
+      await logout();
       router.push('/auth/login');
     } catch (error) {
       console.error('Logout error:', error);
+      toast({
+        title: "Logout Failed",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive",
+      });
     }
   }
 
@@ -42,9 +41,9 @@ export function Sidebar({ settings }) {
   const filteredNavigation = getNavigation(permissions);
   // Update user data from auth context
   const user = {
-    name: authUser?.personalInfo.name.fullName || 'Guest User',
+    name: authUser?.personalInfo.name.fullName || 'User',
     email: authUser?.email || '',
-    avatar: authUser?.personalInfo?.photo.url || ''
+    avatar: authUser?.personalInfo?.photo?.url || ''
   };
 
   return (

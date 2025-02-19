@@ -16,6 +16,7 @@ export function useStaffManagement() {
   const { toast } = useToast();
 
   async function handleStatusToggle(id) {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       await toggleStaffStatus(id);
@@ -30,33 +31,38 @@ export function useStaffManagement() {
         description: error.message || 'Failed to update staff status',
         variant: 'destructive',
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   }
 
   async function handleLinkPersonalInfo(userId, personalInfoId) {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       await linkPersonalInfo(userId, personalInfoId);
       toast({
         title: 'Success',
-        description: 'Personal information linked successfully',
+        description: personalInfoId 
+          ? 'Personal information linked successfully'
+          : 'Personal information unlinked successfully',
       });
       router.refresh();
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to link personal information',
+        description: error.message || 'Failed to update personal information',
         variant: 'destructive',
       });
-      throw error; // Re-throw to handle in the component
+      throw error;
     } finally {
       setIsLoading(false);
     }
   }
 
   async function handleCreateStaff(data) {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       await createStaffMember(data);
@@ -78,6 +84,7 @@ export function useStaffManagement() {
   }
 
   async function handleUpdateStaff(id, data) {
+    if (isLoading) return;
     setIsLoading(true);
     try {
       await updateStaffMember(id, data);

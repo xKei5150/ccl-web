@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Mail, User } from "lucide-react";
+import { Edit, Trash2, Mail, User, Home } from "lucide-react";
+import Link from "next/link";
 
 const UserProfile = ({
   name,
@@ -58,39 +59,59 @@ export default UserProfile;
 
 export function StaffCard({ staff, onEdit, onDelete }) {
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <User className="h-10 w-10 text-muted-foreground" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold">{staff.email}</h3>
-                <Badge variant={staff.isActive === "active" ? "success" : "destructive"}>
-                  {staff.isActive}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>{staff.email}</span>
+    <Card className="overflow-hidden transition-all hover:shadow-md">
+      <Link href={`/dashboard/staff/${staff.id}`}>
+        <CardContent className="p-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                {staff.personalInfo?.photo ? (
+                  <AvatarImage src={staff.personalInfo.photo.url} />
+                ) : (
+                  <AvatarFallback>
+                    {staff.personalInfo?.name?.firstName?.[0] || staff.email[0].toUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold">
+                    {staff.personalInfo?.name?.fullName || staff.email}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span>{staff.email}</span>
+                </div>
               </div>
             </div>
+            
+            {staff.personalInfo && (
+              <div className="text-sm text-muted-foreground space-y-1">
+                {staff.personalInfo.contact?.localAddress && (
+                  <div className="flex items-center gap-1">
+                    <Home className="h-4 w-4" />
+                    <span className="truncate">{staff.personalInfo.contact.localAddress}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          
-          {staff.personalInfo && (
-            <div className="text-sm text-muted-foreground">
-              <p>Personal Information ID: {staff.personalInfo.id}</p>
-            </div>
-          )}
-        </div>
-      </CardContent>
+        </CardContent>
+      </Link>
       
       <CardFooter className="flex justify-end gap-2 p-4 bg-muted/5">
-        <Button variant="ghost" size="sm" onClick={onEdit}>
+        <Button variant="ghost" size="sm" onClick={(e) => {
+          e.preventDefault();
+          onEdit();
+        }}>
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Button>
-        <Button variant="ghost" size="sm" onClick={onDelete}>
+        <Button variant="ghost" size="sm" onClick={(e) => {
+          e.preventDefault();
+          onDelete();
+        }}>
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </Button>

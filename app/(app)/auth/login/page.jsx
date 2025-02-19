@@ -1,113 +1,14 @@
-"use client";
+import { LoginForm } from "@/components/auth/login-form";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { LogIn } from "lucide-react";
-import { login } from "../actions";
-import Link from "next/link";
+export const metadata = {
+    title: "Login | CCL",
+    description: "Barangay Manaagement System",
+  };
 
-const Login = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const returnTo = searchParams.get("from") || "/dashboard";
-
-  async function handleLogin(formData) {
-    try {
-      setIsLoading(true);
-      const result = await login(formData);
-
-      if (result.success) {
-        toast({
-          title: "Welcome back!",
-          description: "Login successful",
-        });
-        
-        // Force a router refresh to update auth state
-        router.refresh();
-        // Use replace to prevent going back to login page
-        router.replace(returnTo);
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: result.error,
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
+export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to access the Barangay Management System
-          </CardDescription>
-        </CardHeader>
-        <form action={handleLogin}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                required
-              />
-              <div className="text-right">
-                <Button variant="link" className="p-0 h-auto" asChild>
-                  <Link href="/auth/forgot-password">
-                    Forgot password?
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              <LogIn className="mr-2 h-4 w-4" />
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <LoginForm />
     </div>
   );
-};
-
-export default Login;
+}

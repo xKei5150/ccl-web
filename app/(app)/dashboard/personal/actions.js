@@ -11,25 +11,21 @@ import { payload } from "@/lib/payload";
 
 async function uploadPhoto(formData) {
   try {
-    const file = formData.get("file");
+    const file = formData.get("photo");  
     if (!file) return null;
-
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = file.name;
-    const mimeType = file.type;
-    const fileSize = file.size;
+
+    const payloadFile = {
+      name: file.name,
+      data: buffer, // Raw buffer data
+      size: file.size,
+      mimetype: file.type,
+    };
 
     const uploadResponse = await payload.create({
       collection: "profile-photo",
-      data: {
-        alt: fileName,
-      },
-      file: {
-        data: buffer,
-        mimetype: mimeType,
-        name: fileName,
-        size: fileSize,
-      },
+      data: { alt: file.name },
+      file: payloadFile,
     });
 
     if (!uploadResponse?.id) {
@@ -78,19 +74,23 @@ export async function createPersonalRecord(formData) {
 export async function updatePersonalRecord(formData, id) {
   try {
     const jsonData = JSON.parse(formData.get("json"));
-    let photoData = jsonData.photo;
 
+    let data = {
+      ...jsonData,
+    };
     if (formData.has("photo")) {
+      let photoData = jsonData.photo;
       const photo = await uploadPhoto(formData);
       if (photo) {
         photoData = photo;
       }
+      data = {
+        ...data,
+        photo: photoData,
+      };
     }
 
-    const data = {
-      ...jsonData,
-      photo: photoData,
-    };
+
 
     return genericUpdate("personal-information", id, data, `/dashboard/personal/${id}`);
   } catch (error) {

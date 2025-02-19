@@ -39,7 +39,7 @@ const ReportsPage = ({ data }) => {
     },
     {
       accessorKey: "involvedPersons",
-      header: "Involved Persons",
+      header: "Involved Party",
       cell: (row) => {
         const persons = row.involvedPersons || [];
         return persons.length > 0 

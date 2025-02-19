@@ -23,18 +23,15 @@ import {
 import { Plus, Trash2, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CustomDatePicker from "@/components/fields/CustomDatePicker";
+import { PersonalInfoSelect } from "./PersonalInfoSelect";
 import * as React from "react";
 
 const householdSchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
-  members: z.array(
-    z.object({
-      member: z.any().optional(),
-    })
-  ),
+  members: z.array(z.any()),
   localAddress: z.string().min(1, "Local address is required"),
   status: z.enum(["active", "inactive"]),
-  residencyDate: z.date().optional(),
+  residencyDate: z.string().optional(),
 });
 
 export default function HouseholdForm({
@@ -131,10 +128,11 @@ export default function HouseholdForm({
                   <FormItem>
                     <FormLabel>Residency Date</FormLabel>
                     <FormControl>
-                      <CustomDatePicker
+                      {/* <CustomDatePicker
                         date={field.value}
                         setDate={field.onChange}
-                      />
+                      /> */}
+                        <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -152,7 +150,7 @@ export default function HouseholdForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => appendMember({ member: null })}
+              onClick={() => appendMember({ member: {} })}
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Member
@@ -176,17 +174,12 @@ export default function HouseholdForm({
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormLabel className="sr-only">Member</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a member" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {/* We'll need to fetch and populate this with actual members */}
-                            <SelectItem value="temp">Temporary Option</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <PersonalInfoSelect
+                            onSelect={field.onChange}
+                            defaultValue={field.value}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

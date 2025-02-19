@@ -1,5 +1,4 @@
-
-import { getStaffMembers } from "./actions";
+import { getStaffMembers, getAvailableUsers } from "./actions";
 import { StaffList } from "@/components/pages/staff/StaffList";
 
 export const metadata = {
@@ -7,10 +6,11 @@ export const metadata = {
   description: "View and manage staff members",
 };
 
-export default async function StaffManagement({ searchParams }) {
-  const params = await searchParams;
-  const page = Number(params.page) || 1;
-  const staff = await getStaffMembers(page);
-  
-  return <StaffList data={staff} />;
+export default async function StaffPage() {
+  const [staffData, availableUsers] = await Promise.all([
+    getStaffMembers(),
+    getAvailableUsers()
+  ]);
+
+  return <StaffList data={staffData} availableUsers={availableUsers?.docs || []} />;
 }

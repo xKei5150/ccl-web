@@ -1,55 +1,57 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getStaffMember } from "../../actions";
-import { Users, Clock, FileText, ShieldCheck } from "lucide-react";
+import { getStaffMember } from "../actions";
+import { Users, Clock, FileText } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PersonalInfoSelect } from "@/components/form/PersonalInfoSelect";
+import { PersonalInfoLinkCard } from "@/components/pages/staff/PersonalInfoLinkCard";
+import { PersonalInfoDisplay } from "@/components/pages/staff/PersonalInfoDisplay";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { payload } from "@/lib/payload";
 
-export async function generateMetadata({ params }) {
-  const { id } = params;
-  const { data: staff } = await getStaffMember(id);
-  
-  if (!staff) return {
-    title: "Staff Not Found | CCL",
-    description: "The requested staff member could not be found",
-  };
-
-  return {
-    title: `${staff.email} | Staff Details | CCL`,
-    description: `View staff member details for ${staff.email}`,
-  };
+function formatDate(date) {
+  return date ? format(new Date(date), "PPP") : "N/A";
 }
 
 function StaffInfo({ staff }) {
   return (
     <Card>
-      <CardHeader className="text-lg font-semibold">Basic Information</CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="pt-6">
+        <div className="flex items-start gap-6 mb-8">
+          <Avatar className="h-20 w-20">
+            {staff.personalInfo?.photo ? (
+              <AvatarImage src={staff.personalInfo.photo.url} />
+            ) : (
+              <AvatarFallback className="text-xl">
+                {staff.personalInfo?.name?.firstName?.[0] || staff.email[0].toUpperCase()}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold">
+              {staff.personalInfo?.name?.fullName || staff.email}
+            </h2>
+            <div className="flex gap-2">
+              <Badge>{staff.role}</Badge>
+              <Badge variant={staff.active ? "success" : "destructive"}>
+                {staff.active ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-gray-500">Email</label>
             <p className="mt-1">{staff.email}</p>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-500">Status</label>
-            <p className={`mt-1 inline-flex px-2 py-1 rounded-full text-sm ${
-              staff.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-            }`}>
-              {staff.active ? "Active" : "Inactive"}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-500">Role</label>
-            <p className="mt-1 capitalize">{staff.role}</p>
-          </div>
-          <div>
             <label className="text-sm font-medium text-gray-500">Member Since</label>
-            <p className="mt-1">{format(new Date(staff.createdAt), "PPP")}</p>
+            <p className="mt-1">{formatDate(staff.createdAt)}</p>
           </div>
         </div>
       </CardContent>
@@ -65,12 +67,12 @@ function StaffTimeline({ staff }) {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-gray-500" />
-            <span>Account created on {format(new Date(staff.createdAt), "PPP")}</span>
+            <span>Account created on {formatDate(staff.createdAt)}</span>
           </div>
           {staff.updatedAt !== staff.createdAt && (
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-gray-500" />
-              <span>Last updated on {format(new Date(staff.updatedAt), "PPP")}</span>
+              <span>Last updated on {formatDate(staff.updatedAt)}</span>
             </div>
           )}
         </div>
@@ -79,46 +81,12 @@ function StaffTimeline({ staff }) {
   );
 }
 
-function PersonalInformation({ staff, personalInfoList }) {
-  return (
-    <Card>
-      <CardHeader className="text-lg font-semibold">Personal Information</CardHeader>
-      <CardContent className="space-y-4">
-        {staff.personalInfo ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Full Name</label>
-              <p className="mt-1">{staff.personalInfo.name?.fullName}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Contact Number</label>
-              <p className="mt-1">{staff.personalInfo.contactNumber || "N/A"}</p>
-            </div>
-            <div className="col-span-2">
-              <label className="text-sm font-medium text-gray-500">Address</label>
-              <p className="mt-1">{staff.personalInfo.address || "N/A"}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-4">
-            <p className="text-sm text-gray-500 mb-4">No personal information linked</p>
-            <PersonalInfoSelect
-              userId={staff.id}
-              personalInfo={personalInfoList}
-              className="w-[250px] mx-auto"
-            />
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 export default async function StaffDetails({ params }) {
-  const { id } = params;
+  const { id } = await params;
   const { data: staff } = await getStaffMember(id);
-  const personalInfo = await payload.find({
+  const { docs: personalInfoList } = await payload.find({
     collection: 'personal-information',
+    depth: 1,
     limit: 100,
   });
 
@@ -127,13 +95,12 @@ export default async function StaffDetails({ params }) {
   }
 
   return (
-    <>
     <div className="container py-6 space-y-6">
       <PageHeader
         title="Staff Details"
-        subtitle={staff.email}
+        subtitle={staff.personalInfo?.name?.fullName || staff.email}
         icon={<Users className="h-8 w-8" />}
-        actions={
+        action={
           <Link href={`/dashboard/staff/${id}/edit`}>
             <Button>Edit Staff</Button>
           </Link>
@@ -141,7 +108,7 @@ export default async function StaffDetails({ params }) {
       />
 
       <Tabs defaultValue="info" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="info" className="gap-2">
             <Users className="h-4 w-4" />
             Basic Info
@@ -156,22 +123,28 @@ export default async function StaffDetails({ params }) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="info" className="space-y-6">
+        <TabsContent value="info">
           <StaffInfo staff={staff} />
         </TabsContent>
 
-        <TabsContent value="personal" className="space-y-6">
-          <PersonalInformation 
-            staff={staff} 
-            personalInfoList={personalInfo.docs} 
-          />
+        <TabsContent value="personal">
+          {staff.personalInfo ? (
+            <PersonalInfoDisplay 
+              info={staff.personalInfo} 
+              staff={staff}
+            />
+          ) : (
+            <PersonalInfoLinkCard 
+              staff={staff} 
+              personalInfoList={personalInfoList} 
+            />
+          )}
         </TabsContent>
 
-        <TabsContent value="activity" className="space-y-6">
+        <TabsContent value="activity">
           <StaffTimeline staff={staff} />
         </TabsContent>
       </Tabs>
     </div>
-    </>
   );
 }

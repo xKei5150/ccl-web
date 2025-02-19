@@ -135,31 +135,19 @@ const ThemeContext = createContext({
   themePresets: themePresets,
 });
 
-export function ThemeProvider({ children }) {
-  const [theme, dispatch] = useReducer(themeReducer, themePresets.default);
+export function ThemeProvider({ children, initialTheme }) {
+  const [theme, dispatch] = useReducer(
+    themeReducer, 
+    initialTheme || themePresets.default
+  );
 
   useEffect(() => {
-    // Load saved theme or system preference
-    const savedTheme = localStorage.getItem("appTheme");
-    const savedPreset = localStorage.getItem("appThemePreset");
-    
-    if (savedTheme) {
-      dispatch({ type: "UPDATE_THEME", payload: JSON.parse(savedTheme) });
-    } else if (savedPreset && themePresets[savedPreset]) {
-      dispatch({ type: "LOAD_PRESET", preset: savedPreset });
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if (prefersDark) {
-        dispatch({ type: "LOAD_PRESET", preset: "dark" });
-      }
+    if (!initialTheme) {
+      dispatch({ type: "LOAD_PRESET", preset: "default" });
     }
-  }, []);
+  }, [initialTheme]);
 
   useEffect(() => {
-    // Save theme to localStorage and apply CSS variables
-    localStorage.setItem("appTheme", JSON.stringify(theme));
-    
     // Apply CSS variables
     Object.entries(theme).forEach(([key, value]) => {
       const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
@@ -167,13 +155,32 @@ export function ThemeProvider({ children }) {
     });
   }, [theme]);
 
-  const updateTheme = (newTheme) => {
-    dispatch({ type: "UPDATE_THEME", payload: newTheme });
+  const updateTheme = async (newTheme) => {
+    try {
+      const response = await fetch('/api/globals/theme-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 'theme-settings',
+          ...newTheme
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update theme');
+      
+      const data = await response.json();
+      dispatch({ type: "UPDATE_THEME", payload: data });
+      return data;
+    } catch (error) {
+      console.error('Error updating theme:', error);
+      throw error;
+    }
   };
 
   const loadPreset = (presetName) => {
     if (themePresets[presetName]) {
-      localStorage.setItem("appThemePreset", presetName);
       dispatch({ type: "LOAD_PRESET", preset: presetName });
     }
   };

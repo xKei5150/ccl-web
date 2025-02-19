@@ -6,11 +6,27 @@ const Reports: CollectionConfig = {
         useAsTitle: 'title', // Use the report title as the title in the admin UI
     },
     access: {
-        read: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
-        create: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
-        update: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+        read: ({ req: { user } }) => {
+            if (!user) return false;
+            if (['admin', 'staff'].includes(user.role)) return true;
+            return {
+                submittedBy: {
+                    equals: user?.id
+                }
+            };
+        },
+        create: ({ req: { user } }) => Boolean(user),
+        update: ({ req: { user } }) => {
+            if (!user) return false;
+            if (['admin', 'staff'].includes(user.role)) return true;
+            return {
+                submittedBy: {
+                    equals: user?.id
+                }
+            };
+        },
         delete: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
-      },
+    },
     fields: [
         {
             name: 'title',
@@ -89,6 +105,14 @@ const Reports: CollectionConfig = {
             ],
             defaultValue: 'open',
             label: 'Status'
+        },
+        {
+            name: 'submittedBy',
+            type: 'relationship',
+            relationTo: 'users',
+            required: true,
+            label: 'Submitted By',
+            defaultValue: ({ user }) => user?.id // Automatically set to current user
         }
     ],
 };

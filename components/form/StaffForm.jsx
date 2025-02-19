@@ -9,17 +9,22 @@ import { useToast } from "@/hooks/use-toast";
 import { createStaffMember, updateStaffMember } from "@/app/(app)/dashboard/staff/actions";
 import { PersonalInfoSelect } from "@/components/form/PersonalInfoSelect";
 
-export function StaffForm({ defaultValues }) {
+export function StaffForm({ defaultValues, personalInfoList }) {
   const router = useRouter();
   const { toast } = useToast();
+  
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    setValue,
-    watch,
+    control,
+    watch
   } = useForm({
-    defaultValues: defaultValues || {
+    defaultValues: defaultValues ? {
+      email: defaultValues.email,
+      personalInfo: defaultValues.personalInfo?.id || null,
+      isActive: defaultValues.isActive || "active",
+    } : {
       email: "",
       personalInfo: null,
       isActive: "active",
@@ -28,6 +33,7 @@ export function StaffForm({ defaultValues }) {
 
   const onSubmit = async (data) => {
     try {
+      // Server action will handle the proper relation format
       if (defaultValues) {
         await updateStaffMember(data, defaultValues.id);
         toast({
@@ -79,8 +85,10 @@ export function StaffForm({ defaultValues }) {
             <div>
               <label className="text-sm font-medium mb-1 block">Personal Information</label>
               <PersonalInfoSelect
-                value={watch("personalInfo")}
-                onChange={(value) => setValue("personalInfo", value)}
+                name="personalInfo"
+                control={control}
+                personalInfo={personalInfoList}
+                className="w-full"
               />
             </div>
           </div>
