@@ -87,7 +87,7 @@ export function DashboardCharts({ initialData, availableYears }) {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart2Icon className="h-5 w-5 text-primary" />

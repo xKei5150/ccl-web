@@ -7,7 +7,7 @@ import {TabsTrigger} from "../../ui/tabs";
 
 export default function DashboardPage() {
     return (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
             <Card className="p-6">
                 <CardHeader className="px-0 pt-0">
                     <CardTitle>Barangay Management Overview</CardTitle>

@@ -81,16 +81,10 @@ const BusinessForm = ({
       setIsSubmitting(false);
     }
   };
-  const DEBUG = process.env.NODE_ENV === "development";
   return (
     <main className="max-w-6xl mx-auto space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        {DEBUG && (
-            <pre className="bg-gray-100 p-4 rounded-md">
-              {JSON.stringify(form.formState.errors, null, 2)}
-            </pre>
-          )}          
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
             <CardContent className="p-6">
               <FormField

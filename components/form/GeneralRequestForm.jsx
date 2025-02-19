@@ -58,7 +58,10 @@ export default function GeneralRequestForm({
   const [userPersonalInfo, setUserPersonalInfo] = useState(null);
   const form = useForm({
     resolver: zodResolver(requestSchema),
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      person: defaultValues.person?.id || defaultValues.person
+    },
   });
 
   useEffect(() => {
@@ -91,7 +94,7 @@ export default function GeneralRequestForm({
       setIsSubmitting(false);
     }
   };
-
+  console.log("defaultValues", defaultValues);
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">

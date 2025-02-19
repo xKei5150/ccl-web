@@ -11,6 +11,7 @@
     "payload": "payload"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.5.0",
     "@google/generative-ai": "^0.21.0",
     "@hookform/resolvers": "^3.10.0",
     "@internationalized/date": "^3.7.0",

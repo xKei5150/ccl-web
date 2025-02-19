@@ -56,6 +56,7 @@ export function PersonalInfoSelect({ onSelect, defaultValue }) {
   }, [fetchPeople]);
 
   function handleSelect(person) {
+    console.log("Selected person:", person);
     setSelected(person);
     setOpen(false);
     onSelect(person.id);

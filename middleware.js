@@ -14,6 +14,7 @@ const roleProtectedPaths = {
   '/dashboard/personal': ['admin', 'staff'],
   '/dashboard/household': ['admin', 'staff'],
   '/dashboard/business': ['admin', 'staff'],
+  '/dashboard/business-permits': ['admin', 'staff'],
 };
 
 // Paths that citizens can access - being explicit about exact paths
