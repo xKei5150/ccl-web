@@ -1,12 +1,17 @@
 'use client';
 
-import { usePredictions } from '@/hooks/usePredictions';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUpIcon, TrendingDownIcon, BrainCircuitIcon } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useFetchData } from '@/lib/client-data';
+import { Loading } from '@/components/ui/loading';
 
+/**
+ * Card component for displaying a prediction value
+ */
 function PredictionCard({ title, value, trend, description }) {
   return (
     <Card>
@@ -26,27 +31,52 @@ function PredictionCard({ title, value, trend, description }) {
   );
 }
 
+/**
+ * Tab component for displaying prediction data
+ */
 export function PredictionsTab({ data }) {
-  const { isPredicting, predictions, error } = usePredictions(data);
+  // Prepare data for prediction API
+  const dataForPrediction = useMemo(() => {
+    return data.map(item => ({
+      month: item.name,
+      requests: item.requests,
+      permits: item.permits,
+      households: item.households
+    }));
+  }, [data]);
+  
+  // Use React Query to fetch predictions
+  const { data: predictions, isLoading, isError, error } = useFetchData(
+    ['predictions', JSON.stringify(dataForPrediction)],
+    '/api/dashboard/predictions',
+    {
+      method: 'POST',
+      body: JSON.stringify({ data: dataForPrediction }),
+      staleTime: 10 * 60 * 1000, // 10 minutes
+    }
+  );
 
-  if (isPredicting) {
+  if (isLoading) {
     return (
       <Card>
-        <CardContent className="h-[400px] flex items-center justify-center">
-          <div className="space-y-4 text-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent mx-auto" />
-            <p className="text-sm text-muted-foreground">Analyzing trends...</p>
-          </div>
+        <CardContent className="h-[400px]">
+          <Loading 
+            variant="spinner" 
+            size="lg" 
+            text="Generating predictions from your data..." 
+          />
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card className="border-destructive">
         <CardContent className="pt-6">
-          <p className="text-destructive">{error}</p>
+          <p className="text-destructive">
+            {error?.message || "Failed to generate predictions. Please try again."}
+          </p>
         </CardContent>
       </Card>
     );

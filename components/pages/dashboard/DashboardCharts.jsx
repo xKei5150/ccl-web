@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,15 +14,25 @@ import {
   Users, Files,
   FileCheck, BrainCircuitIcon, BarChart3Icon, Award
 } from "lucide-react";
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/style-utils';
 import DashboardChart from './DashboardChart';
-import { fetchAnalytics } from '@/lib/actions/dashboard-actions';
 import { PredictionsTab } from './PredictionsTab';
+import { useFetchData } from '@/lib/client-data';
+import { Loading } from '@/components/ui/loading';
 
-export function DashboardCharts({ initialData, availableYears }) {
+/**
+ * Main dashboard charts component using React Query for data fetching
+ * 
+ * @param {Object} props Component props
+ * @param {Array} props.initialData Initial data from server
+ * @param {Array} props.availableYears Available years for selection
+ * @param {number} props.initialYear Initial selected year
+ * @returns {JSX.Element} Dashboard charts component
+ */
+export function DashboardCharts({ initialData, availableYears, initialYear }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentYear = searchParams.get('year') || new Date().getFullYear().toString();
+  const currentYear = searchParams.get('year') || initialYear.toString();
   const [selectedMetric, setSelectedMetric] = useState('requests');
 
   function handleYearChange(year) {
@@ -104,28 +114,21 @@ export function DashboardCharts({ initialData, availableYears }) {
               </CardContent>
             </Card>
 
-            <Suspense fallback={<AnalyticsCardSkeleton />}>
-              <AnalyticsCard metric={selectedMetric} year={parseInt(currentYear)} />
-            </Suspense>
+            <AnalyticsCard metric={selectedMetric} year={parseInt(currentYear)} />
           </div>
         </TabsContent>
 
         <TabsContent value="predictions">
-          <Suspense fallback={
-            <Card>
-              <CardContent className="h-[400px] flex items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
-              </CardContent>
-            </Card>
-          }>
-            <PredictionsTab data={initialData} />
-          </Suspense>
+          <PredictionsTab data={initialData} />
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
+/**
+ * Card component for displaying metrics
+ */
 function MetricCard({ title, value, icon: Icon, isSelected, onClick }) {
   return (
     <Card 
@@ -157,27 +160,22 @@ function MetricCard({ title, value, icon: Icon, isSelected, onClick }) {
   );
 }
 
+/**
+ * Analytics card component using React Query
+ */
 function AnalyticsCard({ metric, year }) {
-  const [analytics, setAnalytics] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadAnalytics() {
-      try {
-        setIsLoading(true);
-        const data = await fetchAnalytics(metric, year);
-        setAnalytics(data);
-      } catch (error) {
-        console.error('Failed to load analytics:', error);
-      } finally {
-        setIsLoading(false);
-      }
+  // Use React Query for data fetching
+  const { data: analytics, isLoading, isError } = useFetchData(
+    ['analytics', metric, year],
+    `/api/dashboard/analytics?metric=${metric}&year=${year}`,
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1
     }
-
-    loadAnalytics();
-  }, [metric, year]);
+  );
 
   if (isLoading) return <AnalyticsCardSkeleton />;
+  if (isError) return <AnalyticsError />;
   if (!analytics) return null;
 
   const { trend, percentChange, insights, recommendations, stats } = analytics;
@@ -248,10 +246,7 @@ function AnalyticsCard({ metric, year }) {
               <div className="space-y-2">
                 {insights.map((insight, i) => (
                   <Card key={i} className="p-3 bg-muted/50">
-                    <div className="flex gap-3 items-start">
-                      <div className="h-2 w-2 rounded-full bg-primary mt-2" />
-                      <p className="text-sm leading-relaxed">{insight}</p>
-                    </div>
+                    <p className="text-sm">{insight}</p>
                   </Card>
                 ))}
               </div>
@@ -259,20 +254,15 @@ function AnalyticsCard({ metric, year }) {
           </TabsContent>
           
           <TabsContent value="recommendations" className="space-y-4">
-            <ScrollArea className="h-[280px] pr-4">
+            <ScrollArea className="h-[320px] pr-4">
               <div className="space-y-3">
                 {recommendations.map((recommendation, i) => (
-                  <Card key={i} className="p-4 transition-colors hover:bg-muted/50">
-                    <div className="flex gap-3 items-start">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <LightbulbIcon className="h-4 w-4 text-primary" />
+                  <Card key={i} className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-xs font-semibold text-primary">{i+1}</span>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-sm leading-relaxed">{recommendation}</p>
-                        <Badge variant="secondary" className="text-xs">
-                          Suggested Action
-                        </Badge>
-                      </div>
+                      <p className="text-sm">{recommendation}</p>
                     </div>
                   </Card>
                 ))}
@@ -285,35 +275,66 @@ function AnalyticsCard({ metric, year }) {
   );
 }
 
-function StatsCard({ title, value, icon: Icon }) {
-  return (
-    <div className="rounded-lg border bg-card p-3 hover:bg-muted/50 transition-colors">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        <p className="text-sm font-medium leading-none">{title}</p>
-      </div>
-      <p className="mt-2.5 text-2xl font-bold tracking-tight">{value}</p>
-    </div>
-  );
-}
-
-function AnalyticsCardSkeleton() {
+/**
+ * Error state for analytics card
+ */
+function AnalyticsError() {
   return (
     <Card>
-      <CardHeader>
-        <div className="h-6 w-1/3 bg-muted rounded animate-pulse" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="h-4 w-full bg-muted rounded animate-pulse" />
-          <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="rounded-full bg-destructive/10 p-3 mb-4">
+          <ActivityIcon className="h-6 w-6 text-destructive" />
         </div>
+        <h3 className="text-lg font-medium mb-2">Failed to load analytics</h3>
+        <p className="text-sm text-muted-foreground max-w-md">
+          There was a problem loading analytics data. Please try again later.
+        </p>
       </CardContent>
     </Card>
   );
 }
 
+/**
+ * Stats card for displaying analytics values
+ */
+function StatsCard({ title, value, icon: Icon }) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center gap-3">
+        <div className="rounded-full h-8 w-8 bg-primary/10 flex items-center justify-center">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-xl font-semibold">{value}</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Loading skeleton for analytics card
+ */
+function AnalyticsCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="space-y-2">
+          <div className="h-5 w-1/3 bg-muted rounded animate-pulse"></div>
+          <div className="h-4 w-1/4 bg-muted rounded animate-pulse"></div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Loading variant="skeleton" />
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Helper function to sum metric values
+ */
 function sumMetric(data, metric) {
-  return data.reduce((sum, item) => sum + item[metric], 0);
+  return data.reduce((total, item) => total + (item[metric] || 0), 0);
 }

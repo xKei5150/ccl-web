@@ -2,13 +2,16 @@
 
 import { AuthProvider } from "@/hooks/use-auth";
 import { Suspense } from "react";
+import { QueryProvider } from "./query-provider";
 
 export function RootProvider({ children }) {
   return (
     <Suspense>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
+      <QueryProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </QueryProvider>
     </Suspense>
   );
 }

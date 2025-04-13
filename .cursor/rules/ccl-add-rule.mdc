@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+When working with the CCL codebase, follow these standards:
+Components: Use existing Shadcn/UI components; maintain consistent styling and patterns.
+Data Fetching:
+Server components: Use fetchCollection/fetchDocument from lib/data-fetching.js
+Client components: Use useFetchData/usePaginatedData from lib/client-data.js
+Form Handling:
+Form validation: Use Zod schemas from lib/validation.js
+Form submission: Use useFormSubmit hook for consistent handling
+State Management:
+URL state: Use useUrlParam/useUrlFilters for URL-based state
+React Query: For client-side data fetching and caching
+File Structure:
+Server actions in page.js files
+Client components with 'use client' in separate files
+Zod validation schemas in validation files
+Performance:
+Favor server components when possible
+Add proper Suspense boundaries for async operations
+Use standardized loading states
+This approach ensures consistent patterns, optimized performance, and maintainable code across the entire application.

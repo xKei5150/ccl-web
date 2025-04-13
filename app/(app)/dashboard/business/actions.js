@@ -1,27 +1,95 @@
-// app/(app)/dashboard/business/action.js
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import {
-  genericCreate,
-  genericFind,
-  genericFindByID,
-  genericUpdate,
-  genericDelete,
-} from "@/lib/services/PayloadDataService";
+  createBusiness,
+  updateBusiness,
+  deleteBusiness
+} from "./data";
 
-export async function getBusinesses(page = 1, limit = 10) {
-  return genericFind("business", page, limit);
+/**
+ * Create a new business from form submission
+ * 
+ * @param {FormData} formData - Form data from client
+ */
+export async function createBusinessAction(formData) {
+  try {
+    await createBusiness(formData);
+    // Success path is handled by the data function with redirect
+  } catch (error) {
+    console.error("Error creating business:", error);
+    return {
+      success: false,
+      message: "Failed to create business. Please try again."
+    };
+  }
 }
 
-export async function getBusiness(id) {
-  return genericFindByID("business", id);
+/**
+ * Update an existing business
+ * 
+ * @param {string} id - Business ID
+ * @param {FormData} formData - Form data
+ */
+export async function updateBusinessAction(id, formData) {
+  try {
+    await updateBusiness(id, formData);
+    revalidatePath(`/dashboard/business/${id}`);
+    revalidatePath('/dashboard/business');
+    return {
+      success: true,
+      message: "Business updated successfully"
+    };
+  } catch (error) {
+    console.error(`Error updating business ${id}:`, error);
+    return {
+      success: false,
+      message: "Failed to update business. Please try again."
+    };
+  }
 }
 
-export async function createBusiness(data) {
-  return genericCreate("business", data, "/dashboard/business");
-}
-export async function updateBusiness(newData, id) {
-  return genericUpdate("business", id, newData, `/dashboard/business/${id}`);
+/**
+ * Delete a business and handle revalidation
+ * 
+ * @param {string} id - Business ID
+ */
+export async function deleteBusinessAction(id) {
+  try {
+    await deleteBusiness(id);
+    revalidatePath('/dashboard/business');
+    return {
+      success: true,
+      message: "Business deleted successfully"
+    };
+  } catch (error) {
+    console.error(`Error deleting business ${id}:`, error);
+    return {
+      success: false,
+      message: "Failed to delete business. Please try again."
+    };
+  }
 }
 
-export async function deleteBusiness(ids) {
-  return genericDelete("business", ids, `/dashboard/business`);
+/**
+ * Delete multiple businesses
+ * 
+ * @param {string[]} ids - Array of business IDs
+ */
+export async function bulkDeleteBusinessAction(ids) {
+  try {
+    await deleteBusiness(ids);
+    revalidatePath('/dashboard/business');
+    return {
+      success: true,
+      message: `${ids.length} businesses deleted successfully`
+    };
+  } catch (error) {
+    console.error(`Error deleting businesses:`, error);
+    return {
+      success: false,
+      message: "Failed to delete businesses. Please try again."
+    };
+  }
 }

@@ -3,25 +3,58 @@
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/style-utils"
 
+/**
+ * Popover component for contextual overlays
+ */
 const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger
 
-const PopoverContent = React.forwardRef(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
-    <PopoverPrimitive.Content
-      ref={ref}
-      align={align}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        className
-      )}
-      {...props} />
-  </PopoverPrimitive.Portal>
-))
-PopoverContent.displayName = PopoverPrimitive.Content.displayName
+/**
+ * PopoverContent component with size variants
+ * 
+ * @param {object} props - Component properties
+ * @param {string} props.className - Additional CSS classes
+ * @param {string} props.align - Alignment (start, center, end)
+ * @param {number} props.sideOffset - Offset from trigger
+ * @param {string} props.size - Size variant (sm, default, lg, xl, auto)
+ * @returns {JSX.Element} PopoverContent component
+ */
+const PopoverContent = React.forwardRef(({ 
+  className, 
+  align = "center", 
+  sideOffset = 4, 
+  size = "default",
+  ...props 
+}, ref) => {
+  // Size variants
+  const sizeClasses = {
+    xs: "w-48",
+    sm: "w-64",
+    default: "w-72",
+    lg: "w-80",
+    xl: "w-96",
+    auto: "w-auto min-w-[8rem]"
+  };
+
+  return (
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Content
+        ref={ref}
+        align={align}
+        sideOffset={sideOffset}
+        className={cn(
+          "z-50 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          sizeClasses[size] || sizeClasses.default,
+          className
+        )}
+        {...props}
+      />
+    </PopoverPrimitive.Portal>
+  )
+})
+PopoverContent.displayName = "PopoverContent"
 
 export { Popover, PopoverTrigger, PopoverContent }

@@ -2,10 +2,14 @@
 "use client";
 
 import { Building2 } from "lucide-react";
-import { deleteBusiness } from "@/app/(app)/dashboard/business/actions";
+import { deleteBusiness } from "@/app/(app)/dashboard/business/data";
 import DataPageLayout from "@/components/layout/DataPageLayout";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-const BusinessPage = ({ data }) => {
+export function BusinessPage({ data }) {
+  const router = useRouter();
+
   const columns = [
     {
       accessorKey: "businessName",
@@ -18,13 +22,27 @@ const BusinessPage = ({ data }) => {
     {
       accessorKey: "registrationDate",
       header: "Registration Date",
-      cell: (row) => new Date(row.registrationDate).toLocaleDateString(),
+      cell: ({ row }) => {
+        const date = row.getValue("registrationDate");
+        return date ? new Date(date).toLocaleDateString() : "N/A";
+      },
     },
     {
       accessorKey: "businessEmailAddress",
       header: "Business Email",
     },
   ];
+
+  const handleDelete = async (ids) => {
+    try {
+      await deleteBusiness(ids);
+      toast.success("Business deleted successfully");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to delete business");
+      console.error(error);
+    }
+  };
 
   return (
     <DataPageLayout
@@ -35,10 +53,8 @@ const BusinessPage = ({ data }) => {
       data={data}
       baseUrl="/dashboard/business"
       newItemUrl="/dashboard/business/new"
-      deleteAction={deleteBusiness}
+      deleteAction={handleDelete}
       newButtonLabel="New Business"
     />
   );
-};
-
-export default BusinessPage;
+}
