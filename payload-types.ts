@@ -22,6 +22,9 @@ export interface Config {
     media: Media;
     users: User;
     posts: Post;
+    financing: Financing;
+    'financing-audit-log': FinancingAuditLog;
+    'storage-folders': StorageFolder;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -39,6 +42,9 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    financing: FinancingSelect<false> | FinancingSelect<true>;
+    'financing-audit-log': FinancingAuditLogSelect<false> | FinancingAuditLogSelect<true>;
+    'storage-folders': StorageFoldersSelect<false> | StorageFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -305,6 +311,7 @@ export interface User {
 export interface Media {
   id: number;
   alt?: string | null;
+  folder?: (number | null) | StorageFolder;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -345,6 +352,17 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage-folders".
+ */
+export interface StorageFolder {
+  id: number;
+  name: string;
+  parent?: (number | null) | StorageFolder;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -355,6 +373,136 @@ export interface Post {
   slug?: string | null;
   publishedDate: string;
   status: 'draft' | 'published';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "financing".
+ */
+export interface Financing {
+  id: number;
+  title: string;
+  description?: string | null;
+  approvalState?: ('draft' | 'submitted' | 'under_review' | 'approved' | 'rejected') | null;
+  accountType?: ('capital' | 'operational' | 'grant' | 'revenue' | 'transfer') | null;
+  fiscalYear?: string | null;
+  budgetedAmount?: number | null;
+  /**
+   * Reference to budget allocation or code
+   */
+  budgetReference?: string | null;
+  departmentCode?: string | null;
+  /**
+   * Justification for this expenditure
+   */
+  justification?: string | null;
+  /**
+   * Legislative or policy authorization reference
+   */
+  authorizationReference?: string | null;
+  approvalHistory?:
+    | {
+        state: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected';
+        timestamp: string;
+        user: string;
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  groups?:
+    | {
+        title: string;
+        description?: string | null;
+        subtotalOperation?: ('sum' | 'average' | 'min' | 'max') | null;
+        items?:
+          | {
+              number?: number | null;
+              title?: string | null;
+              value?: number | null;
+              operation?: ('add' | 'subtract' | 'multiply' | 'divide') | null;
+              /**
+               * Government accounting code
+               */
+              accountCode?: string | null;
+              /**
+               * Fiscal period (e.g., Q1 2023)
+               */
+              fiscalPeriod?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  finalCalculations?:
+    | {
+        number?: number | null;
+        title?: string | null;
+        operation?: ('add' | 'subtract' | 'multiply' | 'divide' | 'groupRef') | null;
+        value?: number | null;
+        /**
+         * Zero-based index of the group
+         */
+        groupReference?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  auditTrail?:
+    | {
+        action: string;
+        timestamp: string;
+        user: string;
+        changes?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Audit trail for all financing record changes
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "financing-audit-log".
+ */
+export interface FinancingAuditLog {
+  id: number;
+  timestamp: string;
+  user: number | User;
+  action: 'create' | 'update' | 'delete' | 'state_change';
+  record: number | Financing;
+  /**
+   * Stored for reference even if the record is deleted
+   */
+  financingTitle?: string | null;
+  previousState?: ('draft' | 'submitted' | 'under_review' | 'approved' | 'rejected') | null;
+  newState?: ('draft' | 'submitted' | 'under_review' | 'approved' | 'rejected') | null;
+  /**
+   * Detailed changes made to the record
+   */
+  changes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Additional context about this change
+   */
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -408,6 +556,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'financing';
+        value: number | Financing;
+      } | null)
+    | ({
+        relationTo: 'financing-audit-log';
+        value: number | FinancingAuditLog;
+      } | null)
+    | ({
+        relationTo: 'storage-folders';
+        value: number | StorageFolder;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -664,6 +824,7 @@ export interface ReportsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -744,6 +905,99 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "financing_select".
+ */
+export interface FinancingSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  approvalState?: T;
+  accountType?: T;
+  fiscalYear?: T;
+  budgetedAmount?: T;
+  budgetReference?: T;
+  departmentCode?: T;
+  justification?: T;
+  authorizationReference?: T;
+  approvalHistory?:
+    | T
+    | {
+        state?: T;
+        timestamp?: T;
+        user?: T;
+        notes?: T;
+        id?: T;
+      };
+  groups?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        subtotalOperation?: T;
+        items?:
+          | T
+          | {
+              number?: T;
+              title?: T;
+              value?: T;
+              operation?: T;
+              accountCode?: T;
+              fiscalPeriod?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  finalCalculations?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        operation?: T;
+        value?: T;
+        groupReference?: T;
+        id?: T;
+      };
+  auditTrail?:
+    | T
+    | {
+        action?: T;
+        timestamp?: T;
+        user?: T;
+        changes?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "financing-audit-log_select".
+ */
+export interface FinancingAuditLogSelect<T extends boolean = true> {
+  timestamp?: T;
+  user?: T;
+  action?: T;
+  record?: T;
+  financingTitle?: T;
+  previousState?: T;
+  newState?: T;
+  changes?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "storage-folders_select".
+ */
+export interface StorageFoldersSelect<T extends boolean = true> {
+  name?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -816,6 +1070,8 @@ export interface ThemeSetting {
 export interface SiteSetting {
   id: number;
   siteName: string;
+  heroImage?: (number | null) | Media;
+  authImage?: (number | null) | Media;
   logo: number | Media;
   favicon?: (number | null) | Media;
   description?: string | null;
@@ -866,6 +1122,8 @@ export interface ThemeSettingsSelect<T extends boolean = true> {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  heroImage?: T;
+  authImage?: T;
   logo?: T;
   favicon?: T;
   description?: T;

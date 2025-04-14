@@ -5,16 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Mail } from "lucide-react";
-import { resetPasswordRequest } from "@/app/(app)/auth/actions";
+import { Mail, ArrowLeft } from "lucide-react";
+import { resetPassword } from "@/app/(app)/auth/actions";
 import Link from "next/link";
 
 export function ForgotPasswordForm() {
@@ -25,7 +17,7 @@ export function ForgotPasswordForm() {
   async function handleSubmit(formData) {
     try {
       setIsLoading(true);
-      const result = await resetPasswordRequest(formData);
+      const result = await resetPassword(formData);
 
       if (result.success) {
         setIsSubmitted(true);
@@ -53,53 +45,57 @@ export function ForgotPasswordForm() {
 
   if (isSubmitted) {
     return (
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
-          <CardDescription>
-            We've sent password reset instructions to your email address.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button variant="link" className="w-full" asChild>
-            <Link href="/auth/login">Return to Login</Link>
-          </Button>
-        </CardFooter>
-      </Card>
+      <div className="text-center">
+        <h2 className="text-base font-medium mb-2">Check Your Email</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          We've sent password reset instructions to your email address.
+        </p>
+        <Link 
+          href="/auth/login" 
+          className="text-sm text-primary hover:underline flex items-center justify-center"
+        >
+          <ArrowLeft className="mr-1 h-3 w-3" />
+          Return to Login
+        </Link>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
-        <CardDescription>
-          Enter your email address and we'll send you a link to reset your password
-        </CardDescription>
-      </CardHeader>
-      <form action={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            <Mail className="mr-2 h-4 w-4" />
-            {isLoading ? "Sending..." : "Send Reset Link"}
-          </Button>
-          <Button variant="link" className="w-full" asChild>
-            <Link href="/auth/login">Back to Login</Link>
-          </Button>
-        </CardFooter>
+    <div>
+      <h2 className="text-base font-medium mb-1">Forgot Password</h2>
+      <p className="text-xs text-muted-foreground mb-3">
+        Enter your email to receive a password reset link
+      </p>
+      
+      <form action={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            required
+            className="h-9 text-sm"
+          />
+        </div>
+        
+        <Button type="submit" className="w-full h-9 text-sm" disabled={isLoading}>
+          <Mail className="mr-2 h-4 w-4" />
+          {isLoading ? "Sending..." : "Send Reset Link"}
+        </Button>
+        
+        <div className="text-center">
+          <Link 
+            href="/auth/login" 
+            className="text-xs text-primary hover:underline inline-flex items-center"
+          >
+            <ArrowLeft className="mr-1 h-3 w-3" />
+            Back to Login
+          </Link>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 }

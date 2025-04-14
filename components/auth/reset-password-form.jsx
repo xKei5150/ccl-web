@@ -1,41 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Key } from "lucide-react";
+import { KeyRound, ArrowLeft } from "lucide-react";
 import { resetPassword } from "@/app/(app)/auth/actions";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export function ResetPasswordForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
+
   async function handleSubmit(formData) {
     try {
       setIsLoading(true);
-      const result = await resetPassword({ ...formData, token });
+      
+      if (!token) {
+        toast({
+          variant: "destructive",
+          title: "Invalid token",
+          description: "Password reset token is missing or invalid",
+        });
+        return;
+      }
+
+      const password = formData.get("password");
+      const confirmPassword = formData.get("confirmPassword");
+
+      if (password !== confirmPassword) {
+        toast({
+          variant: "destructive",
+          title: "Passwords don't match",
+          description: "Please ensure both passwords match",
+        });
+        return;
+      }
+
+      const result = await resetPassword({
+        password,
+        token,
+      });
 
       if (result.success) {
+        setIsSubmitted(true);
         toast({
-          title: "Password Reset Successful",
-          description: "You can now login with your new password.",
+          title: "Password reset successful",
+          description: "Your password has been updated",
         });
-        router.push("/auth/login");
       } else {
         toast({
           variant: "destructive",
@@ -54,62 +71,87 @@ export function ResetPasswordForm() {
     }
   }
 
+  if (isSubmitted) {
+    return (
+      <div className="text-center">
+        <h2 className="text-base font-medium mb-2">Password Reset Complete</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Your password has been successfully reset.
+        </p>
+        <Link 
+          href="/auth/login" 
+          className="text-sm text-primary hover:underline flex items-center justify-center"
+        >
+          <ArrowLeft className="mr-1 h-3 w-3" />
+          Return to Login
+        </Link>
+      </div>
+    );
+  }
+
   if (!token) {
     return (
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-bold">Invalid Reset Link</CardTitle>
-          <CardDescription>
-            This password reset link is invalid or has expired.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button variant="link" className="w-full" onClick={() => router.push("/auth/forgot-password")}>
-            Request New Reset Link
-          </Button>
-        </CardFooter>
-      </Card>
+      <div className="text-center">
+        <h2 className="text-base font-medium mb-2">Invalid Request</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          The password reset link is invalid or expired.
+        </p>
+        <Link 
+          href="/auth/forgot-password" 
+          className="text-sm text-primary hover:underline flex items-center justify-center"
+        >
+          <ArrowLeft className="mr-1 h-3 w-3" />
+          Request New Link
+        </Link>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
-        <CardDescription>
-          Enter your new password below
-        </CardDescription>
-      </CardHeader>
-      <form action={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your new password"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              placeholder="Confirm your new password"
-              required
-            />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            <Key className="mr-2 h-4 w-4" />
-            {isLoading ? "Resetting..." : "Reset Password"}
-          </Button>
-        </CardFooter>
+    <div>
+      <h2 className="text-base font-medium mb-1">Reset Password</h2>
+      <p className="text-xs text-muted-foreground mb-3">
+        Enter your new password below
+      </p>
+      
+      <form action={handleSubmit} className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-sm">New Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            className="h-9 text-sm"
+          />
+        </div>
+        
+        <div className="space-y-1.5">
+          <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            className="h-9 text-sm"
+          />
+        </div>
+        
+        <Button type="submit" className="w-full h-9 text-sm mt-4" disabled={isLoading}>
+          <KeyRound className="mr-2 h-4 w-4" />
+          {isLoading ? "Resetting..." : "Reset Password"}
+        </Button>
+        
+        <div className="text-center">
+          <Link 
+            href="/auth/login" 
+            className="text-xs text-primary hover:underline inline-flex items-center"
+          >
+            <ArrowLeft className="mr-1 h-3 w-3" />
+            Back to Login
+          </Link>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 }

@@ -5,62 +5,70 @@ import { useState } from "react";
 import { DocumentPreviewDialog } from "./DocumentPreviewDialog";
 import { cn } from "@/lib/utils";
 
-export default function DocumentPreview({ document }) {
+export default function DocumentPreview({ document = {}, className = "" }) {
   const [showPreview, setShowPreview] = useState(false);
+  
+  // Ensure document is an object
+  if (!document || typeof document !== 'object') {
+    document = {};
+  }
+  
   const isImage = document.mimeType?.startsWith('image/');
   const isPDF = document.mimeType === 'application/pdf';
   const isVideo = document.mimeType?.startsWith('video/');
   const isPreviewable = isImage || isPDF || isVideo;
 
   const getIcon = () => {
-    if (isImage) return <ImageIcon className="w-8 h-8 text-blue-500" />;
-    if (isPDF) return <FileText className="w-8 h-8 text-red-500" />;
-    if (isVideo) return <Video className="w-8 h-8 text-purple-500" />;
-    return <File className="w-8 h-8 text-gray-500" />;
+    if (isImage) return <ImageIcon className="w-6 h-6 text-blue-500" />;
+    if (isPDF) return <FileText className="w-6 h-6 text-red-500" />;
+    if (isVideo) return <Video className="w-6 h-6 text-purple-500" />;
+    return <File className="w-6 h-6 text-gray-500" />;
   };
+
+  // If there's no document or URL, show a placeholder
+  if (!document.url && !document.filename && !document.alt) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-1 p-2 text-center">
+          <File className="w-6 h-6 text-gray-400" />
+          <span className="text-xs text-gray-400">No file</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div 
         className={cn(
-          "group relative bg-white p-4 rounded-lg border border-gray-100 transition-all duration-300",
-          isPreviewable && "cursor-pointer hover:shadow-md hover:border-gray-200"
+          "group relative bg-white rounded-lg transition-all duration-300 h-full w-full",
+          isPreviewable && "cursor-pointer"
         )}
         onClick={() => isPreviewable && setShowPreview(true)}
       >
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center justify-center h-full">
           {isImage ? (
-            <div className="relative w-full pt-[100%]">
+            <div className="relative w-full h-full flex items-center justify-center">
               <img
                 src={document.url}
-                alt={document.filename}
-                className="absolute inset-0 w-50% h-50% object-cover rounded-md"
+                alt={document.filename || document.alt || "Image"}
+                className="object-contain max-h-full max-w-full"
               />
             </div>
           ) : (
-            <div className="w-full pt-[100%] relative bg-gray-50 rounded-md">
-              <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <div className="flex flex-col items-center gap-1 p-2 text-center">
                 {getIcon()}
+                <span className="text-xs text-gray-600 mt-1 line-clamp-1 max-w-full px-2">
+                  {document.filename || document.alt || "File"}
+                </span>
               </div>
             </div>
           )}
 
-          <div className="w-full">
-            <div className="flex items-center gap-2 text-sm text-gray-900">
-              <span className="truncate" title={document.filename}>
-                {document.filename}
-              </span>
-            </div>
-            {document.notes && (
-              <p className="text-xs text-gray-500 mt-1 truncate" title={document.notes}>
-                {document.notes}
-              </p>
-            )}
-          </div>
-
           {isPreviewable && (
             <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-              <span className="bg-white/90 px-3 py-1 rounded-full text-sm font-medium text-gray-900">
+              <span className="bg-white/90 px-2 py-1 rounded-full text-xs font-medium text-gray-900">
                 Preview
               </span>
             </div>
@@ -68,11 +76,13 @@ export default function DocumentPreview({ document }) {
         </div>
       </div>
 
-      <DocumentPreviewDialog
-        document={document}
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-      />
+      {isPreviewable && (
+        <DocumentPreviewDialog
+          document={document}
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </>
   );
 }

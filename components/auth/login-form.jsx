@@ -7,14 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Form,
   FormControl,
   FormField,
@@ -104,80 +96,71 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-        <CardDescription>
-          Sign in to access the Barangay Management System
-        </CardDescription>
-      </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleLogin)}>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder="Enter your email"
-                      required
-                      autoComplete="email"
-                      disabled={isLoading}
-                      aria-describedby="email-error"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="password"
-                      placeholder="Enter your password"
-                      required
-                      autoComplete="current-password"
-                      disabled={isLoading}
-                      aria-describedby="password-error"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <div className="text-right">
-                    <Button variant="link" className="p-0 h-auto" asChild>
-                      <Link href="/auth/forgot-password">
-                        Forgot password?
-                      </Link>
-                    </Button>
-                  </div>
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              <LogIn className="mr-2 h-4 w-4" />
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </CardFooter>
-          <div className="mt-2 text-center text-sm">
-            Don't have an account?{" "}
-            <Link href="/auth/register" className="underline">
-              Register
-            </Link>
-          </div>
-        </form>
-      </Form>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleLogin)}>
+        <div className="space-y-3">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Email</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                    autoComplete="email"
+                    disabled={isLoading}
+                    className="h-9"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex justify-between items-center">
+                  <FormLabel className="text-sm">Password</FormLabel>
+                  <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline">
+                    Forgot?
+                  </Link>
+                </div>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                    autoComplete="current-password"
+                    disabled={isLoading}
+                    className="h-9"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <Button type="submit" className="w-full mt-4 h-9" disabled={isLoading}>
+          <LogIn className="mr-2 h-4 w-4" />
+          {isLoading ? "Signing in..." : "Sign In"}
+        </Button>
+        
+        <div className="mt-3 text-center text-xs">
+          Don't have an account?{" "}
+          <Link href="/auth/register" className="text-primary hover:underline">
+            Register
+          </Link>
+        </div>
+      </form>
+    </Form>
   );
 }

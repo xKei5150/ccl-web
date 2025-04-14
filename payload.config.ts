@@ -15,7 +15,9 @@ import SiteSettings from './globals/SiteSettings'
 import Media from './collections/Media'
 import Users from './collections/Users'
 import Posts from './collections/Posts'
-
+import Financing from './collections/Financing'
+import FinancingAuditLog from './collections/FinancingAuditLog'
+import StorageFolders from './collections/StorageFolders'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 
 export default buildConfig({
@@ -35,6 +37,9 @@ export default buildConfig({
     Media,
     Users,
     Posts,
+    Financing,
+    FinancingAuditLog,
+    StorageFolders,
   ],
 
   globals: [

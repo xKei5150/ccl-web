@@ -14,6 +14,18 @@ const SiteSettings: GlobalConfig = {
       label: 'Site Name',
     },
     {
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Hero Image',
+    },
+    {
+      name: 'authImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Auth Image',
+    },
+    {
       name: 'logo',
       type: 'relationship',
       relationTo: 'media',

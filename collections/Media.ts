@@ -41,6 +41,12 @@ const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
     },
+    {
+      name: 'folder',
+      type: 'relationship',
+      relationTo: 'storage-folders',
+      hasMany: false,
+    },
   ],
 }
 

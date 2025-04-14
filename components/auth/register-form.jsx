@@ -6,14 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { UserPlus, ArrowLeft, ArrowRight } from "lucide-react";
 import { register } from "@/app/(app)/auth/actions";
 import Link from "next/link";
@@ -143,15 +135,14 @@ export function RegisterForm() {
 
   const renderStep1 = () => (
     <>
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
-        <CardDescription>
-          Step 1: Enter your account credentials
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+      <h2 className="text-base font-medium mb-1">Create an Account</h2>
+      <p className="text-xs text-muted-foreground mb-3">
+        Step 1: Enter your account credentials
+      </p>
+      
+      <form className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm">Email</Label>
           <Input
             id="email"
             name="email"
@@ -160,10 +151,12 @@ export function RegisterForm() {
             onChange={handleInputChange}
             placeholder="Enter your email"
             required
+            className="h-9 text-sm"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+        
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-sm">Password</Label>
           <Input
             id="password"
             name="password"
@@ -172,10 +165,12 @@ export function RegisterForm() {
             onChange={handleInputChange}
             placeholder="Create a password"
             required
+            className="h-9 text-sm"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+        
+        <div className="space-y-1.5">
+          <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
           <Input
             id="confirmPassword"
             name="confirmPassword"
@@ -184,54 +179,49 @@ export function RegisterForm() {
             onChange={handleInputChange}
             placeholder="Confirm your password"
             required
+            className="h-9 text-sm"
           />
         </div>
-      </CardContent>
-      <CardFooter className="flex flex-col space-y-4">
+        
         <Button
           type="button"
-          className="w-full"
+          className="w-full mt-2 h-9 text-sm"
           onClick={() => setStep(2)}
           disabled={!validateStep1()}
         >
           Next Step
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-        <p className="text-sm text-muted-foreground text-center">
+        
+        <p className="text-xs text-muted-foreground text-center">
           Already have an account?{" "}
-          <Button variant="link" className="p-0 h-auto" asChild>
-            <Link href="/auth/login">Sign in</Link>
-          </Button>
+          <Link href="/auth/login" className="text-primary hover:underline">
+            Sign in
+          </Link>
         </p>
-      </CardFooter>
+      </form>
     </>
   );
 
   const renderStep2 = () => (
     <>
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-bold">Personal Information</CardTitle>
-        <CardDescription>
-          Step 2: Tell us about yourself
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Name</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <h2 className="text-base font-medium mb-1">Personal Information</h2>
+      <p className="text-xs text-muted-foreground mb-3">
+        Step 2: Tell us about yourself
+      </p>
+      
+      <form onSubmit={handleRegister} className="space-y-3">
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-sm">Name</Label>
+            <div className="grid grid-cols-2 gap-1.5">
               <Input
                 name="name.firstName"
                 value={formData.name.firstName}
                 onChange={handleInputChange}
                 placeholder="First Name"
                 required
-              />
-              <Input
-                name="name.middleName"
-                value={formData.name.middleName}
-                onChange={handleInputChange}
-                placeholder="Middle Name (optional)"
+                className="h-9 text-sm"
               />
               <Input
                 name="name.lastName"
@@ -239,12 +229,20 @@ export function RegisterForm() {
                 onChange={handleInputChange}
                 placeholder="Last Name"
                 required
+                className="h-9 text-sm"
               />
             </div>
+            <Input
+              name="name.middleName"
+              value={formData.name.middleName}
+              onChange={handleInputChange}
+              placeholder="Middle Name (optional)"
+              className="h-9 text-sm mt-1.5"
+            />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="localAddress">Local Address</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="localAddress" className="text-sm">Address</Label>
             <Input
               id="localAddress"
               name="contact.localAddress"
@@ -252,103 +250,110 @@ export function RegisterForm() {
               onChange={handleInputChange}
               placeholder="Enter your address"
               required
+              className="h-9 text-sm"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Sex</Label>
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="sex" className="text-sm">Sex</Label>
               <Select
                 value={formData.demographics.sex}
                 onValueChange={(value) => handleSelectChange(value, "demographics.sex")}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sex" />
+                <SelectTrigger id="sex" className="h-9 text-sm">
+                  <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Birth Date</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="birthDate" className="text-sm">Birth Date</Label>
               <Input
-                type="date"
+                id="birthDate"
                 name="demographics.birthDate"
+                type="date"
                 value={formData.demographics.birthDate}
                 onChange={handleInputChange}
                 required
+                className="h-9 text-sm"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Marital Status</Label>
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="maritalStatus" className="text-sm">Marital Status</Label>
               <Select
                 value={formData.demographics.maritalStatus}
-                onValueChange={(value) => handleSelectChange(value, "demographics.maritalStatus")}
+                onValueChange={(value) =>
+                  handleSelectChange(value, "demographics.maritalStatus")
+                }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                <SelectTrigger id="maritalStatus" className="h-9 text-sm">
+                  <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="single">Single</SelectItem>
                   <SelectItem value="married">Married</SelectItem>
-                  <SelectItem value="divorced">Divorced</SelectItem>
                   <SelectItem value="widowed">Widowed</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="separated">Separated</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Residency Status</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="residencyStatus" className="text-sm">Residency</Label>
               <Select
                 value={formData.status.residencyStatus}
-                onValueChange={(value) => handleSelectChange(value, "status.residencyStatus")}
+                onValueChange={(value) =>
+                  handleSelectChange(value, "status.residencyStatus")
+                }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                <SelectTrigger id="residencyStatus" className="h-9 text-sm">
+                  <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="renting">Renting</SelectItem>
-                  <SelectItem value="own-mortgage">Own (with mortgage)</SelectItem>
-                  <SelectItem value="own-outright">Own (outright)</SelectItem>
+                  <SelectItem value="permanent">Permanent</SelectItem>
+                  <SelectItem value="temporary">Temporary</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex justify-between space-x-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setStep(1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-        <Button
-          type="submit"
-          className="flex-1"
-          disabled={isLoading || !validateStep2()}
-        >
-          <UserPlus className="mr-2 h-4 w-4" />
-          {isLoading ? "Creating account..." : "Create Account"}
-        </Button>
-      </CardFooter>
+
+        <div className="flex gap-1.5 mt-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setStep(1)}
+            disabled={isLoading}
+            className="h-9 text-xs"
+          >
+            <ArrowLeft className="mr-1 h-3 w-3" />
+            Back
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1 h-9 text-xs"
+            disabled={!validateStep2() || isLoading}
+          >
+            {isLoading ? "Registering..." : "Register"}
+            <UserPlus className="ml-1 h-3 w-3" />
+          </Button>
+        </div>
+      </form>
     </>
   );
 
   return (
-    <Card className="w-full max-w-md">
-      <form onSubmit={handleRegister}>
-        {step === 1 ? renderStep1() : renderStep2()}
-      </form>
-    </Card>
+    <div className="w-full">
+      {step === 1 ? renderStep1() : renderStep2()}
+    </div>
   );
 }

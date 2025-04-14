@@ -7,7 +7,9 @@ import {
   Settings,
   AlertCircle,
   Users,
-  Megaphone
+  Megaphone,
+  CreditCard,
+  BarChart
 } from "lucide-react";
 const navigationWithPermissions = [
   {
@@ -21,6 +23,25 @@ const navigationWithPermissions = [
     icon: Megaphone,
     path: "/dashboard/posts",
     requiredPermissions: ["collections.posts.read"]
+  },
+  {
+    title: "Analytics & Records",
+    icon: BarChart,
+    path: "/dashboard/analytics",
+    requiredPermissions: ["collections.requests.read"],
+    children: [
+      {
+        title: "Services",
+        path: "/dashboard/services",
+        requiredPermissions: ["collections.requests.read"]
+      }
+    ]
+  },
+  {
+    title: "Financing",
+    icon: CreditCard,
+    path: "/dashboard/financing",
+    requiredPermissions: ["collections.financing.read"],
   },
   {
     title: "Requests",
