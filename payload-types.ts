@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     'personal-information': PersonalInformation;
     'profile-photo': ProfilePhoto;
@@ -25,6 +81,8 @@ export interface Config {
     financing: Financing;
     'financing-audit-log': FinancingAuditLog;
     'storage-folders': StorageFolder;
+    projects: Project;
+    demographics: Demographic;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -45,6 +103,8 @@ export interface Config {
     financing: FinancingSelect<false> | FinancingSelect<true>;
     'financing-audit-log': FinancingAuditLogSelect<false> | FinancingAuditLogSelect<true>;
     'storage-folders': StorageFoldersSelect<false> | StorageFoldersSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    demographics: DemographicsSelect<false> | DemographicsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -110,7 +170,7 @@ export interface PersonalInformation {
     maritalStatus?: ('single' | 'married' | 'divorced' | 'widowed') | null;
   };
   status?: {
-    residencyStatus?: ('renting' | 'own-mortgage' | 'own-outright') | null;
+    residencyStatus?: ('permanent' | 'temporary') | null;
     lifeStatus?: ('alive' | 'deceased') | null;
   };
   updatedAt: string;
@@ -508,6 +568,100 @@ export interface FinancingAuditLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  description?: string | null;
+  projectType: 'event' | 'infrastructure' | 'program' | 'initiative' | 'other';
+  status: 'planning' | 'ongoing' | 'completed' | 'on_hold' | 'cancelled';
+  startDate?: string | null;
+  endDate?: string | null;
+  /**
+   * Specific venue or area for the project.
+   */
+  location?: string | null;
+  /**
+   * Name of the primary person responsible.
+   */
+  projectLead?: string | null;
+  /**
+   * List team members and their roles.
+   */
+  teamMembers?:
+    | {
+        name: string;
+        role?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Link to the funding source for this project.
+   */
+  relatedFinancing?: (number | null) | Financing;
+  eventDetails?: {
+    expectedAttendees?: number | null;
+    actualAttendees?: number | null;
+    /**
+     * Registration details, observations, etc.
+     */
+    attendeeNotes?: string | null;
+  };
+  infrastructureDetails?: {
+    contractor?: string | null;
+    completionPercentage?: number | null;
+  };
+  programDetails?: {
+    targetBeneficiaries?: string | null;
+    /**
+     * How will success be measured?
+     */
+    keyPerformanceIndicators?: string | null;
+  };
+  createdBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demographics".
+ */
+export interface Demographic {
+  id: number;
+  /**
+   * Year of demographic data
+   */
+  year: number;
+  maleCount: number;
+  femaleCount: number;
+  /**
+   * Will be calculated from male + female counts
+   */
+  totalPopulation?: number | null;
+  householdsCount?: number | null;
+  voterCount?: number | null;
+  pwdCount?: number | null;
+  ageGroups?:
+    | {
+        ageRange: string;
+        count: number;
+        id?: string | null;
+      }[]
+    | null;
+  chronicDiseases?:
+    | {
+        diseaseName: string;
+        count: number;
+        id?: string | null;
+      }[]
+    | null;
+  submittedBy: number | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -568,6 +722,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'storage-folders';
         value: number | StorageFolder;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'demographics';
+        value: number | Demographic;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -998,6 +1160,80 @@ export interface StorageFoldersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  projectType?: T;
+  status?: T;
+  startDate?: T;
+  endDate?: T;
+  location?: T;
+  projectLead?: T;
+  teamMembers?:
+    | T
+    | {
+        name?: T;
+        role?: T;
+        id?: T;
+      };
+  relatedFinancing?: T;
+  eventDetails?:
+    | T
+    | {
+        expectedAttendees?: T;
+        actualAttendees?: T;
+        attendeeNotes?: T;
+      };
+  infrastructureDetails?:
+    | T
+    | {
+        contractor?: T;
+        completionPercentage?: T;
+      };
+  programDetails?:
+    | T
+    | {
+        targetBeneficiaries?: T;
+        keyPerformanceIndicators?: T;
+      };
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demographics_select".
+ */
+export interface DemographicsSelect<T extends boolean = true> {
+  year?: T;
+  maleCount?: T;
+  femaleCount?: T;
+  totalPopulation?: T;
+  householdsCount?: T;
+  voterCount?: T;
+  pwdCount?: T;
+  ageGroups?:
+    | T
+    | {
+        ageRange?: T;
+        count?: T;
+        id?: T;
+      };
+  chronicDiseases?:
+    | T
+    | {
+        diseaseName?: T;
+        count?: T;
+        id?: T;
+      };
+  submittedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1060,6 +1296,11 @@ export interface ThemeSetting {
   sidebarAccent?: string | null;
   sidebarAccentForeground?: string | null;
   sidebarBorder?: string | null;
+  'chart-1'?: string | null;
+  'chart-2'?: string | null;
+  'chart-3'?: string | null;
+  'chart-4'?: string | null;
+  'chart-5'?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1112,6 +1353,11 @@ export interface ThemeSettingsSelect<T extends boolean = true> {
   sidebarAccent?: T;
   sidebarAccentForeground?: T;
   sidebarBorder?: T;
+  'chart-1'?: T;
+  'chart-2'?: T;
+  'chart-3'?: T;
+  'chart-4'?: T;
+  'chart-5'?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

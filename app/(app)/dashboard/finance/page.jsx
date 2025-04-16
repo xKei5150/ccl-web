@@ -1,8 +1,8 @@
 import FinancingReportsPage from "@/components/pages/financing/FinancingReportsPage";
 
 export const metadata = {
-  title: "Financing Reports & Analytics",
-  description: "Analyze financing data with visual reports and insights",
+  title: "Barangay Financial Reports & Analytics",
+  description: "Analyze barangay expenditures with visual reports and AI-powered insights",
 }
 
 export default async function FinancingReportsRoute() {

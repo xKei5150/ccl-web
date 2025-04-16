@@ -115,11 +115,11 @@ const PersonalInformation: CollectionConfig = {
           name: 'residencyStatus',
           type: 'select',
           options: [
-            { label: 'Renting', value: 'renting' },
-            { label: 'Own (with mortgage)', value: 'own-mortgage' },
-            { label: 'Own (outright)', value: 'own-outright' },
+            { label: 'Permanent', value: 'permanent' },
+            { label: 'Temporary', value: 'temporary' },
           ],
           label: 'Residency Status',
+          required: false,
         },
         {
           name: 'lifeStatus',
@@ -129,6 +129,8 @@ const PersonalInformation: CollectionConfig = {
             { label: 'Deceased', value: 'deceased' },
           ],
           label: 'Life Status',
+          required: false,
+          defaultValue: 'alive',
         },
       ],
     },

@@ -77,6 +77,8 @@ export default async function AuthLayout({ children }) {
                   width={24} 
                   height={24} 
                   className="rounded-full"
+                  priority
+                  loading="eager"
                 />
               )}
               <span className="text-xs font-medium">{siteSettings?.siteName || "CCL Web"}</span>

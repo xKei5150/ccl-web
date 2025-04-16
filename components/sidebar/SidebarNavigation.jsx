@@ -9,7 +9,9 @@ import {
   Users,
   Megaphone,
   CreditCard,
-  BarChart
+  BarChart,
+  PackageOpen,
+  PersonStanding
 } from "lucide-react";
 const navigationWithPermissions = [
   {
@@ -25,7 +27,7 @@ const navigationWithPermissions = [
     requiredPermissions: ["collections.posts.read"]
   },
   {
-    title: "Analytics & Records",
+    title: "Analytics & Statistics",
     icon: BarChart,
     path: "/dashboard/analytics",
     requiredPermissions: ["collections.requests.read"],
@@ -34,6 +36,21 @@ const navigationWithPermissions = [
         title: "Services",
         path: "/dashboard/services",
         requiredPermissions: ["collections.requests.read"]
+      },
+      {
+        title: "Finance",
+        path: "/dashboard/finance",
+        requiredPermissions: ["collections.financing.read"]
+      },
+      {
+        title: "Demographic Record",
+        path: "/dashboard/demographic-record",
+        requiredPermissions: ["collections.demographics.read"]
+      },
+      {
+        title: "Reports Statistics",
+        path: "/dashboard/reports-stat",
+        requiredPermissions: ["collections.reports.read"]
       }
     ]
   },
@@ -68,6 +85,12 @@ const navigationWithPermissions = [
     requiredPermissions: ["collections.reports.read || collections.reports.read.permission"]
   },
   {
+    title: "Projects",
+    icon: PersonStanding,
+    path: "/dashboard/projects",
+    requiredPermissions: ["collections.projects.read"]
+  },
+  {
     title: "Records",
     icon: FolderOpen,
     path: "/records",
@@ -89,6 +112,11 @@ const navigationWithPermissions = [
         title: "Business Information",
         path: "/dashboard/business",
         requiredPermissions: ["collections.business.read"]
+      },
+      {
+        title: "Demographics",
+        path: "/dashboard/demographics",
+        requiredPermissions: ["collections.demographics.read"]
       }
     ]
   },
@@ -97,6 +125,12 @@ const navigationWithPermissions = [
     icon: Users,
     path: "/dashboard/staff",
     requiredPermissions: ["globals.site-settings.update"]
+  },
+  {
+    title: "Media Storage",
+    icon: PackageOpen,
+    path: "/dashboard/storage",
+    requiredPermissions: ["collections.storage-folders.read"]
   },
   {
     title: "Settings",

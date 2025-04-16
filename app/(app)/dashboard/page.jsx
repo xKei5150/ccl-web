@@ -14,15 +14,34 @@ export default async function Dashboard() {
   return (
     <div className="min-h-screen">
       <div 
-        className="w-full bg-gradient-to-b from-primary/10 to-background pt-10 pb-16 relative"
+        className="w-full bg-gradient-to-b from-primary/10 to-background pt-10 pb-16 relative "
         style={{
-          backgroundImage: siteSettings?.heroImage ? `url(${siteSettings.heroImage.url})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          position: 'relative',
+          overflow: 'hidden'
         }}
       >
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" style={{opacity: siteSettings?.heroImage ? 1 : 0}}></div>
-        <div className="container mx-auto relative z-10 flex flex-col items-center text-center">
+        {/* Background image as pseudo-element */}
+        {siteSettings?.heroImage && (
+          <div 
+            className="absolute inset-0 z-0"
+            style={{
+              backgroundImage: `url(${siteSettings.heroImage.url})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: 'brightness(0.6)',
+              opacity: 0.9
+            }}
+          />
+        )}
+        
+        {/* Overlay */}
+        <div 
+          className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10" 
+          style={{opacity: siteSettings?.heroImage ? 1 : 0}}
+        ></div>
+        
+        {/* Content container with higher z-index */}
+        <div className="container mx-auto relative z-20 flex flex-col items-center text-center text-white">
           {siteSettings?.logo ? (
             <div className="mb-6">
               <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background shadow-xl">
@@ -34,7 +53,7 @@ export default async function Dashboard() {
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
             Welcome to {siteSettings?.siteName || "Dashboard"}
           </h1>
-          <p className="text-muted-foreground mx-auto">
+          <p className="mx-auto">
             {siteSettings?.description || "Manage your site and content from here"}
           </p>
         </div>

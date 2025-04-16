@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PlusCircle, Calculator, ArrowLeft, Delete, Edit, Copy, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, FileCheck, FileWarning, Clock, DollarSign, History } from "lucide-react";
+import { PlusCircle, Calculator, ArrowLeft, Delete, Edit, Copy, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, FileCheck, FileWarning, Clock, PhilippinePeso, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -490,7 +490,7 @@ export default function ViewFinancingPage({ data }) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <DollarSign className="h-5 w-5 mr-2" />
+                    <PhilippinePeso className="h-5 w-5 mr-2" />
                     Budget Performance
                   </CardTitle>
                 </CardHeader>

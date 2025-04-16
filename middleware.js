@@ -2,11 +2,11 @@
 import { NextResponse } from 'next/server';
 
 // Paths that don't require authentication
-const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'];
+const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/admin'];
 
 // Paths that require specific roles
 const roleProtectedPaths = {
-  '/admin': ['admin', 'staff'],
+  // '/admin': ['admin', 'staff'],
   '/dashboard/staff': ['admin', 'staff'],
   '/dashboard/reports': ['admin', 'staff'],
   '/dashboard/site-settings': ['admin'],

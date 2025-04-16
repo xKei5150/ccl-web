@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, ArrowLeft } from "lucide-react";
-import { resetPassword } from "@/app/(app)/auth/actions";
+import { forgotPassword } from "@/app/(app)/auth/actions";
 import Link from "next/link";
 
 export function ForgotPasswordForm() {
@@ -17,7 +17,7 @@ export function ForgotPasswordForm() {
   async function handleSubmit(formData) {
     try {
       setIsLoading(true);
-      const result = await resetPassword(formData);
+      const result = await forgotPassword(formData);
 
       if (result.success) {
         setIsSubmitted(true);

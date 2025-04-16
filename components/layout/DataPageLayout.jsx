@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Trash, Plus, Edit2 } from "lucide-react";
+import { Trash, Plus, Edit2, FolderOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryParams } from "@/hooks/use-query-parans";
@@ -17,12 +17,13 @@ const DataPageLayout = ({
   subtitle,
   icon: Icon,
   columns,
-  data,
+  data = [],
   baseUrl,
   newItemUrl,
   deleteAction,
   newButtonLabel = "New",
   customActions = [],
+  emptyMessage,
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -70,6 +71,22 @@ const DataPageLayout = ({
   // Combine default actions with any custom actions
   const actions = [...defaultActions, ...customActions];
 
+  // Empty state component
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <FolderOpen className="h-12 w-12 text-gray-400 mb-4" />
+      <h3 className="text-lg font-medium text-gray-900 mb-1">
+        No {title.toLowerCase()} yet
+      </h3>
+      <p className="text-sm text-gray-500 mb-4">
+        {emptyMessage || `Get started by creating a new ${title.toLowerCase()}.`}
+      </p>
+      <Button onClick={() => router.push(newItemUrl)}>
+        <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
+      </Button>
+    </div>
+  );
+
   return (
     <>
       <div className="flex justify-between">
@@ -81,24 +98,30 @@ const DataPageLayout = ({
       <main className="max-w-6xl mx-auto space-y-6">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardContent className="p-6">
-            <DataTable
-              data={data}
-              columns={columns}
-              actions={actions}
-              enableMultiSelect
-              onSelectionChange={handleSelectionChange}
-              onPageChange={handlePageChange}
-              baseUrl={baseUrl}
-            />
-            {selectedRows.length > 0 && (
-              <Button
-                variant="destructive"
-                onClick={() => handleDelete(selectedRows)}
-                className="mt-4"
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedRows.length})
-              </Button>
+            {data.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <>
+                <DataTable
+                  data={data}
+                  columns={columns}
+                  actions={actions}
+                  enableMultiSelect
+                  onSelectionChange={handleSelectionChange}
+                  onPageChange={handlePageChange}
+                  baseUrl={baseUrl}
+                />
+                {selectedRows.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDelete(selectedRows)}
+                    className="mt-4"
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    Delete Selected ({selectedRows.length})
+                  </Button>
+                )}
+              </>
             )}
           </CardContent>
         </Card>

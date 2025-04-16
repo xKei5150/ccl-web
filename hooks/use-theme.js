@@ -30,6 +30,11 @@ export const themePresets = {
     sidebarAccent: "#F4F4F5",
     sidebarAccentForeground: "#171717",
     sidebarBorder: "#E4E4E7",
+    chart1: "#FF6B6B",
+    chart2: "#4ECDC4",
+    chart3: "#45B7D1",
+    chart4: "#96C93D",
+    chart5: "#FF9F43",
   },
   dark: {
     background: "#0A0A0A",
@@ -58,6 +63,11 @@ export const themePresets = {
     sidebarAccent: "#27272A",
     sidebarAccentForeground: "#F4F4F5",
     sidebarBorder: "#27272A",
+    chart1: "#4287F5",
+    chart2: "#2ECC71",
+    chart3: "#F1C40F",
+    chart4: "#9B59B6",
+    chart5: "#E74C3C",
   },
   light: {
     background: "#FAFAFA",
@@ -86,6 +96,11 @@ export const themePresets = {
     sidebarAccent: "#F5F5F5",
     sidebarAccentForeground: "#171717",
     sidebarBorder: "#E5E5E5",
+    chart1: "#2563EB",
+    chart2: "#10B981",
+    chart3: "#FBBF24",
+    chart4: "#8B5CF6",
+    chart5: "#EF4444",
   },
   modern: {
     background: "#FFFFFF",
@@ -114,6 +129,11 @@ export const themePresets = {
     sidebarAccent: "#F4F4F5",
     sidebarAccentForeground: "#18181B",
     sidebarBorder: "#E4E4E7",
+    chart1: "#8B5CF6", 
+    chart2: "#06B6D4",
+    chart3: "#F59E0B",
+    chart4: "#10B981",
+    chart5: "#EF4444",
   }
 };
 
@@ -150,33 +170,51 @@ export function ThemeProvider({ children, initialTheme }) {
   useEffect(() => {
     // Apply CSS variables
     Object.entries(theme).forEach(([key, value]) => {
-      const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-      document.documentElement.style.setProperty(`--${cssKey}`, value);
+      if (!value) return; // Skip undefined values
+      
+      // Special handling for chart colors which use a different naming convention in CSS
+      if (key.startsWith('chart') && /chart[1-5]/.test(key)) {
+        const chartNum = key.replace('chart', '');
+        document.documentElement.style.setProperty(`--chart-${chartNum}`, value);
+      } else {
+        // Normal handling for other variables
+        const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+        document.documentElement.style.setProperty(`--${cssKey}`, value);
+      }
     });
+    
+    // Handle special case for chart colors from server
+    if (theme['chart-1']) document.documentElement.style.setProperty('--chart-1', theme['chart-1']);
+    if (theme['chart-2']) document.documentElement.style.setProperty('--chart-2', theme['chart-2']);
+    if (theme['chart-3']) document.documentElement.style.setProperty('--chart-3', theme['chart-3']);
+    if (theme['chart-4']) document.documentElement.style.setProperty('--chart-4', theme['chart-4']);
+    if (theme['chart-5']) document.documentElement.style.setProperty('--chart-5', theme['chart-5']);
+    
   }, [theme]);
 
   const updateTheme = async (newTheme) => {
-    try {
-      const response = await fetch('/api/globals/theme-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: 'theme-settings',
-          ...newTheme
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update theme');
-      
-      const data = await response.json();
-      dispatch({ type: "UPDATE_THEME", payload: data });
-      return data;
-    } catch (error) {
-      console.error('Error updating theme:', error);
-      throw error;
+    // Convert kebab-case chart colors to camelCase for state consistency
+    const formattedTheme = {...newTheme};
+    
+    if (formattedTheme['chart-1']) {
+      formattedTheme.chart1 = formattedTheme['chart-1'];
     }
+    if (formattedTheme['chart-2']) {
+      formattedTheme.chart2 = formattedTheme['chart-2'];
+    }
+    if (formattedTheme['chart-3']) {
+      formattedTheme.chart3 = formattedTheme['chart-3'];
+    }
+    if (formattedTheme['chart-4']) {
+      formattedTheme.chart4 = formattedTheme['chart-4'];
+    }
+    if (formattedTheme['chart-5']) {
+      formattedTheme.chart5 = formattedTheme['chart-5'];
+    }
+    
+    // Update the theme state with the data received from the server action
+    dispatch({ type: "UPDATE_THEME", payload: formattedTheme });
+    return formattedTheme;
   };
 
   const loadPreset = (presetName) => {

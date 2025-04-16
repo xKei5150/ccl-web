@@ -15,7 +15,7 @@ export default async function FinancingListPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Link href="/dashboard/financing/reports">
+        <Link href="/dashboard/finance">
           <Button variant="outline" className="ml-2">
             <BarChart3 className="mr-2 h-4 w-4" />
             Reports & Analytics

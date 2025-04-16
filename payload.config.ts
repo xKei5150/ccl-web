@@ -2,6 +2,7 @@ import sharp from 'sharp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { buildConfig } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import PersonalInformation from './collections/PersonalInformation'
 import ProfilePhoto from './collections/ProfilePhoto'
 import Business from './collections/Business'
@@ -19,8 +20,10 @@ import Financing from './collections/Financing'
 import FinancingAuditLog from './collections/FinancingAuditLog'
 import StorageFolders from './collections/StorageFolders'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
-
+import Projects from './collections/Projects'
+import Demographics from './collections/Demographics'
 export default buildConfig({
+  serverURL: process.env.SERVER_URL,
   // If you'd like to use Rich Text, pass your editor here
   editor: lexicalEditor({}),
 
@@ -40,6 +43,8 @@ export default buildConfig({
     Financing,
     FinancingAuditLog,
     StorageFolders,
+    Projects,
+    Demographics,
   ],
 
   globals: [
@@ -60,6 +65,20 @@ export default buildConfig({
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
   ],
+
+  // Email configuration using the official nodemailer adapter
+  email: nodemailerAdapter({
+    defaultFromAddress: process.env.EMAIL_FROM_ADDRESS,
+    defaultFromName: process.env.EMAIL_FROM_NAME,
+    transportOptions: {
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
+  }),
 
   // Your Payload secret - should be a complex and secure string, unguessable
   secret: process.env.PAYLOAD_SECRET || '',

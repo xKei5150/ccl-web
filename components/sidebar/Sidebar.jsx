@@ -41,7 +41,7 @@ export function Sidebar({ settings }) {
   const filteredNavigation = getNavigation(permissions);
   // Update user data from auth context
   const user = {
-    name: authUser?.personalInfo.name.fullName || 'User',
+    name: authUser?.personalInfo?.name?.fullName || 'User',
     email: authUser?.email || '',
     avatar: authUser?.personalInfo?.photo?.url || ''
   };
