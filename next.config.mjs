@@ -7,7 +7,7 @@ const nextConfig = {
     },
     experimental: {
       serverActions: {
-        bodySizeLimit: '10mb',
+        bodySizeLimit: '25mb',
       },
     },
     images: {
@@ -20,13 +20,19 @@ const nextConfig = {
         },
         {
           protocol: 'https',
-          hostname: 'ccl-web-theta.vercel.app',
+          hostname: '**.vercel.app',
           pathname: '/api/media/file/**',
+        },
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '3000',
+          pathname: '/api/supporting-documents/file/**',
         },
         {
           protocol: 'https',
           hostname: '**.vercel.app',
-          pathname: '/api/media/file/**',
+          pathname: '/api/supporting-documents/file/**',
         },
       ],
     },
