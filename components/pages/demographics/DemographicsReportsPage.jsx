@@ -12,6 +12,7 @@ import { Bar, BarChart, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveCont
 import { RefreshCw, Filter, SparklesIcon, InfoIcon, ChevronRightIcon, HelpCircleIcon, DownloadIcon, UsersIcon, User, HomeIcon, VoteIcon, AccessibilityIcon, BarChart3Icon, ActivityIcon, HeartPulseIcon, LineChartIcon, CalendarIcon } from "lucide-react";
 import DemographicsAIInsights from "./DemographicsAIInsights";
 import { calculateDemographicsReportData } from "@/app/(app)/dashboard/demographic-record/actions";
+import ExportButton from "@/components/pages/demographic-record/ExportButton";
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899"];
 
@@ -112,13 +113,14 @@ export default function DemographicsReportsPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" disabled className="flex items-center gap-1">
-                    <DownloadIcon className="h-4 w-4" />
-                    Export
-                  </Button>
+                  <ExportButton 
+                    year={selectedYear}
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Export demographic data as CSV (coming soon)</p>
+                  <p>Export demographic data as CSV</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

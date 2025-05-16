@@ -24,6 +24,7 @@ const DataPageLayout = ({
   newButtonLabel = "New",
   customActions = [],
   emptyMessage,
+  exportComponent: ExportComponent,
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -91,9 +92,12 @@ const DataPageLayout = ({
     <>
       <div className="flex justify-between">
         <PageHeader title={title} subtitle={subtitle} icon={Icon && <Icon />} />
-        <Button onClick={() => router.push(newItemUrl)} className="mb-8">
-          <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
-        </Button>
+        <div className="flex space-x-2 mb-8">
+          {ExportComponent && <ExportComponent />}
+          <Button onClick={() => router.push(newItemUrl)}>
+            <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
+          </Button>
+        </div>
       </div>
       <main className="max-w-6xl mx-auto space-y-6">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
@@ -111,16 +115,22 @@ const DataPageLayout = ({
                   onPageChange={handlePageChange}
                   baseUrl={baseUrl}
                 />
-                {selectedRows.length > 0 && (
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDelete(selectedRows)}
-                    className="mt-4"
-                  >
-                    <Trash className="mr-2 h-4 w-4" />
-                    Delete Selected ({selectedRows.length})
-                  </Button>
-                )}
+                <div className="flex space-x-2 mt-4">
+                  {selectedRows.length > 0 && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDelete(selectedRows)}
+                    >
+                      <Trash className="mr-2 h-4 w-4" />
+                      Delete Selected ({selectedRows.length})
+                    </Button>
+                  )}
+                  {ExportComponent && data.length > 0 && (
+                    <div className="ml-auto">
+                      <ExportComponent />
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </CardContent>

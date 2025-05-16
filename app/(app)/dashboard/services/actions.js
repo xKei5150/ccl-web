@@ -207,13 +207,75 @@ export async function calculateServiceReportData(params = {}) {
 // Export report data
 export async function exportServiceReportData(params = {}) {
   try {
-    const { reportType = "requests", data = {}, format = "csv" } = params;
-    // This would normally generate and download a file
-    // For now, just simulate a successful export
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
-    return { success: true, message: "Export successful" };
+    const { reportType = "requests", year = "all", serviceType = "all_types" } = params;
+    
+    // Fetch the data to export
+    const reportData = await calculateServiceReportData({ reportType, year, serviceType });
+    
+    if (reportData.error) {
+      return { error: reportData.error };
+    }
+    
+    // Convert data to CSV based on report type
+    let csvContent = "";
+    let filename = `service-${reportType}-report.csv`;
+    
+    if (reportType === "requests") {
+      // Service type breakdown
+      csvContent = "Service Type,Count\n";
+      reportData.byServiceType?.forEach(item => {
+        csvContent += `${escapeCsvValue(item.name)},${item.value}\n`;
+      });
+      
+      // Add top requested services
+      if (reportData.topRequestedServices?.length) {
+        csvContent += "\nTop Requested Services\n";
+        csvContent += "Service Type,Count\n";
+        reportData.topRequestedServices.forEach(item => {
+          csvContent += `${escapeCsvValue(item.name)},${item.value}\n`;
+        });
+      }
+    } else if (reportType === "processing") {
+      // Processing time comparison
+      csvContent = "Service Type,Expected Days,Actual Days\n";
+      reportData.processingTimeComparison?.forEach(item => {
+        csvContent += `${escapeCsvValue(item.name)},${item.expected},${item.actual}\n`;
+      });
+    } else if (reportType === "trends") {
+      // Monthly trends
+      csvContent = "Month,Count\n";
+      reportData.serviceTrends?.forEach(item => {
+        csvContent += `${item.month},${item.count}\n`;
+      });
+    } else if (reportType === "status") {
+      // Status distribution
+      csvContent = "Status,Count\n";
+      reportData.statusDistribution?.forEach(item => {
+        csvContent += `${escapeCsvValue(item.name)},${item.count}\n`;
+      });
+    }
+    
+    return {
+      success: true,
+      data: csvContent,
+      filename,
+      contentType: 'text/csv'
+    };
   } catch (error) {
     console.error("Failed to export service report data:", error);
     return { error: "Failed to export service report data" };
   }
+}
+
+// Helper function to escape CSV values
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) return '';
+  
+  const stringValue = String(value);
+  // If the value contains commas, quotes, or newlines, wrap it in quotes and escape any existing quotes
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  
+  return stringValue;
 } 

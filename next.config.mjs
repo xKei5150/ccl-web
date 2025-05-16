@@ -10,6 +10,9 @@ const nextConfig = {
         bodySizeLimit: '25mb',
       },
     },
+    turbopack:{
+      
+    },
     images: {
       remotePatterns: [
         {

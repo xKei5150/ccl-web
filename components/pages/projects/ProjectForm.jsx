@@ -21,10 +21,28 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Trash2, Users } from 'lucide-react'
+import { 
+  Plus, 
+  Trash2, 
+  Users, 
+  FileText, 
+  Tag, 
+  Calendar, 
+  MapPin, 
+  User, 
+  ClipboardList, 
+  Building, 
+  BanknoteIcon,
+  Percent,
+  Target,
+  BarChart,
+  X,
+  Save
+} from 'lucide-react'
 import { Combobox } from '@/components/ui/combo-box'
 import { useEffect, useState } from 'react'
 import { getFinancingOptions } from '@/app/(app)/dashboard/projects/actions'
+import { Separator } from '@/components/ui/separator'
 
 const projectTypes = [
   { label: 'Event', value: 'event' },
@@ -45,6 +63,7 @@ const projectStatuses = [
 export function ProjectForm({ initialData, onSubmit, submitText = "Submit", cancelRoute }) {
   const router = useRouter()
   const [financingOptions, setFinancingOptions] = useState([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     async function fetchFinancingOptions() {
@@ -98,10 +117,13 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
   const projectType = form.watch('projectType')
 
   const handleSubmit = async (data) => {
+    setIsSubmitting(true);
     try {
       await onSubmit(data)
     } catch (error) {
       console.error('Error submitting form:', error)
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -110,8 +132,12 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {/* Basic Information */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              <CardTitle>Basic Information</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid gap-4">
@@ -120,7 +146,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      Title
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -134,7 +163,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      Description
+                    </FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -149,7 +181,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="projectType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        Type
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -177,7 +212,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        Status
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -207,7 +245,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Date</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        Start Date
+                      </FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -221,7 +262,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="endDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>End Date</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        End Date
+                      </FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
@@ -236,7 +280,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      Location
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -250,17 +297,24 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
 
         {/* Team Information */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Team Information</CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => appendTeamMember({ name: '', role: '' })}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Team Member
-            </Button>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle>Team Information</CardTitle>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => appendTeamMember({ name: '', role: '' })}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Team Member
+              </Button>
+            </div>
+            <Separator className="mt-3" />
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid gap-4">
@@ -269,7 +323,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                 name="projectLead"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Lead</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      Project Lead
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Name of the primary person responsible" />
                     </FormControl>
@@ -296,7 +353,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                           name={`teamMembers.${index}.name`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="sr-only">Member Name</FormLabel>
+                              <FormLabel className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                Member Name
+                              </FormLabel>
                               <FormControl>
                                 <Input {...field} placeholder="Member name" />
                               </FormControl>
@@ -309,7 +369,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                           name={`teamMembers.${index}.role`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="sr-only">Role</FormLabel>
+                              <FormLabel className="flex items-center gap-2">
+                                <Tag className="h-4 w-4 text-muted-foreground" />
+                                Role
+                              </FormLabel>
                               <FormControl>
                                 <Input {...field} placeholder="Role in project" />
                               </FormControl>
@@ -323,6 +386,7 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                         variant="ghost"
                         size="sm"
                         onClick={() => removeTeamMember(index)}
+                        className="flex items-center gap-2 text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -336,8 +400,12 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
 
         {/* Related Financing */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Related Financing</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <BanknoteIcon className="h-5 w-5 text-primary" />
+              <CardTitle>Related Financing</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent className="pt-6">
             <FormField
@@ -345,7 +413,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
               name="relatedFinancing"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Budget/Financing</FormLabel>
+                  <FormLabel className="flex items-center gap-2">
+                    <BanknoteIcon className="h-4 w-4 text-muted-foreground" />
+                    Budget/Financing
+                  </FormLabel>
                   <FormControl>
                     <Combobox
                       options={financingOptions}
@@ -367,8 +438,12 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
         {/* Type-specific Details */}
         {projectType === 'event' && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Event Details</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle>Event Details</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid gap-4">
@@ -378,7 +453,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                     name="eventDetails.expectedAttendees"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Expected Attendees</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          Expected Attendees
+                        </FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -391,7 +469,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                     name="eventDetails.actualAttendees"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Actual Attendees</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          Actual Attendees
+                        </FormLabel>
                         <FormControl>
                           <Input type="number" {...field} />
                         </FormControl>
@@ -405,7 +486,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="eventDetails.attendeeNotes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Attendance Notes</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        Attendance Notes
+                      </FormLabel>
                       <FormControl>
                         <Textarea {...field} placeholder="Registration details, observations, etc." />
                       </FormControl>
@@ -420,8 +504,12 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
 
         {projectType === 'infrastructure' && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Infrastructure Details</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Building className="h-5 w-5 text-primary" />
+                <CardTitle>Infrastructure Details</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid gap-4">
@@ -430,7 +518,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="infrastructureDetails.contractor"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contractor/Vendor</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        Contractor/Vendor
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -443,7 +534,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="infrastructureDetails.completionPercentage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Completion Percentage</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Percent className="h-4 w-4 text-muted-foreground" />
+                        Completion Percentage
+                      </FormLabel>
                       <FormControl>
                         <Input type="number" min="0" max="100" {...field} />
                       </FormControl>
@@ -458,8 +552,12 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
 
         {projectType === 'program' && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Program Details</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                <CardTitle>Program Details</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid gap-4">
@@ -468,7 +566,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="programDetails.targetBeneficiaries"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Target Beneficiaries</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-muted-foreground" />
+                        Target Beneficiaries
+                      </FormLabel>
                       <FormControl>
                         <Textarea {...field} />
                       </FormControl>
@@ -481,7 +582,10 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
                   name="programDetails.keyPerformanceIndicators"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Key Performance Indicators (KPIs)</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <BarChart className="h-4 w-4 text-muted-foreground" />
+                        Key Performance Indicators (KPIs)
+                      </FormLabel>
                       <FormControl>
                         <Textarea {...field} placeholder="How will success be measured?" />
                       </FormControl>
@@ -499,10 +603,28 @@ export function ProjectForm({ initialData, onSubmit, submitText = "Submit", canc
             type="button"
             variant="outline"
             onClick={cancelRoute}
+            className="flex items-center gap-2"
           >
+            <X className="h-4 w-4" />
             Cancel
           </Button>
-          <Button type="submit">{submitText}</Button>
+          <Button 
+            type="submit"
+            disabled={isSubmitting}
+            className="flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <span>Submitting...</span>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                {submitText}
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </Form>

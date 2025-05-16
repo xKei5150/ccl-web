@@ -86,6 +86,126 @@ const Requests: CollectionConfig = {
       hasMany: true,
       label: 'Supporting Documents',
     },
+    // Certificate-specific fields
+    {
+      name: 'certificateDetails',
+      type: 'group',
+      label: 'Certificate Details',
+      admin: {
+        condition: (data) => ['indigencyCertificate', 'barangayClearance', 'barangayResidency'].includes(data?.type),
+      },
+      fields: [
+        {
+          name: 'controlNumber',
+          type: 'text',
+          label: 'Control Number',
+          admin: {
+            description: 'Automatically generated when certificate is issued',
+          },
+        },
+        {
+          name: 'dateIssued',
+          type: 'date',
+          label: 'Date Issued',
+          admin: {
+            description: 'Date when the certificate was issued',
+          },
+        },
+        {
+          name: 'validUntil',
+          type: 'date',
+          label: 'Valid Until',
+          admin: {
+            description: 'Date until when the certificate is valid',
+          },
+        },
+        // CTC Information
+        {
+          name: 'ctcDetails',
+          type: 'group',
+          label: 'CTC Details',
+          fields: [
+            {
+              name: 'ctcNo',
+              type: 'text',
+              label: 'CTC Number',
+            },
+            {
+              name: 'ctcDateIssued',
+              type: 'date',
+              label: 'CTC Date Issued',
+            },
+            {
+              name: 'ctcAmount',
+              type: 'text',
+              label: 'CTC Amount',
+            },
+            {
+              name: 'ctcPlaceIssued',
+              type: 'text',
+              label: 'CTC Place Issued',
+            },
+          ],
+        },
+        // Payment Information
+        {
+          name: 'payment',
+          type: 'group',
+          label: 'Payment Details',
+          fields: [
+            {
+              name: 'orNumber',
+              type: 'text',
+              label: 'OR Number',
+            },
+            {
+              name: 'amount',
+              type: 'text',
+              label: 'Amount Paid',
+            },
+            {
+              name: 'date',
+              type: 'date',
+              label: 'Payment Date',
+            },
+            {
+              name: 'method',
+              type: 'select',
+              label: 'Payment Method',
+              options: [
+                { label: 'Cash', value: 'cash' },
+                { label: 'Online Payment', value: 'online' },
+                { label: 'Free/Waived', value: 'free' },
+              ],
+              defaultValue: 'cash',
+            },
+          ],
+        },
+        // Approver Information
+        {
+          name: 'approver',
+          type: 'group',
+          label: 'Approver Details',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              label: 'Approved By',
+            },
+            {
+              name: 'position',
+              type: 'text',
+              label: 'Approver Position',
+            },
+            {
+              name: 'date',
+              type: 'date',
+              label: 'Approval Date',
+            },
+          ],
+        },
+      ],
+    },
     {
       name: 'status',
       type: 'select',

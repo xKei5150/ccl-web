@@ -222,3 +222,150 @@ export async function analyzeReportInsightsAI(params = {}) {
     };
   }
 } 
+
+// Export reports data to CSV
+export async function exportReportsData(params = {}) {
+  try {
+    const { reportType = "overview", year = "", month = "", status = "all" } = params;
+    let csvContent = "";
+    let filename = `reports-${reportType}-${year || "all"}-${month || "all"}.csv`;
+    
+    if (reportType === "overview") {
+      // First get the dashboard data
+      const dashboardData = await calculateReportsDashboardData({ year, month, status });
+      
+      if (!dashboardData || !dashboardData.overview) {
+        return { error: "No report data available to export" };
+      }
+      
+      // Create overview CSV
+      csvContent = "REPORTS OVERVIEW\n";
+      csvContent += "Status,Count\n";
+      csvContent += `Total,${dashboardData.overview.total || 0}\n`;
+      csvContent += `Open,${dashboardData.overview.open || 0}\n`;
+      csvContent += `In Progress,${dashboardData.overview.inProgress || 0}\n`;
+      csvContent += `Closed,${dashboardData.overview.closed || 0}\n\n`;
+      
+      // Add status breakdown
+      if (dashboardData.byStatus && dashboardData.byStatus.length > 0) {
+        csvContent += "STATUS BREAKDOWN\n";
+        csvContent += "Status,Count\n";
+        dashboardData.byStatus.forEach(item => {
+          csvContent += `${item.status},${item.count}\n`;
+        });
+        csvContent += "\n";
+      }
+      
+      // Add trends data
+      if (dashboardData.trends && dashboardData.trends.length > 0) {
+        csvContent += "TRENDS\n";
+        if (dashboardData.trendType === 'yearly') {
+          csvContent += "Year,Count\n";
+          dashboardData.trends.forEach(item => {
+            csvContent += `${item.year},${item.count}\n`;
+          });
+        } else if (dashboardData.trendType === 'monthly') {
+          csvContent += "Month,Count\n";
+          dashboardData.trends.forEach(item => {
+            csvContent += `${item.month},${item.count}\n`;
+          });
+        }
+      }
+    } else if (reportType === "insights") {
+      // Get the insights data
+      const insightsData = await analyzeReportInsightsAI({ year, month, status });
+      
+      if (!insightsData || (!insightsData.byType && !insightsData.insights)) {
+        return { error: "No insights data available to export" };
+      }
+      
+      // Report types breakdown
+      if (insightsData.byType && insightsData.byType.length > 0) {
+        csvContent = "REPORT CATEGORIES\n";
+        csvContent += "Category,Count\n";
+        insightsData.byType.forEach(item => {
+          csvContent += `${escapeCsvValue(item.type)},${item.count}\n`;
+        });
+        csvContent += "\n";
+      }
+      
+      // Insights
+      if (insightsData.insights && insightsData.insights.length > 0) {
+        csvContent += "KEY INSIGHTS\n";
+        insightsData.insights.forEach((insight, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(insight)}\n`;
+        });
+        csvContent += "\n";
+      }
+      
+      // Recommendations
+      if (insightsData.recommendations && insightsData.recommendations.length > 0) {
+        csvContent += "RECOMMENDATIONS\n";
+        insightsData.recommendations.forEach((recommendation, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(recommendation)}\n`;
+        });
+      }
+    } else if (reportType === "trends") {
+      // Get the trends analysis
+      const trendsData = await analyzeReportTrendsAI({
+        trends: (await calculateReportsDashboardData({ year, month, status })).trends,
+        type: month ? 'none' : year ? 'monthly' : 'yearly'
+      });
+      
+      if (!trendsData) {
+        return { error: "No trends data available to export" };
+      }
+      
+      // Create trends CSV
+      csvContent = "REPORTS TRENDS ANALYSIS\n\n";
+      csvContent += `Trend,${trendsData.trend || "stable"}\n`;
+      csvContent += `Percentage Change,${trendsData.percentageChange || "0%"}\n\n`;
+      
+      csvContent += "ANALYSIS\n";
+      csvContent += `${escapeCsvValue(trendsData.analysis || "No analysis available.")}\n\n`;
+      
+      csvContent += "PREDICTION\n";
+      csvContent += `${escapeCsvValue(trendsData.prediction || "No prediction available.")}\n\n`;
+      
+      // Insights
+      if (trendsData.insights && trendsData.insights.length > 0) {
+        csvContent += "KEY INSIGHTS\n";
+        trendsData.insights.forEach((insight, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(insight)}\n`;
+        });
+        csvContent += "\n";
+      }
+      
+      // Recommendations
+      if (trendsData.recommendations && trendsData.recommendations.length > 0) {
+        csvContent += "RECOMMENDATIONS\n";
+        trendsData.recommendations.forEach((recommendation, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(recommendation)}\n`;
+        });
+      }
+    }
+    
+    return {
+      success: true,
+      data: csvContent,
+      filename,
+      contentType: 'text/csv'
+    };
+  } catch (error) {
+    console.error("Failed to export reports data:", error);
+    return { error: "Failed to export reports data" };
+  }
+}
+
+// Helper function to escape CSV values
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) return '';
+  
+  const stringValue = String(value);
+  // If the value contains commas, quotes, or newlines, wrap it in quotes and escape any existing quotes
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  
+  return stringValue;
+} 

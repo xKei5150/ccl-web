@@ -6,8 +6,8 @@ import BusinessForm from "@/components/form/BusinessForm";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { FilePenLine } from "lucide-react";
-
+import { Building2, PenSquare, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { updateBusiness } from "@/app/(app)/dashboard/business/actions";
 
 
@@ -17,7 +17,6 @@ const EditBusinessPage = ({ businessData }) => {
 
   const onSubmit = async (data) => {
     try {
-      console.log("Updated record data:", data);
       const response = await updateBusiness(data, businessData.id);
       if(!response.success || !response.data) {
         throw new Error("Failed to update business record");
@@ -25,33 +24,41 @@ const EditBusinessPage = ({ businessData }) => {
       toast({
         title: "Success",
         description: "Business record updated successfully",
+        variant: "success",
       });
-      router.push("/dashboard/business");
+      router.push(`/dashboard/business/${businessData.id}`);
     } catch (error) {
       console.error("Failed to update business record:", error);
       toast({
         title: "Error",
-        description: "Failed to update business record request",
+        description: "Failed to update business record",
         variant: "destructive",
       });
     }
   };
 
-  const cancelRoute = () => router.push("/dashboard/business");
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
-    <PageHeader
+      <PageHeader
         title="Edit Business Information"
-        subtitle="Update the business information below"
-        icon={<FilePenLine className="h-8 w-8" />}
-        />
+        subtitle="Update business details"
+        icon={<PenSquare className="h-8 w-8" />}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => router.push(`/dashboard/business/${businessData.id}`)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Business
+        </Button>
+      </PageHeader>
       <BusinessForm
         defaultValues={businessData}
         onSubmit={onSubmit}
         submitText="Update Record"
-        cancelRoute={cancelRoute}
+        cancelRoute={() => router.push(`/dashboard/business/${businessData.id}`)}
       />
     </div>
   );

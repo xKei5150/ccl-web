@@ -13,6 +13,7 @@ import Households from './collections/Households'
 import Reports from './collections/Reports'
 import ThemeSettings from './globals/ThemeSettings'
 import SiteSettings from './globals/SiteSettings'
+import CertificateSettings from './globals/CertificateSettings'
 import Media from './collections/Media'
 import Users from './collections/Users'
 import Posts from './collections/Posts'
@@ -50,6 +51,7 @@ export default buildConfig({
   globals: [
     ThemeSettings,
     SiteSettings,
+    CertificateSettings,
   ],
 
   plugins: [
@@ -67,18 +69,18 @@ export default buildConfig({
   ],
 
   // Email configuration using the official nodemailer adapter
-  email: nodemailerAdapter({
-    defaultFromAddress: process.env.EMAIL_FROM_ADDRESS,
-    defaultFromName: process.env.EMAIL_FROM_NAME,
-    transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    },
-  }),
+  // email: nodemailerAdapter({
+  //   defaultFromAddress: process.env.EMAIL_FROM_ADDRESS,
+  //   defaultFromName: process.env.EMAIL_FROM_NAME,
+  //   transportOptions: {
+  //     host: process.env.SMTP_HOST,
+  //     port: parseInt(process.env.SMTP_PORT) || 587,
+  //     auth: {
+  //       user: process.env.SMTP_USER,
+  //       pass: process.env.SMTP_PASS,
+  //     },
+  //   },
+  // }),
 
   // Your Payload secret - should be a complex and secure string, unguessable
   secret: process.env.PAYLOAD_SECRET || '',

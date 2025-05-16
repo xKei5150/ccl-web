@@ -1,11 +1,12 @@
 "use client";
 
 import { PageHeader } from "@/components/layout/PageHeader";
-import { BadgePlus } from "lucide-react";
+import { Home, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import HouseholdForm from "@/components/form/HouseholdForm";
 import { createHousehold } from "@/app/(app)/dashboard/household/actions";
+import { Button } from "@/components/ui/button";
 
 export default function NewHouseholdPage() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function NewHouseholdPage() {
       toast({
         title: "Success",
         description: "Household record created successfully",
+        variant: "success",
       });
       router.push("/dashboard/household");
     } catch (error) {
@@ -37,17 +39,30 @@ export default function NewHouseholdPage() {
   }
 
   return (
-    <div className="max-w-screen mx-auto p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
       <PageHeader
         title="New Household Record"
-        subtitle="Fill in the form below to create a new household record"
-        icon={<BadgePlus className="h-8 w-8" />}
-      />
-      <HouseholdForm
-        defaultValues={defaultValues}
-        onSubmit={onSubmit}
-        cancelRoute={() => router.push("/dashboard/household")}
-      />
+        subtitle="Create a new household record"
+        icon={<Home className="h-8 w-8" />}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => router.push('/dashboard/household')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to List
+        </Button>
+      </PageHeader>
+      <div className="max-w-6xl mx-auto">
+        <HouseholdForm
+          defaultValues={defaultValues}
+          onSubmit={onSubmit}
+          submitText="Create Record"
+          cancelRoute={() => router.push("/dashboard/household")}
+        />
+      </div>
     </div>
   );
 }

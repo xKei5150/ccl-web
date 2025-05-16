@@ -6,6 +6,7 @@ import { deleteFinancingRecord } from "@/app/(app)/dashboard/financing/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { formatGovCurrency, APPROVAL_STATES } from "@/lib/finance-utils";
+import ExportButton from "./ExportButton";
 
 // Approval state badge variants
 const approvalStateVariants = {
@@ -80,6 +81,7 @@ export default function FinancingPage({ data }) {
       newItemUrl="/dashboard/financing/new"
       deleteAction={deleteFinancingRecord}
       newButtonLabel="New Financing Record"
+      exportComponent={ExportButton}
     />
   );
 }

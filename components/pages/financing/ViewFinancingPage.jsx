@@ -15,13 +15,14 @@ import {
   calculateGroupSubtotal, 
   applyGroupOperation,
   calculateBudgetVariance,
-  validateGovernmentRecord,
   formatGovCurrency,
   APPROVAL_STATES,
   ACCOUNT_TYPES
 } from "@/lib/finance-utils";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
+import FinancingAuditHistory from "./FinancingAuditHistory";
+import ExportButton from "./ExportButton";
 
 // Various operations with their symbols for display
 const operationSymbols = {
@@ -50,7 +51,6 @@ export default function ViewFinancingPage({ data }) {
   const [calculationSteps, setCalculationSteps] = useState([]);
   const [showCalculationSteps, setShowCalculationSteps] = useState(false);
   const [budgetVariance, setBudgetVariance] = useState({ variance: 0, percentage: 0, status: 'invalid' });
-  const [validationResult, setValidationResult] = useState(null);
   
   // Initialize expanded state for all groups
   useEffect(() => {
@@ -90,11 +90,6 @@ export default function ViewFinancingPage({ data }) {
           const variance = calculateBudgetVariance(result.total, parseFloat(data.budgetedAmount));
           setBudgetVariance(variance);
         }
-        
-        // Validate the government record
-        const recordWithTotal = { ...data, total: result.total };
-        const validation = validateGovernmentRecord(recordWithTotal);
-        setValidationResult(validation);
       }
     } catch (error) {
       console.error("Error in calculation effect:", error);
@@ -205,55 +200,6 @@ export default function ViewFinancingPage({ data }) {
     );
   }
 
-  // Render the compliance validation results
-  function renderValidationResults() {
-    if (!validationResult) {
-      return <div className="text-gray-500 text-center py-2">No validation results available</div>;
-    }
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Badge variant={validationResult.isValid ? "success" : "destructive"}>
-            {validationResult.isValid ? "Compliant" : "Non-Compliant"}
-          </Badge>
-          <span className="text-sm text-gray-500">
-            Validation timestamp: {new Date(validationResult.timestamp).toLocaleString()}
-          </span>
-        </div>
-
-        {validationResult.errors.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-red-600">Compliance Errors</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              {validationResult.errors.map((error, index) => (
-                <li key={index} className="text-red-600">{error}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {validationResult.warnings.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-semibold text-amber-600">Warnings</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              {validationResult.warnings.map((warning, index) => (
-                <li key={index} className="text-amber-600">{warning}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {validationResult.isValid && validationResult.warnings.length === 0 && (
-          <div className="bg-green-50 p-3 rounded-md text-green-700 flex items-center">
-            <CheckCircle2 className="h-5 w-5 mr-2" />
-            This record meets all compliance requirements.
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -276,6 +222,7 @@ export default function ViewFinancingPage({ data }) {
         </div>
         
         <div className="flex items-center space-x-2">
+          <ExportButton recordId={data.id} />
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/financing/${data.id}/edit`}>
               <Edit className="h-4 w-4 mr-2" />
@@ -290,9 +237,8 @@ export default function ViewFinancingPage({ data }) {
       </div>
       
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
           <TabsTrigger value="calculations">Calculations</TabsTrigger>
           <TabsTrigger value="audit">Audit Trail</TabsTrigger>
         </TabsList>
@@ -561,70 +507,6 @@ export default function ViewFinancingPage({ data }) {
           </div>
         </TabsContent>
         
-        <TabsContent value="compliance" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Compliance Validation Results */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Compliance Validation</CardTitle>
-                <CardDescription>
-                  Results of compliance checks against government regulations
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {renderValidationResults()}
-              </CardContent>
-            </Card>
-            
-            {/* Authorization Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Authorization Details</CardTitle>
-                <CardDescription>
-                  Legislative and departmental approval information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Legislative Reference</h3>
-                  <p className="mt-1">{data.authorizationReference || "Not specified"}</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Department Code</h3>
-                  <p className="mt-1">{data.departmentCode || "Not specified"}</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Spending Justification</h3>
-                  <p className="mt-1 whitespace-pre-line">{data.justification || "Not provided"}</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Approval History</h3>
-                  {data.approvalHistory ? (
-                    <ul className="mt-2 space-y-2 text-sm">
-                      {data.approvalHistory.map((approval, index) => (
-                        <li key={index} className="flex items-start">
-                          <div className="mr-2">
-                            {approvalStateVariants[approval.state]?.icon || <Clock className="h-3 w-3" />}
-                          </div>
-                          <div>
-                            <span className="font-medium capitalize">{approval.state.replace(/-/g, ' ')}</span> by {approval.user} on {new Date(approval.timestamp).toLocaleDateString()}
-                            {approval.notes && <p className="text-gray-500 mt-1">{approval.notes}</p>}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="mt-1 text-gray-500">No approval history available</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
         <TabsContent value="calculations" className="mt-6">
           <div className="space-y-6">
             {/* Group Subtotals Summary */}
@@ -691,49 +573,7 @@ export default function ViewFinancingPage({ data }) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {data.auditTrail && data.auditTrail.length > 0 ? (
-                <div className="space-y-4">
-                  {data.auditTrail.map((entry, index) => (
-                    <div key={index} className="border-l-2 border-gray-200 pl-4 py-1">
-                      <div className="flex justify-between items-start">
-                        <div className="font-medium">{entry.action}</div>
-                        <Badge variant="outline" className="text-xs">
-                          {new Date(entry.timestamp).toLocaleString()}
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        By: {entry.user || 'Unknown'}
-                      </div>
-                      {entry.changes && (
-                        <div className="mt-2 text-sm bg-gray-50 p-2 rounded">
-                          <div className="font-medium mb-1">Changes:</div>
-                          {Object.entries(entry.changes).map(([field, value], i) => (
-                            <div key={i} className="grid grid-cols-2 gap-2">
-                              <div className="text-gray-600">{field}:</div>
-                              <div>
-                                {value.from !== undefined && value.to !== undefined ? (
-                                  <span>
-                                    <span className="line-through text-red-500">{value.from}</span>
-                                    {' → '}
-                                    <span className="text-green-600">{value.to}</span>
-                                  </span>
-                                ) : (
-                                  JSON.stringify(value)
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <History className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>No audit trail available for this record</p>
-                </div>
-              )}
+              <FinancingAuditHistory recordId={data.id} />
             </CardContent>
           </Card>
         </TabsContent>

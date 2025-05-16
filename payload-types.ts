@@ -115,10 +115,12 @@ export interface Config {
   globals: {
     'theme-settings': ThemeSetting;
     'site-settings': SiteSetting;
+    'certificate-settings': CertificateSetting;
   };
   globalsSelect: {
     'theme-settings': ThemeSettingsSelect<false> | ThemeSettingsSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'certificate-settings': CertificateSettingsSelect<false> | CertificateSettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -296,6 +298,37 @@ export interface Request {
     duration?: string | null;
   };
   supportingDocuments?: (number | SupportingDocument)[] | null;
+  certificateDetails?: {
+    /**
+     * Automatically generated when certificate is issued
+     */
+    controlNumber?: string | null;
+    /**
+     * Date when the certificate was issued
+     */
+    dateIssued?: string | null;
+    /**
+     * Date until when the certificate is valid
+     */
+    validUntil?: string | null;
+    ctcDetails?: {
+      ctcNo?: string | null;
+      ctcDateIssued?: string | null;
+      ctcAmount?: string | null;
+      ctcPlaceIssued?: string | null;
+    };
+    payment?: {
+      orNumber?: string | null;
+      amount?: string | null;
+      date?: string | null;
+      method?: ('cash' | 'online' | 'free') | null;
+    };
+    approver?: {
+      name?: string | null;
+      position?: string | null;
+      date?: string | null;
+    };
+  };
   status?: ('pending' | 'processing' | 'approved' | 'rejected' | 'completed') | null;
   updatedAt: string;
   createdAt: string;
@@ -934,6 +967,36 @@ export interface RequestsSelect<T extends boolean = true> {
         duration?: T;
       };
   supportingDocuments?: T;
+  certificateDetails?:
+    | T
+    | {
+        controlNumber?: T;
+        dateIssued?: T;
+        validUntil?: T;
+        ctcDetails?:
+          | T
+          | {
+              ctcNo?: T;
+              ctcDateIssued?: T;
+              ctcAmount?: T;
+              ctcPlaceIssued?: T;
+            };
+        payment?:
+          | T
+          | {
+              orNumber?: T;
+              amount?: T;
+              date?: T;
+              method?: T;
+            };
+        approver?:
+          | T
+          | {
+              name?: T;
+              position?: T;
+              date?: T;
+            };
+      };
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1324,6 +1387,114 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificate-settings".
+ */
+export interface CertificateSetting {
+  id: number;
+  images?: {
+    /**
+     * Upload a logo image to be displayed on the top left of all certificates (recommended size: 200x200px)
+     */
+    barangayLogo?: (number | null) | Media;
+    /**
+     * Upload the Philippine seal or flag to be displayed on the top right of all certificates
+     */
+    philippineSeal?: (number | null) | Media;
+    /**
+     * Upload the official barangay seal to be used as a watermark on clearance certificates
+     */
+    officialSeal?: (number | null) | Media;
+    /**
+     * Upload a digital signature of the Barangay Captain for certificates (PNG with transparent background recommended)
+     */
+    captainSignature?: (number | null) | Media;
+    /**
+     * Upload a background image for certificates (will be displayed with reduced opacity)
+     */
+    backgroundImage?: (number | null) | Media;
+    /**
+     * Control the opacity/visibility of the background image
+     */
+    backgroundOpacity?: ('5' | '10' | '15' | '20') | null;
+  };
+  barangayDetails?: {
+    headerText?: string | null;
+    province?: string | null;
+    municipality?: string | null;
+    barangayName?: string | null;
+    barangayAddress?: string | null;
+    contactNumber?: string | null;
+    tagline?: string | null;
+  };
+  barangayOfficials?: {
+    captain?: {
+      name?: string | null;
+      title?: string | null;
+    };
+    councilors?:
+      | {
+          name: string;
+          chairmanship?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    skChairman?: {
+      name?: string | null;
+      title?: string | null;
+    };
+    secretary?: {
+      name?: string | null;
+      title?: string | null;
+    };
+    treasurer?: {
+      name?: string | null;
+      title?: string | null;
+    };
+  };
+  certificateTypes?: {
+    residency?: {
+      title?: string | null;
+      bodyText?: string | null;
+      purposeText?: string | null;
+      defaultValidity?: string | null;
+    };
+    indigency?: {
+      title?: string | null;
+      regularBodyText?: string | null;
+      medicalBodyText?: string | null;
+      regularPurposeText?: string | null;
+      medicalPurposeText?: string | null;
+    };
+    clearance?: {
+      title?: string | null;
+      bodyText?: string | null;
+      purposeText?: string | null;
+      defaultValidity?: string | null;
+      thumbMarkLabel?: string | null;
+    };
+    businessClearance?: {
+      title?: string | null;
+      conditionsText?: string | null;
+      revocationText?: string | null;
+      contactText?: string | null;
+      defaultValidity?: string | null;
+    };
+  };
+  general?: {
+    defaultCitizenship?: string | null;
+    signatureLabel?: string | null;
+    controlNumberPrefix?: {
+      residency?: string | null;
+      indigency?: string | null;
+      clearance?: string | null;
+      businessClearance?: string | null;
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "theme-settings_select".
  */
 export interface ThemeSettingsSelect<T extends boolean = true> {
@@ -1376,6 +1547,124 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   contactEmail?: T;
   contactPhone?: T;
   address?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificate-settings_select".
+ */
+export interface CertificateSettingsSelect<T extends boolean = true> {
+  images?:
+    | T
+    | {
+        barangayLogo?: T;
+        philippineSeal?: T;
+        officialSeal?: T;
+        captainSignature?: T;
+        backgroundImage?: T;
+        backgroundOpacity?: T;
+      };
+  barangayDetails?:
+    | T
+    | {
+        headerText?: T;
+        province?: T;
+        municipality?: T;
+        barangayName?: T;
+        barangayAddress?: T;
+        contactNumber?: T;
+        tagline?: T;
+      };
+  barangayOfficials?:
+    | T
+    | {
+        captain?:
+          | T
+          | {
+              name?: T;
+              title?: T;
+            };
+        councilors?:
+          | T
+          | {
+              name?: T;
+              chairmanship?: T;
+              id?: T;
+            };
+        skChairman?:
+          | T
+          | {
+              name?: T;
+              title?: T;
+            };
+        secretary?:
+          | T
+          | {
+              name?: T;
+              title?: T;
+            };
+        treasurer?:
+          | T
+          | {
+              name?: T;
+              title?: T;
+            };
+      };
+  certificateTypes?:
+    | T
+    | {
+        residency?:
+          | T
+          | {
+              title?: T;
+              bodyText?: T;
+              purposeText?: T;
+              defaultValidity?: T;
+            };
+        indigency?:
+          | T
+          | {
+              title?: T;
+              regularBodyText?: T;
+              medicalBodyText?: T;
+              regularPurposeText?: T;
+              medicalPurposeText?: T;
+            };
+        clearance?:
+          | T
+          | {
+              title?: T;
+              bodyText?: T;
+              purposeText?: T;
+              defaultValidity?: T;
+              thumbMarkLabel?: T;
+            };
+        businessClearance?:
+          | T
+          | {
+              title?: T;
+              conditionsText?: T;
+              revocationText?: T;
+              contactText?: T;
+              defaultValidity?: T;
+            };
+      };
+  general?:
+    | T
+    | {
+        defaultCitizenship?: T;
+        signatureLabel?: T;
+        controlNumberPrefix?:
+          | T
+          | {
+              residency?: T;
+              indigency?: T;
+              clearance?: T;
+              businessClearance?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

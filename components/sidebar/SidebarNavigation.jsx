@@ -147,6 +147,11 @@ const navigationWithPermissions = [
         title: "Site Settings",
         path: "/dashboard/site-settings",
         requiredPermissions: ["globals.site-settings.update"]
+      },
+      {
+        title: "Certificate Settings",
+        path: "/dashboard/certificate-settings",
+        requiredPermissions: ["globals.site-settings.update"]
       }
     ]
   },

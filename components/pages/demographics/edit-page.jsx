@@ -5,7 +5,7 @@ import DemographicForm from "@/components/forms/demographic-form";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { UsersRound, ArrowLeft } from "lucide-react";
+import { UsersRound, ArrowLeft, PenSquare } from "lucide-react";
 import { updateDemographic, checkYearExists } from "@/app/(app)/dashboard/demographics/actions";
 import { Button } from "@/components/ui/button";
 
@@ -80,8 +80,6 @@ const DemographicEditPage = ({ demographic, id }) => {
     }
   };
 
-  const cancelRoute = () => router.push(`/dashboard/demographics/${id}`);
-
   const handleYearChange = async (year) => {
     // Only check if year has changed from the original
     if (year && year !== demographic.year) {
@@ -99,28 +97,27 @@ const DemographicEditPage = ({ demographic, id }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
       <PageHeader
-        title={`Edit Demographic Record: ${demographic.year}`}
+        title={`Edit Demographic: ${demographic.year}`}
         subtitle="Update demographic data"
-        icon={<UsersRound className="h-8 w-8" />}
-      />
-      
-      <div className="mb-6">
+        icon={<PenSquare className="h-8 w-8" />}
+      >
         <Button
           variant="outline"
           size="sm"
+          className="flex items-center gap-2"
           onClick={() => router.push(`/dashboard/demographics/${id}`)}
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Details
+          <ArrowLeft className="h-4 w-4" />
+          Back to Record
         </Button>
-      </div>
+      </PageHeader>
       
       <div className="max-w-6xl mx-auto">
         <DemographicForm
           defaultValues={defaultValues}
           onSubmit={onSubmit}
           submitText="Update Record"
-          cancelRoute={cancelRoute}
+          cancelRoute={() => router.push(`/dashboard/demographics/${id}`)}
           yearError={yearError}
           onYearChange={handleYearChange}
         />

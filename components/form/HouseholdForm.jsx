@@ -20,11 +20,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, User } from "lucide-react";
+import { 
+  Plus, 
+  Trash2, 
+  User, 
+  Home, 
+  CircleCheck, 
+  MapPin, 
+  Calendar, 
+  Users 
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CustomDatePicker from "@/components/fields/CustomDatePicker";
 import { PersonalInfoSelect } from "./PersonalInfoSelect";
 import * as React from "react";
+import { Separator } from "@/components/ui/separator";
 
 const householdSchema = z.object({
   familyName: z.string().min(1, "Family name is required"),
@@ -66,8 +76,12 @@ export default function HouseholdForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Home className="h-5 w-5 text-primary" />
+              <CardTitle>Basic Information</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -76,7 +90,10 @@ export default function HouseholdForm({
                 name="familyName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Family Name</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Home className="h-4 w-4 text-muted-foreground" />
+                      Family Name
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter family name" />
                     </FormControl>
@@ -90,7 +107,10 @@ export default function HouseholdForm({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <CircleCheck className="h-4 w-4 text-muted-foreground" />
+                      Status
+                    </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -112,7 +132,10 @@ export default function HouseholdForm({
                 name="localAddress"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Local Address</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      Local Address
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter complete address" />
                     </FormControl>
@@ -126,13 +149,12 @@ export default function HouseholdForm({
                 name="residencyDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Residency Date</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      Residency Date
+                    </FormLabel>
                     <FormControl>
-                      {/* <CustomDatePicker
-                        date={field.value}
-                        setDate={field.onChange}
-                      /> */}
-                        <Input type="date" {...field} />
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,17 +166,24 @@ export default function HouseholdForm({
 
         {/* Household Members */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Household Members</CardTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => appendMember({ member: {} })}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Member
-            </Button>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle>Household Members</CardTitle>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => appendMember({ member: {} })}
+                className="flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Add Member
+              </Button>
+            </div>
+            <Separator className="mt-3" />
           </CardHeader>
           <CardContent className="space-y-4">
             {membersFields.length === 0 ? (
@@ -165,7 +194,7 @@ export default function HouseholdForm({
               membersFields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="flex items-center gap-4 p-4 rounded-lg border"
+                  className="flex items-center gap-4 p-4 rounded-lg border bg-background/50"
                 >
                   <User className="h-5 w-5 text-muted-foreground" />
                   <FormField
@@ -187,8 +216,9 @@ export default function HouseholdForm({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => removeMember(index)}
+                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -206,7 +236,10 @@ export default function HouseholdForm({
           >
             Cancel
           </Button>
-          <Button type="submit">{submitText}</Button>
+          <Button type="submit" className="flex items-center gap-2">
+            <Home className="h-4 w-4" />
+            {submitText}
+          </Button>
         </div>
       </form>
     </Form>

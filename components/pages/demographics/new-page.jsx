@@ -5,8 +5,9 @@ import DemographicForm from "@/components/forms/demographic-form";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { UsersRound } from "lucide-react";
+import { UsersRound, ArrowLeft } from "lucide-react";
 import { createDemographic, checkYearExists } from "@/app/(app)/dashboard/demographics/actions";
+import { Button } from "@/components/ui/button";
 
 const DemographicsNewPage = () => {
   const router = useRouter();
@@ -58,8 +59,6 @@ const DemographicsNewPage = () => {
     }
   };
 
-  const cancelRoute = () => router.push("/dashboard/demographics");
-
   const handleYearChange = async (year) => {
     if (year) {
       const result = await checkYearExists(year);
@@ -79,12 +78,22 @@ const DemographicsNewPage = () => {
         title="New Demographic Record"
         subtitle="Add demographic data for a specific year"
         icon={<UsersRound className="h-8 w-8" />}
-      />
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => router.push('/dashboard/demographics')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to List
+        </Button>
+      </PageHeader>
       <div className="max-w-6xl mx-auto">
         <DemographicForm
           onSubmit={onSubmit}
           submitText="Create Record"
-          cancelRoute={cancelRoute}
+          cancelRoute={() => router.push("/dashboard/demographics")}
           yearError={yearError}
           onYearChange={handleYearChange}
         />

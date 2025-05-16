@@ -16,8 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
   APPROVAL_STATES, 
-  ACCOUNT_TYPES,
-  validateGovernmentRecord 
+  ACCOUNT_TYPES
 } from "@/lib/finance-utils";
 import FinancingAuditHistory from "./FinancingAuditHistory";
 
@@ -49,9 +48,6 @@ export default function FinancingForm({ data, isEdit = false }) {
   const [departmentCode, setDepartmentCode] = useState("");
   const [justification, setJustification] = useState("");
   const [authorizationReference, setAuthorizationReference] = useState("");
-  
-  // Validation
-  const [validationResult, setValidationResult] = useState(null);
 
   // Initialize state from data prop for editing
   useEffect(() => {
@@ -263,62 +259,6 @@ export default function FinancingForm({ data, isEdit = false }) {
     
     setFinalCalculations(newCalculations);
   };
-  
-  // Validate the record before submission
-  const validateRecord = () => {
-    const recordData = {
-      title,
-      description,
-      approvalState,
-      accountType,
-      fiscalYear,
-      budgetedAmount: parseFloat(budgetedAmount) || 0,
-      budgetReference,
-      departmentCode,
-      justification,
-      authorizationReference,
-      total: 10000, // A dummy value for validation, real total will be calculated later
-    };
-    
-    return validateGovernmentRecord(recordData);
-  };
-  
-  // Render validation results
-  const renderValidationResults = () => {
-    if (!validationResult) return null;
-    
-    return (
-      <div className="space-y-4">
-        {validationResult.errors.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="font-medium text-destructive">Errors:</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              {validationResult.errors.map((error, index) => (
-                <li key={index} className="text-destructive">{error}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {validationResult.warnings.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="font-medium text-amber-500">Warnings:</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              {validationResult.warnings.map((warning, index) => (
-                <li key={index} className="text-amber-500">{warning}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        
-        {validationResult.isValid && validationResult.warnings.length === 0 && (
-          <div className="p-4 bg-green-50 text-green-700 rounded">
-            No compliance issues found.
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -389,32 +329,6 @@ export default function FinancingForm({ data, isEdit = false }) {
       }
     }
     
-    // Government compliance validation
-    const validation = validateRecord();
-    setValidationResult(validation);
-    
-    // Continue with warnings, but not with errors
-    if (!validation.isValid) {
-      toast({
-        title: "Compliance Errors",
-        description: "Please fix the compliance errors before submitting",
-        variant: "destructive",
-      });
-      
-      // Switch to the compliance tab
-      setActiveTab("compliance");
-      return;
-    }
-    
-    // Show warnings but allow submission
-    if (validation.warnings.length > 0) {
-      toast({
-        title: "Compliance Warnings",
-        description: "Record has compliance warnings, but can still be submitted",
-        variant: "warning",
-      });
-    }
-    
     setIsSubmitting(true);
     
     try {
@@ -454,11 +368,12 @@ export default function FinancingForm({ data, isEdit = false }) {
         
         router.push("/dashboard/financing");
       }
-      
     } catch (error) {
+      console.error("Error submitting financing record:", error);
+      
       toast({
         title: "Error",
-        description: error.message || `Failed to ${isEdit ? 'update' : 'create'} financing record`,
+        description: error.message || "An error occurred while submitting the form",
         variant: "destructive",
       });
     } finally {
@@ -466,495 +381,502 @@ export default function FinancingForm({ data, isEdit = false }) {
     }
   };
 
+  // Render the form
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center mb-6">
-        <Button variant="outline" size="icon" asChild className="mr-2">
-          <Link href={isEdit ? `/dashboard/financing/${data?.id || ''}` : "/dashboard/financing"}>
-            <ArrowLeft className="h-4 w-4" />
+    <div className="space-y-6">
+      {/* Back button */}
+      <div>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={isEdit ? `/dashboard/financing/${data?.id}` : "/dashboard/financing"}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">{isEdit ? "Edit" : "Create"} Financing Record</h1>
       </div>
       
-      <form onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Enter the financing record details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
+      {/* Main form */}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>{isEdit ? "Edit Financing Record" : "New Financing Record"}</CardTitle>
+            <CardDescription>
+              Enter financing details below. Groups are used for organizing calculations.
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            {/* Basic information */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
-                <Input 
-                  id="title" 
-                  placeholder="Financing record title" 
+                <Input
+                  id="title"
+                  placeholder="Financing record title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
                 />
               </div>
               
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea 
-                  id="description" 
-                  placeholder="Provide a detailed description" 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  rows={3}
-                />
+              <div className="space-y-2">
+                <Label htmlFor="approvalState">Approval State</Label>
+                <Select value={approvalState} onValueChange={setApprovalState}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {APPROVAL_STATES.map((state) => (
+                      <SelectItem key={state.value} value={state.value}>
+                        {state.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="approvalState">Approval State</Label>
-                  <Select value={approvalState} onValueChange={setApprovalState}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select approval state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {APPROVAL_STATES.map((state) => (
-                        <SelectItem key={state.value} value={state.value}>
-                          {state.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="accountType">Account Type</Label>
-                  <Select value={accountType} onValueChange={setAccountType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select account type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ACCOUNT_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="groups">Groups & Items</TabsTrigger>
-              <TabsTrigger value="calculations">Final Calculations</TabsTrigger>
-              <TabsTrigger value="compliance">Compliance Info</TabsTrigger>
-              {isEdit && data?.id && <TabsTrigger value="audit-history">Audit History</TabsTrigger>}
-            </TabsList>
+            </div>
             
-            <TabsContent value="groups" className="space-y-4 mt-6">
-              {groups.map((group, groupIndex) => (
-                <Card key={groupIndex}>
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Enter a description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                required
+              />
+            </div>
+            
+            {/* Tabs for different sections */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
+                <TabsTrigger value="groups">Calculation Groups</TabsTrigger>
+                <TabsTrigger value="finalCalculations">Final Calculations</TabsTrigger>
+                <TabsTrigger value="details">Additional Details</TabsTrigger>
+              </TabsList>
+              
+              {/* Groups tab content */}
+              <TabsContent value="groups" className="space-y-4 pt-4">
+                {groups.map((group, groupIndex) => (
+                  <Card key={groupIndex}>
+                    <CardHeader className="py-3 px-4">
+                      <div className="flex items-center justify-between">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => toggleGroupExpansion(groupIndex)}
-                          className="mr-2"
+                          className="p-0"
                         >
-                          {expandedGroups[groupIndex] ? (
-                            <ChevronUp className="h-5 w-5" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5" />
-                          )}
+                          {expandedGroups[groupIndex] ? 
+                            <ChevronUp className="h-5 w-5 mr-2" /> : 
+                            <ChevronDown className="h-5 w-5 mr-2" />
+                          }
+                          <span className="font-semibold">{group.title || `Group ${groupIndex + 1}`}</span>
                         </Button>
-                        
-                        <div>
-                          <CardTitle className="text-xl mb-1">
-                            <Input 
-                              placeholder="Group Title" 
-                              value={group.title}
-                              onChange={(e) => updateGroup(groupIndex, "title", e.target.value)}
-                              className="border-0 p-0 text-xl font-semibold focus-visible:ring-0"
-                              required
-                            />
-                          </CardTitle>
-                          
-                          <CardDescription>
-                            <Textarea
-                              placeholder="Group Description" 
-                              value={group.description}
-                              onChange={(e) => updateGroup(groupIndex, "description", e.target.value)}
-                              className="border-0 p-0 text-sm text-muted-foreground focus-visible:ring-0 min-h-0 h-auto"
-                              rows={1}
-                            />
-                          </CardDescription>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <div className="mr-4">
-                          <Label htmlFor={`group-subtotal-${groupIndex}`} className="text-sm">Subtotal Operation</Label>
-                          <Select
-                            value={group.subtotalOperation}
-                            onValueChange={(value) => updateGroup(groupIndex, "subtotalOperation", value)}
-                          >
-                            <SelectTrigger id={`group-subtotal-${groupIndex}`} className="w-32">
-                              <SelectValue placeholder="Sum" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="sum">Sum</SelectItem>
-                              <SelectItem value="average">Average</SelectItem>
-                              <SelectItem value="min">Minimum</SelectItem>
-                              <SelectItem value="max">Maximum</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
                         
                         <Button
-                          variant="outline"
-                          size="icon"
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive"
                           onClick={() => removeGroup(groupIndex)}
                           disabled={groups.length <= 1}
-                          type="button"
                         >
                           <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Remove group</span>
                         </Button>
                       </div>
-                    </div>
+                    </CardHeader>
+                    
+                    {expandedGroups[groupIndex] && (
+                      <CardContent className="border-t pt-4">
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2 md:col-span-2">
+                              <Label htmlFor={`group-${groupIndex}-title`}>Group Title</Label>
+                              <Input
+                                id={`group-${groupIndex}-title`}
+                                placeholder="Group title"
+                                value={group.title}
+                                onChange={(e) => updateGroup(groupIndex, "title", e.target.value)}
+                                required
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor={`group-${groupIndex}-operation`}>Subtotal Operation</Label>
+                              <Select
+                                value={group.subtotalOperation}
+                                onValueChange={(value) => updateGroup(groupIndex, "subtotalOperation", value)}
+                              >
+                                <SelectTrigger id={`group-${groupIndex}-operation`}>
+                                  <SelectValue placeholder="Select operation" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="sum">Sum</SelectItem>
+                                  <SelectItem value="average">Average</SelectItem>
+                                  <SelectItem value="min">Minimum</SelectItem>
+                                  <SelectItem value="max">Maximum</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor={`group-${groupIndex}-description`}>Group Description</Label>
+                            <Textarea
+                              id={`group-${groupIndex}-description`}
+                              placeholder="Group description"
+                              value={group.description}
+                              onChange={(e) => updateGroup(groupIndex, "description", e.target.value)}
+                              rows={2}
+                            />
+                          </div>
+                          
+                          {/* Items in this group */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label>Items</Label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="xs"
+                                onClick={() => addItem(groupIndex)}
+                              >
+                                <Plus className="h-3.5 w-3.5 mr-1" />
+                                Add Item
+                              </Button>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              {group.items.map((item, itemIndex) => (
+                                <div
+                                  key={itemIndex}
+                                  className="grid grid-cols-12 gap-2 items-center bg-muted/50 p-2 rounded"
+                                >
+                                  <div className="col-span-1 text-center font-mono text-sm">
+                                    {item.number}
+                                  </div>
+                                  
+                                  <div className="col-span-3">
+                                    <Input
+                                      placeholder="Item title"
+                                      value={item.title}
+                                      onChange={(e) => updateItem(groupIndex, itemIndex, "title", e.target.value)}
+                                      required
+                                    />
+                                  </div>
+                                  
+                                  <div className="col-span-2">
+                                    <Select
+                                      value={item.operation}
+                                      onValueChange={(value) => updateItem(groupIndex, itemIndex, "operation", value)}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Operation" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="add">Add</SelectItem>
+                                        <SelectItem value="subtract">Subtract</SelectItem>
+                                        <SelectItem value="multiply">Multiply</SelectItem>
+                                        <SelectItem value="divide">Divide</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  
+                                  <div className="col-span-2">
+                                    <Input
+                                      type="number"
+                                      placeholder="Value"
+                                      value={item.value}
+                                      onChange={(e) => updateItem(groupIndex, itemIndex, "value", e.target.value)}
+                                      step="0.01"
+                                    />
+                                  </div>
+                                  
+                                  <div className="col-span-2">
+                                    <Input
+                                      placeholder="Account code"
+                                      value={item.accountCode}
+                                      onChange={(e) => updateItem(groupIndex, itemIndex, "accountCode", e.target.value)}
+                                    />
+                                  </div>
+                                  
+                                  <div className="col-span-1">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-destructive h-8 w-8 p-0"
+                                      onClick={() => removeItem(groupIndex, itemIndex)}
+                                      disabled={group.items.length <= 1}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">Remove item</span>
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+                
+                <Button type="button" variant="outline" onClick={addGroup}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Group
+                </Button>
+              </TabsContent>
+              
+              {/* Final calculations tab content */}
+              <TabsContent value="finalCalculations" className="space-y-4 pt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Final Calculations</CardTitle>
+                    <CardDescription>
+                      Define calculations that combine groups or add fixed values.
+                    </CardDescription>
                   </CardHeader>
                   
-                  {expandedGroups[groupIndex] && (
-                    <>
-                      <CardContent className="pb-3">
-                        {group.items.map((item, itemIndex) => (
-                          <div className="grid grid-cols-12 gap-4 mt-2 border rounded-md p-4" key={itemIndex}>
-                            <div className="col-span-1">
-                              <Label htmlFor={`item-number-${groupIndex}-${itemIndex}`}>#</Label>
-                              <Input 
-                                id={`item-number-${groupIndex}-${itemIndex}`}
-                                value={item.number}
-                                disabled
-                              />
+                  <CardContent className="space-y-4">
+                    {finalCalculations.length === 0 ? (
+                      <div className="text-center py-4 text-muted-foreground">
+                        <p>No final calculations defined. The total will be the sum of all group subtotals.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {finalCalculations.map((calc, index) => (
+                          <div
+                            key={index}
+                            className="grid grid-cols-12 gap-2 items-center bg-muted/50 p-2 rounded"
+                          >
+                            <div className="col-span-1 text-center font-mono text-sm">
+                              {calc.number}
                             </div>
                             
-                            <div className="col-span-4">
-                              <Label htmlFor={`item-title-${groupIndex}-${itemIndex}`}>Title</Label>
+                            <div className="col-span-3">
                               <Input
-                                id={`item-title-${groupIndex}-${itemIndex}`}
-                                placeholder="Item title"
-                                value={item.title}
-                                onChange={(e) => updateItem(groupIndex, itemIndex, "title", e.target.value)}
+                                placeholder="Step title"
+                                value={calc.title}
+                                onChange={(e) => updateFinalCalculation(index, "title", e.target.value)}
                                 required
                               />
                             </div>
                             
                             <div className="col-span-2">
-                              <Label htmlFor={`item-value-${groupIndex}-${itemIndex}`}>Value</Label>
-                              <Input
-                                id={`item-value-${groupIndex}-${itemIndex}`}
-                                type="number"
-                                step="any"
-                                placeholder="0"
-                                value={item.value}
-                                onChange={(e) => updateItem(groupIndex, itemIndex, "value", e.target.value)}
-                                required
-                              />
-                            </div>
-                            
-                            <div className="col-span-2">
-                              <Label htmlFor={`item-operation-${groupIndex}-${itemIndex}`}>Operation</Label>
                               <Select
-                                value={item.operation}
-                                onValueChange={(value) => updateItem(groupIndex, itemIndex, "operation", value)}
+                                value={calc.operation}
+                                onValueChange={(value) => updateFinalCalculation(index, "operation", value)}
                               >
-                                <SelectTrigger id={`item-operation-${groupIndex}-${itemIndex}`}>
-                                  <SelectValue placeholder="Add" />
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Operation" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="add">Add</SelectItem>
                                   <SelectItem value="subtract">Subtract</SelectItem>
                                   <SelectItem value="multiply">Multiply</SelectItem>
                                   <SelectItem value="divide">Divide</SelectItem>
+                                  <SelectItem value="groupRef">Group Reference</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             
-                            <div className="col-span-2">
-                              <Label htmlFor={`item-accountCode-${groupIndex}-${itemIndex}`}>Account Code</Label>
-                              <Input
-                                id={`item-accountCode-${groupIndex}-${itemIndex}`}
-                                placeholder="Account code"
-                                value={item.accountCode}
-                                onChange={(e) => updateItem(groupIndex, itemIndex, "accountCode", e.target.value)}
-                              />
-                            </div>
+                            {calc.operation === "groupRef" ? (
+                              <div className="col-span-4">
+                                <Select
+                                  value={calc.groupReference?.toString()}
+                                  onValueChange={(value) => updateFinalCalculation(index, "groupReference", value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select group" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {groups.map((group, groupIndex) => (
+                                      <SelectItem key={groupIndex} value={groupIndex.toString()}>
+                                        {group.title || `Group ${groupIndex + 1}`}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ) : (
+                              <div className="col-span-4">
+                                <Input
+                                  type="number"
+                                  placeholder="Value"
+                                  value={calc.value}
+                                  onChange={(e) => updateFinalCalculation(index, "value", e.target.value)}
+                                  step="0.01"
+                                />
+                              </div>
+                            )}
                             
-                            <div className="col-span-1 flex items-end justify-end">
+                            <div className="col-span-2 flex justify-end">
                               <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => removeItem(groupIndex, itemIndex)}
-                                disabled={group.items.length <= 1}
                                 type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive h-8 w-8 p-0"
+                                onClick={() => removeFinalCalculation(index)}
                               >
                                 <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Remove calculation</span>
                               </Button>
                             </div>
                           </div>
                         ))}
-                      </CardContent>
-                      
-                      <CardFooter className="flex justify-end">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => addItem(groupIndex)}
-                          type="button"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Item
-                        </Button>
-                      </CardFooter>
-                    </>
-                  )}
+                      </div>
+                    )}
+                    
+                    <Button type="button" variant="outline" onClick={addFinalCalculation}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Calculation Step
+                    </Button>
+                  </CardContent>
                 </Card>
-              ))}
+              </TabsContent>
               
-              <div className="flex justify-center">
-                <Button 
-                  variant="outline" 
-                  onClick={addGroup}
-                  type="button"
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Group
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="calculations" className="space-y-4 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Final Calculations</CardTitle>
-                  <CardDescription>Define how to calculate the final value</CardDescription>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {finalCalculations.length === 0 && (
-                    <div className="text-center py-6 text-muted-foreground">
-                      No calculations defined yet. Add some below.
-                    </div>
-                  )}
+              {/* Additional details tab content */}
+              <TabsContent value="details" className="space-y-4 pt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Additional Details</CardTitle>
+                    <CardDescription>
+                      Provide additional government-specific information.
+                    </CardDescription>
+                  </CardHeader>
                   
-                  {finalCalculations.map((calc, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-4 border rounded-md p-4">
-                      <div className="col-span-1">
-                        <Label htmlFor={`calc-number-${index}`}>#</Label>
-                        <Input
-                          id={`calc-number-${index}`}
-                          value={calc.number}
-                          disabled
-                        />
-                      </div>
-                      
-                      <div className="col-span-4">
-                        <Label htmlFor={`calc-title-${index}`}>Title</Label>
-                        <Input
-                          id={`calc-title-${index}`}
-                          placeholder="Step title"
-                          value={calc.title}
-                          onChange={(e) => updateFinalCalculation(index, "title", e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="col-span-2">
-                        <Label htmlFor={`calc-operation-${index}`}>Operation</Label>
-                        <Select
-                          value={calc.operation}
-                          onValueChange={(value) => updateFinalCalculation(index, "operation", value)}
-                        >
-                          <SelectTrigger id={`calc-operation-${index}`}>
-                            <SelectValue placeholder="Add" />
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="accountType">Account Type</Label>
+                        <Select value={accountType} onValueChange={setAccountType}>
+                          <SelectTrigger id="accountType">
+                            <SelectValue placeholder="Select account type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="add">Add</SelectItem>
-                            <SelectItem value="subtract">Subtract</SelectItem>
-                            <SelectItem value="multiply">Multiply</SelectItem>
-                            <SelectItem value="divide">Divide</SelectItem>
-                            <SelectItem value="groupRef">Group Reference</SelectItem>
+                            {ACCOUNT_TYPES.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
                       
-                      {calc.operation === "groupRef" ? (
-                        <div className="col-span-3">
-                          <Label htmlFor={`calc-groupRef-${index}`}>Group</Label>
-                          <Select
-                            value={calc.groupReference?.toString()}
-                            onValueChange={(value) => updateFinalCalculation(index, "groupReference", value)}
-                          >
-                            <SelectTrigger id={`calc-groupRef-${index}`}>
-                              <SelectValue placeholder="Select Group" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {groups.map((group, groupIndex) => (
-                                <SelectItem key={groupIndex} value={groupIndex.toString()}>
-                                  {group.title || `Group ${groupIndex + 1}`}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      ) : (
-                        <div className="col-span-3">
-                          <Label htmlFor={`calc-value-${index}`}>Value</Label>
-                          <Input
-                            id={`calc-value-${index}`}
-                            type="number"
-                            step="any"
-                            placeholder="0"
-                            value={calc.value}
-                            onChange={(e) => updateFinalCalculation(index, "value", e.target.value)}
-                            required={calc.operation !== "groupRef"}
-                          />
-                        </div>
-                      )}
-                      
-                      <div className="col-span-2 flex items-end justify-end">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => removeFinalCalculation(index)}
-                          type="button"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="space-y-2">
+                        <Label htmlFor="fiscalYear">Fiscal Year</Label>
+                        <Input
+                          id="fiscalYear"
+                          placeholder="e.g., 2023"
+                          value={fiscalYear}
+                          onChange={(e) => setFiscalYear(e.target.value)}
+                        />
                       </div>
                     </div>
-                  ))}
-                </CardContent>
-                
-                <CardFooter className="flex justify-center">
-                  <Button
-                    variant="outline"
-                    onClick={addFinalCalculation}
-                    type="button"
-                    className="w-full"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Calculation Step
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="compliance" className="space-y-4 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Compliance Information</CardTitle>
-                  <CardDescription>Government-specific information required for compliance</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="fiscalYear">Fiscal Year</Label>
-                    <Input
-                      id="fiscalYear"
-                      placeholder="e.g., 2023-2024"
-                      value={fiscalYear}
-                      onChange={(e) => setFiscalYear(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="budgetedAmount">Budgeted Amount</Label>
-                      <Input
-                        id="budgetedAmount"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={budgetedAmount}
-                        onChange={(e) => setBudgetedAmount(e.target.value)}
-                      />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="budgetedAmount">Budgeted Amount</Label>
+                        <Input
+                          id="budgetedAmount"
+                          type="number"
+                          placeholder="0.00"
+                          value={budgetedAmount}
+                          onChange={(e) => setBudgetedAmount(e.target.value)}
+                          step="0.01"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="departmentCode">Department Code</Label>
+                        <Input
+                          id="departmentCode"
+                          placeholder="Department code"
+                          value={departmentCode}
+                          onChange={(e) => setDepartmentCode(e.target.value)}
+                        />
+                      </div>
                     </div>
                     
-                    <div>
+                    <div className="space-y-2">
                       <Label htmlFor="budgetReference">Budget Reference</Label>
                       <Input
                         id="budgetReference"
-                        placeholder="Budget reference code"
+                        placeholder="Reference to budget allocation"
                         value={budgetReference}
                         onChange={(e) => setBudgetReference(e.target.value)}
                       />
                     </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="departmentCode">Department Code</Label>
-                    <Input
-                      id="departmentCode"
-                      placeholder="Department code"
-                      value={departmentCode}
-                      onChange={(e) => setDepartmentCode(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="authorizationReference">Authorization Reference</Label>
-                    <Input
-                      id="authorizationReference"
-                      placeholder="Legislative authorization"
-                      value={authorizationReference}
-                      onChange={(e) => setAuthorizationReference(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="justification">Spending Justification</Label>
-                    <Textarea
-                      id="justification"
-                      placeholder="Justify this expenditure"
-                      value={justification}
-                      onChange={(e) => setJustification(e.target.value)}
-                      rows={4}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {validationResult && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Validation Results</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {renderValidationResults()}
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="justification">Justification</Label>
+                      <Textarea
+                        id="justification"
+                        placeholder="Justification for this expenditure"
+                        value={justification}
+                        onChange={(e) => setJustification(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="authorizationReference">Authorization Reference</Label>
+                      <Input
+                        id="authorizationReference"
+                        placeholder="Legislative or policy authorization"
+                        value={authorizationReference}
+                        onChange={(e) => setAuthorizationReference(e.target.value)}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
-              )}
-            </TabsContent>
-            
-            {isEdit && data?.id && (
-              <TabsContent value="audit-history" className="space-y-4 mt-6">
-                <FinancingAuditHistory recordId={data.id} />
+                
+                {/* Audit history for edit mode */}
+                {isEdit && data?.id && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Audit History</CardTitle>
+                      <CardDescription>
+                        View the history of changes made to this financing record.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <FinancingAuditHistory recordId={data.id} />
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
-            )}
-          </Tabs>
+            </Tabs>
+          </CardContent>
           
-          <div className="flex justify-end space-x-4">
-            <Button variant="outline" asChild>
-              <Link href={isEdit ? `/dashboard/financing/${data?.id || ''}` : "/dashboard/financing"}>Cancel</Link>
+          <CardFooter className="flex justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              asChild
+            >
+              <Link href={isEdit ? `/dashboard/financing/${data?.id}` : "/dashboard/financing"}>
+                Cancel
+              </Link>
             </Button>
+            
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? `${isEdit ? 'Updating' : 'Creating'}...` : (isEdit ? 'Update Record' : 'Create Record')}
-              {!isSubmitting && <Save className="ml-2 h-4 w-4" />}
+              {isSubmitting ? (
+                <>Processing...</>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {isEdit ? "Update" : "Create"} Record
+                </>
+              )}
             </Button>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </form>
     </div>
   );

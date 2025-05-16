@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,8 +16,22 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { 
+  Plus, 
+  Trash2, 
+  AlertTriangle, 
+  Calendar, 
+  Male, 
+  Female, 
+  Users, 
+  HomeIcon, 
+  VoteIcon, 
+  Accessibility, 
+  PieChart, 
+  Activity 
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 
 // Schema for validation
 const ageGroupSchema = z.object({
@@ -163,6 +177,13 @@ export default function DemographicForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <CardTitle>Basic Information</CardTitle>
+            </div>
+            <Separator />
+          </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FormField
@@ -170,7 +191,10 @@ export default function DemographicForm({
                 name="year"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Year</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      Year
+                    </FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -193,7 +217,10 @@ export default function DemographicForm({
                 name="maleCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Male Population</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Male className="h-4 w-4 text-muted-foreground" />
+                      Male Population
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" {...field} placeholder="Enter male count" />
                     </FormControl>
@@ -207,7 +234,10 @@ export default function DemographicForm({
                 name="femaleCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Female Population</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Female className="h-4 w-4 text-muted-foreground" />
+                      Female Population
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" {...field} placeholder="Enter female count" />
                     </FormControl>
@@ -216,9 +246,10 @@ export default function DemographicForm({
                 )}
               />
 
-              <div className="col-span-1 md:col-span-3 bg-blue-50 p-4 rounded-md flex items-center space-x-2">
+              <div className="col-span-1 md:col-span-3 bg-primary/5 p-4 rounded-md flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
                 <div className="font-medium">Total Population: {totalPopulation}</div>
-                <div className="text-sm text-gray-500">(Calculated from Male + Female)</div>
+                <div className="text-sm text-muted-foreground">(Calculated from Male + Female)</div>
               </div>
 
               <FormField
@@ -226,7 +257,10 @@ export default function DemographicForm({
                 name="householdsCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Number of Households</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <HomeIcon className="h-4 w-4 text-muted-foreground" />
+                      Number of Households
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" {...field} placeholder="Enter households count" />
                     </FormControl>
@@ -241,7 +275,10 @@ export default function DemographicForm({
                 name="voterCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Registered Voters</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <VoteIcon className="h-4 w-4 text-muted-foreground" />
+                      Registered Voters
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" {...field} placeholder="Enter voter count" />
                     </FormControl>
@@ -256,7 +293,10 @@ export default function DemographicForm({
                 name="pwdCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Persons with Disability (PWD)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Accessibility className="h-4 w-4 text-muted-foreground" />
+                      Persons with Disability (PWD)
+                    </FormLabel>
                     <FormControl>
                       <Input type="number" {...field} placeholder="Enter PWD count" />
                     </FormControl>
@@ -271,24 +311,30 @@ export default function DemographicForm({
 
         {/* Age Groups Section */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <PieChart className="h-5 w-5 text-primary" />
+                <CardTitle>Age Groups</CardTitle>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => appendAgeGroup({
+                  ageRange: "",
+                  count: "",
+                })}
+              >
+                <Plus className="h-4 w-4" />
+                Add Age Group
+              </Button>
+            </div>
+            <Separator className="mt-3" />
+          </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Age Groups</h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => appendAgeGroup({
-                    ageRange: "",
-                    count: "",
-                  })}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Age Group
-                </Button>
-              </div>
-
               {ageGroupsExceedTotal && (
                 <Alert variant="warning" className="bg-amber-50 border-amber-200">
                   <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -298,13 +344,19 @@ export default function DemographicForm({
                 </Alert>
               )}
 
-              <div className="bg-blue-50 p-3 rounded-md mb-4 text-sm flex justify-between">
-                <div>Age Groups Total: {ageGroupsTotal}</div>
-                <div>Total Population: {totalPopulation}</div>
+              <div className="bg-primary/5 p-3 rounded-md mb-4 text-sm flex justify-between">
+                <div className="flex items-center gap-2">
+                  <PieChart className="h-4 w-4 text-muted-foreground" />
+                  Age Groups Total: {ageGroupsTotal}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  Total Population: {totalPopulation}
+                </div>
               </div>
 
               {ageGroupFields.map((field, index) => (
-                <Card key={field.id} className="border border-gray-200">
+                <Card key={field.id} className="border border-gray-200 bg-background/50">
                   <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                       <FormField
@@ -312,7 +364,10 @@ export default function DemographicForm({
                         name={`ageGroups.${index}.ageRange`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Age Range</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <PieChart className="h-4 w-4 text-muted-foreground" />
+                              Age Range
+                            </FormLabel>
                             <FormControl>
                               <Input {...field} placeholder="e.g., 0-5, 6-17, 18-59, 60+" />
                             </FormControl>
@@ -326,7 +381,10 @@ export default function DemographicForm({
                         name={`ageGroups.${index}.count`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Count</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              Count
+                            </FormLabel>
                             <div className="flex items-center gap-2">
                               <FormControl className="flex-1">
                                 <Input 
@@ -344,10 +402,10 @@ export default function DemographicForm({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="text-red-500"
+                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                                 onClick={() => removeAgeGroup(index)}
                               >
-                                <Trash2 className="h-5 w-5" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                             <FormMessage />
@@ -364,26 +422,32 @@ export default function DemographicForm({
 
         {/* Chronic Diseases Section */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                <CardTitle>Chronic Diseases</CardTitle>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => appendDisease({
+                  diseaseName: "",
+                  count: "",
+                })}
+              >
+                <Plus className="h-4 w-4" />
+                Add Disease
+              </Button>
+            </div>
+            <Separator className="mt-3" />
+          </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Chronic Diseases</h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => appendDisease({
-                    diseaseName: "",
-                    count: "",
-                  })}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Disease
-                </Button>
-              </div>
-
               {diseaseFields.map((field, index) => (
-                <Card key={field.id} className="border border-gray-200">
+                <Card key={field.id} className="border border-gray-200 bg-background/50">
                   <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                       <FormField
@@ -391,7 +455,10 @@ export default function DemographicForm({
                         name={`chronicDiseases.${index}.diseaseName`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Disease Name</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <Activity className="h-4 w-4 text-muted-foreground" />
+                              Disease Name
+                            </FormLabel>
                             <FormControl>
                               <Input {...field} placeholder="e.g., Diabetes, Hypertension" />
                             </FormControl>
@@ -405,7 +472,10 @@ export default function DemographicForm({
                         name={`chronicDiseases.${index}.count`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Count</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              Count
+                            </FormLabel>
                             <div className="flex items-center gap-2">
                               <FormControl className="flex-1">
                                 <Input 
@@ -418,10 +488,10 @@ export default function DemographicForm({
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="text-red-500"
+                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                                 onClick={() => removeDisease(index)}
                               >
-                                <Trash2 className="h-5 w-5" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                             <FormMessage />
@@ -441,13 +511,28 @@ export default function DemographicForm({
             <Button
               type="button"
               variant="outline"
+              className="flex items-center gap-2"
               onClick={cancelRoute}
             >
               Cancel
             </Button>
           )}
-          <Button type="submit" disabled={isSubmitting || yearError}>
-            {isSubmitting ? "Submitting..." : submitText}
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || yearError}
+            className="flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Calendar className="h-4 w-4" />
+                {submitText}
+              </>
+            )}
           </Button>
         </div>
       </form>

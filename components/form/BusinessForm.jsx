@@ -1,7 +1,7 @@
 // BusinessPermitForm.jsx
 "use client";
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { businessDataSchema } from "@/lib/schema";
@@ -22,7 +22,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  CircleCheck, 
+  Users, 
+  Mail, 
+  Phone, 
+  FileText, 
+  Plus, 
+  Trash2,
+  User
+} from "lucide-react";
 import DynamicSupportingDocument from "@/components/fields/DynamicSupportingDocument";
+import { Separator } from "@/components/ui/separator";
 
 // Helper function to recursively convert nulls to empty strings or appropriate defaults
 const defaultNullValues = (obj) => {
@@ -89,23 +103,29 @@ const BusinessForm = ({
       setIsSubmitting(false);
     }
   };
+  
   const DEBUG = process.env.NODE_ENV === "development"; 
+  
   return (
     <main className="max-w-6xl mx-auto space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        {DEBUG && (
+          {DEBUG && (
             <pre className="bg-gray-100 p-4 rounded-md">
               {JSON.stringify(form.formState.errors, null, 2)}
             </pre>
           )}    
+          
+          {/* Business Information Section */}
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 gap-4"></div>
-              {/* Business Information Section */}
-              <h2 className="text-xl font-semibold mb-4">
-                Business Information
-              </h2>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                <CardTitle>Business Information</CardTitle>
+              </div>
+              <Separator />
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Business Name */}
                 <FormField
@@ -113,7 +133,10 @@ const BusinessForm = ({
                   name="businessName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Name</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        Business Name
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter business name" />
                       </FormControl>
@@ -128,7 +151,10 @@ const BusinessForm = ({
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Address</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        Business Address
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -146,7 +172,10 @@ const BusinessForm = ({
                   name="registrationDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Registration Date</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        Registration Date
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -176,7 +205,10 @@ const BusinessForm = ({
                   name="typeOfOwnership"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type of Ownership</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        Type of Ownership
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -213,7 +245,10 @@ const BusinessForm = ({
                     name="typeOfCorporation"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type of Corporation</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          Type of Corporation
+                        </FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value}
@@ -240,7 +275,10 @@ const BusinessForm = ({
                   name="businessContactNo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Contact No</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        Business Contact No
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -259,7 +297,10 @@ const BusinessForm = ({
                   name="businessEmailAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Email Address</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        Business Email Address
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -271,13 +312,17 @@ const BusinessForm = ({
                     </FormItem>
                   )}
                 />
+                
                 {/* Status */}
                 <FormField
                   control={form.control}
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <CircleCheck className="h-4 w-4 text-muted-foreground" />
+                        Status
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -298,74 +343,115 @@ const BusinessForm = ({
                   )}
                 />
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Dynamic Owners */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Owner(s)</h3>
-                <div className="space-y-4">
-                  {ownerFields.map((field, index) => (
-                    <div key={field.id} className="flex items-center gap-4">
-                      <FormField
-                        control={form.control}
-                        name={`owners.${index}.ownerName`}
-                        render={({ field }) => (
-                          <FormItem className="flex-1">
-                            <FormLabel>Owner {index + 1}</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                placeholder="Enter owner name"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="button" onClick={() => removeOwner(index)}>
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => appendOwner("")}
-                  >
-                    Add Owner
-                  </Button>
+          {/* Dynamic Owners */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <CardTitle>Business Owner(s)</CardTitle>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendOwner({ ownerName: "" })}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Owner
+                </Button>
               </div>
+              <Separator className="mt-3" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {ownerFields.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  No owners added yet
+                </div>
+              ) : (
+                ownerFields.map((field, index) => (
+                  <div 
+                    key={field.id} 
+                    className="flex items-center gap-4 p-4 rounded-lg border bg-background/50"
+                  >
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <FormField
+                      control={form.control}
+                      name={`owners.${index}.ownerName`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormLabel className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            Owner {index + 1}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter owner name"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOwner(index)}
+                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent>
-              {/* Supporting Documents Section */}
-              <div className="bg-white shadow p-6 rounded-md">
-                <h2 className="text-xl font-semibold mb-4">
-                  Supporting Documents
-                </h2>
-                <DynamicSupportingDocument control={form.control} />
+          {/* Supporting Documents */}
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <CardTitle>Supporting Documents</CardTitle>
               </div>
+              <Separator />
+            </CardHeader>
+            <CardContent>
+              <DynamicSupportingDocument control={form.control} />
             </CardContent>
           </Card>
+          
           {/* Action Buttons */}
           <div className="flex justify-end gap-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => cancelRoute && cancelRoute()}
+              className="flex items-center gap-2"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
               {isSubmitting ? (
                 <>
                   <span className="mr-2">Submitting...</span>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 </>
               ) : (
-                submitText
+                <>
+                  <Building2 className="h-4 w-4" />
+                  {submitText}
+                </>
               )}
             </Button>
           </div>

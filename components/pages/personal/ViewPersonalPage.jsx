@@ -5,10 +5,22 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { SquareUser, PenSquare } from "lucide-react";
+import { 
+  SquareUser, 
+  PenSquare, 
+  ArrowLeft, 
+  User, 
+  Calendar, 
+  Mail, 
+  MapPin, 
+  HeartPulse, 
+  Home,
+  Image
+} from "lucide-react";
 import { InfoItem } from "@/components/ui/info-item";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 const ViewPersonalPage = ({ data }) => {
   const router = useRouter();
@@ -44,20 +56,36 @@ const ViewPersonalPage = ({ data }) => {
         subtitle="Personal Record Details"
         icon={<SquareUser className="h-8 w-8" />}
       >
-        <Button
-          onClick={() => router.push(`/dashboard/personal/${data.id}/edit`)}
-          className="flex items-center gap-2"
-        >
-          <PenSquare className="h-4 w-4" />
-          Edit Record
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => router.push('/dashboard/personal')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to List
+          </Button>
+          
+          <Button
+            onClick={() => router.push(`/dashboard/personal/${data.id}/edit`)}
+            className="flex items-center gap-2"
+          >
+            <PenSquare className="h-4 w-4" />
+            Edit Record
+          </Button>
+        </div>
       </PageHeader>
 
       <main className="max-w-6xl mx-auto space-y-6">
         {/* Profile Photo */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Profile Photo</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Image className="h-5 w-5 text-primary" />
+              <CardTitle>Profile Photo</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent className="flex justify-center">
             <Avatar className="w-48 h-48">
@@ -68,7 +96,7 @@ const ViewPersonalPage = ({ data }) => {
                   className="object-cover"
                 />
               ) : (
-                <AvatarFallback className="text-4xl">
+                <AvatarFallback className="text-4xl bg-primary/10 text-primary">
                   {data.name.firstName?.[0]?.toUpperCase() || "?"}
                 </AvatarFallback>
               )}
@@ -78,22 +106,41 @@ const ViewPersonalPage = ({ data }) => {
 
         {/* Personal Information */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              <CardTitle>Basic Information</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <InfoItem
-                label="Full Name"
+                label={
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>Full Name</span>
+                  </div>
+                }
                 value={data.name.fullName}
               />
               <InfoItem
-                label="Birth Date"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Birth Date</span>
+                  </div>
+                }
                 value={data.demographics?.birthDate ? 
                   new Date(data.demographics.birthDate).toLocaleDateString() : 'N/A'}
               />
               <InfoItem
-                label="Sex"
+                label={
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>Sex</span>
+                  </div>
+                }
                 value={<span className="capitalize">{data.demographics?.sex || 'N/A'}</span>}
               />
             </div>
@@ -102,17 +149,31 @@ const ViewPersonalPage = ({ data }) => {
 
         {/* Contact Information */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              <CardTitle>Contact Information</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InfoItem
-                label="Email Address"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>Email Address</span>
+                  </div>
+                }
                 value={data.contact?.emailAddress || 'N/A'}
               />
               <InfoItem
-                label="Local Address"
+                label={
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>Local Address</span>
+                  </div>
+                }
                 value={data.contact?.localAddress || 'N/A'}
               />
             </div>
@@ -121,17 +182,31 @@ const ViewPersonalPage = ({ data }) => {
 
         {/* Status Information */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Status Information</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <HeartPulse className="h-5 w-5 text-primary" />
+              <CardTitle>Status Information</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <InfoItem
-                label="Marital Status"
+                label={
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>Marital Status</span>
+                  </div>
+                }
                 value={<span className="capitalize">{data.demographics?.maritalStatus || 'N/A'}</span>}
               />
               <InfoItem
-                label="Residency Status"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Home className="h-4 w-4 text-muted-foreground" />
+                    <span>Residency Status</span>
+                  </div>
+                }
                 value={
                   <span
                     className={cn(
@@ -144,7 +219,12 @@ const ViewPersonalPage = ({ data }) => {
                 }
               />
               <InfoItem
-                label="Life Status"
+                label={
+                  <div className="flex items-center gap-2">
+                    <HeartPulse className="h-4 w-4 text-muted-foreground" />
+                    <span>Life Status</span>
+                  </div>
+                }
                 value={
                   <span
                     className={cn(

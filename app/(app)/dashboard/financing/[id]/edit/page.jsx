@@ -3,7 +3,7 @@ import EditFinancingPage from "@/components/pages/financing/EditFinancingPage";
 import { getFinancingRecord } from "@/app/(app)/dashboard/financing/actions";
 
 export const metadata = {
-  title: "Edit Financing Record",
+  title: "Edit Financing Record | CCL",
   description: "Update details of a financing record",
 }
 
@@ -19,7 +19,7 @@ export default async function EditFinancingRecordPage({ params }) {
       return notFound();
     }
     
-    return <EditFinancingPage data={financingRecord.data} />;
+    return <EditFinancingPage data={financingRecord.data} id={id} />;
   } catch (error) {
     console.error("Error fetching financing record:", error);
     return notFound();

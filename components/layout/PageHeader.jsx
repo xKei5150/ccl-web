@@ -1,6 +1,6 @@
 import React from "react";
 
-export const PageHeader = ({ title, subtitle, icon, action }) => {
+export const PageHeader = ({ title, subtitle, icon, action, children }) => {
   return (
     <header className="mb-2 max-w-6xl">
       <div className="flex items-center justify-between">
@@ -19,11 +19,17 @@ export const PageHeader = ({ title, subtitle, icon, action }) => {
             )}
           </div>
         </div>
-        {action && (
+        
+        {/* Render either children or action prop */}
+        {children ? (
+          <div className="flex-shrink-0">
+            {children}
+          </div>
+        ) : action ? (
           <div className="flex-shrink-0">
             {action}
           </div>
-        )}
+        ) : null}
       </div>
     </header>
   );

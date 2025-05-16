@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Bar, BarChart, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Line, LineChart, CartesianGrid, Legend, PieChart, Pie, Cell } from "recharts";
 import { FileText, Filter, SparklesIcon, InfoIcon, ChevronRightIcon, DownloadIcon, BarChart3Icon, BadgeAlertIcon, LineChartIcon, CalendarIcon, LayersIcon, RefreshCw, BrainCircuitIcon, CalendarDaysIcon } from "lucide-react";
 import { calculateReportsDashboardData, analyzeReportTrendsAI, analyzeReportInsightsAI } from "@/app/(app)/dashboard/reports-stat/actions";
+import ExportButton from "@/components/pages/reports-stat/ExportButton";
 
 const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899"];
 const STATUSES = [
@@ -172,13 +173,17 @@ export default function ReportsDashboardPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" disabled className="flex items-center gap-1">
-                    <DownloadIcon className="h-4 w-4" />
-                    Export
-                  </Button>
+                  <ExportButton 
+                    reportType={activeTab}
+                    year={selectedYear === 'all' ? '' : selectedYear}
+                    month={selectedMonth === 'all' ? '' : selectedMonth}
+                    status={selectedStatus}
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Export reports data as CSV (coming soon)</p>
+                  <p>Export reports data as CSV</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -378,152 +383,189 @@ export default function ReportsDashboardPage() {
   );
 }
 
+// AI Insights component 
 function ReportsAIInsights({ selectedYear, selectedMonth, selectedStatus }) {
-  const [activeTab, setActiveTab] = useState("trends");
-  const [isLoadingTrends, setIsLoadingTrends] = useState(true);
-  const [isLoadingInsights, setIsLoadingInsights] = useState(true);
-  const [trendData, setTrendData] = useState({ analysis: "Loading...", prediction: "Loading...", insights: [], recommendations: [] });
-  const [insightsData, setInsightsData] = useState({ byType: [], insights: ["Loading..."], recommendations: ["Loading..."] });
-  const [trendsChartData, setTrendsChartData] = useState([]);
-  const [trendType, setTrendType] = useState('yearly'); // Track if trends are monthly or yearly
+  const [trendsInsights, setTrendsInsights] = useState(null);
+  const [categoriesInsights, setCategoriesInsights] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchAIAnalyses() {
-      setIsLoadingTrends(true);
-      setIsLoadingInsights(true);
-
-      // Fetch base data (includes trends)
-      const baseData = await calculateReportsDashboardData({ year: selectedYear, month: selectedMonth, status: selectedStatus });
-      setTrendsChartData(baseData?.trends || []);
-      setTrendType(baseData?.trendType || 'none'); // Store trend type
-      
-      // Fetch trend analysis
-      const trendsAnalysis = await analyzeReportTrendsAI({ trends: baseData?.trends, type: baseData?.trendType });
-      setTrendData(trendsAnalysis);
-      setIsLoadingTrends(false);
-
-      // Fetch insights analysis (categorization, etc.)
-      const insightsAnalysis = await analyzeReportInsightsAI({ year: selectedYear, month: selectedMonth, status: selectedStatus });
-      setInsightsData(insightsAnalysis);
-      setIsLoadingInsights(false);
+      setIsLoading(true);
+      try {
+        // Get dashboard data first
+        const dashboardData = await calculateReportsDashboardData({
+          year: selectedYear,
+          month: selectedMonth,
+          status: selectedStatus
+        });
+        
+        // Get trends analysis if we have trends data
+        if (dashboardData?.trends?.length > 0) {
+          const trendsAnalysis = await analyzeReportTrendsAI({
+            trends: dashboardData.trends,
+            type: selectedMonth ? 'none' : selectedYear ? 'monthly' : 'yearly'
+          });
+          setTrendsInsights(trendsAnalysis);
+        }
+        
+        // Get report categorization insights
+        const insights = await analyzeReportInsightsAI({
+          year: selectedYear,
+          month: selectedMonth,
+          status: selectedStatus
+        });
+        setCategoriesInsights(insights);
+      } catch (error) {
+        console.error("Error fetching AI insights:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
+    
     fetchAIAnalyses();
-  }, [selectedYear, selectedMonth, selectedStatus]); 
+  }, [selectedYear, selectedMonth, selectedStatus]);
 
-  const isLoading = isLoadingTrends || isLoadingInsights;
-
-  // Helper to format month number/year for chart axis
-  const formatTrendAxis = (value) => {
-    if (trendType === 'monthly') {
-      const monthDate = new Date();
-      monthDate.setMonth(parseInt(value, 10) - 1);
-      return monthDate.toLocaleString('default', { month: 'short' });
-    }
-    return value; // year
-  };
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SparklesIcon className="h-5 w-5 text-purple-500" />
+            AI Insights
+          </CardTitle>
+          <CardDescription>Analyzing your reports data...</CardDescription>
+        </CardHeader>
+        <CardContent className="h-32 flex items-center justify-center">
+          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>AI Insights</CardTitle>
-        <CardDescription>Automated analysis of incident and report data</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-4 grid grid-cols-3 w-full">
-            <TabsTrigger value="trends" className="flex items-center gap-2"><LineChartIcon className="h-4 w-4 text-blue-500" />Trends</TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2"><BrainCircuitIcon className="h-4 w-4 text-amber-500" />Insights & Types</TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2"><SparklesIcon className="h-4 w-4 text-green-500" />Recommendations</TabsTrigger>
-          </TabsList>
-          {/* Trends Tab Content */}
-          <TabsContent value="trends">
-            {isLoadingTrends ? <div className="py-8 text-center">Loading trends analysis...</div> : (
-              <div>
-                <div className="mb-2 font-medium">{trendData.analysis}</div>
-                <div className="mb-2 text-muted-foreground">{trendData.prediction}</div>
-                {trendsChartData.length > 0 && trendType !== 'none' ? (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={trendsChartData} margin={{ left: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      {/* Use formatter for XAxis */}
-                      <XAxis 
-                        dataKey={trendType === 'monthly' ? 'month' : 'year'} 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tickFormatter={formatTrendAxis} 
-                      />
-                      <YAxis width={40} axisLine={false} tickLine={false} />
-                      <RechartsTooltip />
-                      <Line type="monotone" dataKey="count" stroke={COLORS[0]} name="Reports" strokeWidth={2} dot={{ r: 4, fill: COLORS[0] }} activeDot={{ r: 6, fill: COLORS[0] }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : <div className="text-muted-foreground">{trendType === 'none' ? 'Select a year to view monthly trends or remove month filter for yearly trends.' : 'No trend data available for chart.'}</div>}
-                 <h4 className="mt-4 mb-2 font-semibold">Trend-Based Insights:</h4>
-                 <ul className="list-disc pl-6 space-y-1">
-                  {Array.isArray(trendData.insights) && trendData.insights.map((insight, i) => (
-                    <li key={`trend-insight-${i}`} className="flex items-center gap-2">
-                      <LineChartIcon className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                      <span>{insight}</span>
-                    </li>
-                  ))}
-                 </ul>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BrainCircuitIcon className="h-5 w-5 text-amber-500" />
+            AI Report Categories
+          </CardTitle>
+          <CardDescription>
+            AI-generated categories based on report content analysis
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {categoriesInsights?.byType?.length > 0 ? (
+            <div className="px-6 pt-2 pb-4">
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoriesInsights.byType.slice(0, 6)} // Show top 6 categories
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                      nameKey="type"
+                      label={({ type, percent }) => `${type} (${(percent * 100).toFixed(0)}%)`}
+                    >
+                      {categoriesInsights.byType.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip formatter={(value, name, props) => [`${value} reports`, props.payload.type]} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            )}
-          </TabsContent>
-          {/* Insights Tab Content */}
-          <TabsContent value="insights">
-            {isLoadingInsights ? <div className="py-8 text-center">Loading insights and categorization...</div> : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div className="mt-4 space-y-4">
                 <div>
-                  <h4 className="mb-2 font-semibold">AI Report Categorization:</h4>
-                  {insightsData.byType && insightsData.byType.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={220}>
-                     <BarChart data={insightsData.byType} layout="vertical" margin={{ right: 30 }}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                        <XAxis type="number" axisLine={false} tickLine={false} />
-                        <YAxis dataKey="type" type="category" width={80} axisLine={false} tickLine={false}/>
-                        <RechartsTooltip />
-                        <Bar dataKey="count" name="Count" radius={[0, 4, 4, 0]} >
-                           {insightsData.byType.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : <div className="text-muted-foreground">No category data available.</div>}
-                </div>
-                 <div>
-                   <h4 className="mb-2 font-semibold">Content-Based Insights:</h4>
-                   <ul className="list-disc pl-6 space-y-1">
-                    {Array.isArray(insightsData.insights) && insightsData.insights.map((insight, i) => (
-                      <li key={`content-insight-${i}`} className="flex items-center gap-2">
-                        <BrainCircuitIcon className="h-4 w-4 text-amber-400 flex-shrink-0" />
-                        <span>{insight}</span>
-                      </li>
+                  <h4 className="font-medium mb-2">Key Insights:</h4>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    {categoriesInsights.insights.map((insight, i) => (
+                      <li key={i}>{insight}</li>
                     ))}
-                   </ul>
-                 </div>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium mb-2">Recommendations:</h4>
+                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                    {categoriesInsights.recommendations.map((rec, i) => (
+                      <li key={i}>{rec}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            )}
-          </TabsContent>
-           {/* Recommendations Tab Content */}
-          <TabsContent value="recommendations">
-            {isLoadingInsights ? <div className="py-8 text-center">Loading recommendations...</div> : (
+            </div>
+          ) : (
+            <div className="p-6 text-center text-muted-foreground">
+              No category insights available for the selected filters.
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <LineChartIcon className="h-5 w-5 text-blue-500" />
+            Trend Analysis
+          </CardTitle>
+          <CardDescription>
+            AI-powered analysis of report submission trends
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {trendsInsights ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-sm text-muted-foreground">Trend</span>
+                  <div className="text-2xl font-bold">{trendsInsights.trend}</div>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Change</span>
+                  <div className="text-2xl font-bold">{trendsInsights.percentageChange}</div>
+                </div>
+              </div>
+              
+              <Separator />
+              
               <div>
-                <h4 className="mb-2 font-semibold">AI Recommendations:</h4>
-                <ul className="list-disc pl-6 space-y-1">
-                  {Array.isArray(insightsData.recommendations) && insightsData.recommendations.map((rec, i) => (
-                    <li key={`rec-${i}`} className="flex items-center gap-2">
-                      <SparklesIcon className="h-4 w-4 text-green-500 flex-shrink-0" />
-                      <span>{rec}</span>
-                    </li>
+                <h4 className="font-medium mb-2">Analysis:</h4>
+                <p className="text-sm">{trendsInsights.analysis}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-2">Prediction:</h4>
+                <p className="text-sm">{trendsInsights.prediction}</p>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h4 className="font-medium mb-2">Key Insights:</h4>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  {trendsInsights.insights.map((insight, i) => (
+                    <li key={i}>{insight}</li>
                   ))}
                 </ul>
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center text-muted-foreground">
+              {selectedMonth ? 
+                "Select a year without month to view trend analysis" : 
+                "No trend insights available for the selected filters."
+              }
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 } 

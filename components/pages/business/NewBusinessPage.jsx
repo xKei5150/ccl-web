@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { useToast } from "@/components/ui/use-toast";
-import { BadgePlus } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Building2, ArrowLeft } from "lucide-react";
 import BusinessForm from "@/components/form/BusinessForm";
 import { createBusiness } from "@/app/(app)/dashboard/business/actions";
 
@@ -11,44 +12,47 @@ export default function NewBusinessPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const onSubmit = async (data) => {
+  async function onSubmit(data) {
     try {
-      console.log("New business permit data:", data);
-      const response = await createBusiness(data);
-      if (!response.success) {
-        throw new Error(response.message);
-      }
+      await createBusiness(data);
       toast({
         title: "Success",
-        description: "Business permit request submitted successfully",
+        description: "Business record created successfully",
         variant: "success",
       });
       router.push("/dashboard/business");
     } catch (error) {
+      console.error("Failed to create business record:", error);
       toast({
         title: "Error",
-        description: `Failed to submit business permit request: ${error.message}`,
+        description: "Failed to create business record",
         variant: "destructive",
       });
     }
-  };
-
-  const cancelRoute = () => router.push("/dashboard/business");
+  }
 
   return (
-    <>
-      <div className="max-w-screen mx-auto p-4">
-        <PageHeader
-          title="Create Business Record"
-          subtitle="Fill in the form below to create a new business record"
-          icon={<BadgePlus className="h-8 w-8" />}
-        />
-        <BusinessForm
-          onSubmit={onSubmit}
-          submitText="Submit Record"
-          cancelRoute={cancelRoute}
-        />
-      </div>
-    </>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
+      <PageHeader
+        title="New Business Record"
+        subtitle="Register a new business"
+        icon={<Building2 className="h-8 w-8" />}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => router.push('/dashboard/business')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to List
+        </Button>
+      </PageHeader>
+      <BusinessForm
+        onSubmit={onSubmit}
+        submitText="Create Business"
+        cancelRoute={() => router.push("/dashboard/business")}
+      />
+    </div>
   );
 }

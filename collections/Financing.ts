@@ -378,7 +378,7 @@ const Financing: CollectionConfig = {
       async ({ req, data, operation, originalDoc }) => {
         console.log('Financing beforeChange hook triggered:', { operation });
         
-        if (!req.user) {
+        if (!req?.user) {
           console.log('No user in request, skipping audit');
           return data;
         }
@@ -391,7 +391,9 @@ const Financing: CollectionConfig = {
         
         try {
           // Check for approval state changes
-          if (originalDoc && data.approvalState !== originalDoc.approvalState) {
+          if (originalDoc && originalDoc.approvalState !== undefined && 
+              data.approvalState !== undefined && 
+              data.approvalState !== originalDoc.approvalState) {
             console.log('Approval state changed, creating audit entry', {
               from: originalDoc.approvalState,
               to: data.approvalState
@@ -400,13 +402,13 @@ const Financing: CollectionConfig = {
             await createAuditEntry(req.payload, {
               action: 'state_change',
               recordId: originalDoc.id,
-              financingTitle: originalDoc.title,
+              financingTitle: originalDoc.title || 'Untitled',
               userId: req.user.id,
-              previousState: originalDoc.approvalState,
-              newState: data.approvalState,
-              notes: `Status changed from ${originalDoc.approvalState || 'draft'} to ${data.approvalState}`
+              previousState: originalDoc.approvalState || 'draft',
+              newState: data.approvalState || 'draft',
+              notes: `Status changed from ${originalDoc.approvalState || 'draft'} to ${data.approvalState || 'draft'}`
             });
-          } else {
+          } else if (originalDoc) {
             // Process generic update
             // Compute changes by comparing fields
             const changes = computeChanges(originalDoc, data);
@@ -421,7 +423,7 @@ const Financing: CollectionConfig = {
               await createAuditEntry(req.payload, {
                 action: 'update',
                 recordId: originalDoc.id,
-                financingTitle: originalDoc.title,
+                financingTitle: originalDoc.title || 'Untitled',
                 userId: req.user.id,
                 changes
               });
@@ -439,17 +441,17 @@ const Financing: CollectionConfig = {
     ],
     afterChange: [
       async ({ req, doc, operation }) => {
-        console.log('Financing afterChange hook triggered:', { operation, recordId: doc.id });
+        console.log('Financing afterChange hook triggered:', { operation, recordId: doc?.id });
         
         // For new records, create the initial audit entry
-        if (operation === 'create' && req.user) {
+        if (operation === 'create' && req?.user) {
           try {
             console.log('Creating audit entry for new record', { recordId: doc.id });
             
             await createAuditEntry(req.payload, {
               action: 'create',
               recordId: doc.id,
-              financingTitle: doc.title,
+              financingTitle: doc.title || 'Untitled',
               userId: req.user.id,
               notes: 'Financing record created'
             });
@@ -465,28 +467,35 @@ const Financing: CollectionConfig = {
       async ({ req, id }) => {
         console.log('Financing beforeDelete hook triggered:', { id });
         
-        if (!req.user) {
+        if (!req?.user) {
           console.log('No user in request, skipping audit');
           return;
         }
         
         try {
           // Get the record before deletion to preserve its title
-          const record = await req.payload.findByID({
-            collection: 'financing',
-            id
-          });
+          let record;
+          try {
+            record = await req.payload.findByID({
+              collection: 'financing',
+              id
+            });
+          } catch (err) {
+            console.error('Error fetching record for deletion audit:', err);
+          }
+          
+          const title = record?.title || 'Untitled';
           
           console.log('Creating audit entry for record deletion', { 
             recordId: id, 
-            title: record.title 
+            title 
           });
           
           // Log the deletion
           await createAuditEntry(req.payload, {
             action: 'delete',
             recordId: id,
-            financingTitle: record.title,
+            financingTitle: title,
             userId: req.user.id,
             notes: 'Financing record deleted'
           });
@@ -501,7 +510,11 @@ const Financing: CollectionConfig = {
 
 // Helper function to compute what fields changed between versions
 function computeChanges(oldDoc, newDoc) {
-  const changes: { [key: string]: any } = {}; // Initialize with type
+  const changes: { [key: string]: any } = {}; 
+  
+  if (!oldDoc || !newDoc) {
+    return changes;
+  }
   
   // Check top-level fields
   const fieldsToCheck = [
@@ -510,7 +523,7 @@ function computeChanges(oldDoc, newDoc) {
   ];
   
   fieldsToCheck.forEach(field => {
-    if (oldDoc[field] !== newDoc[field]) {
+    if (oldDoc[field] !== undefined && newDoc[field] !== undefined && oldDoc[field] !== newDoc[field]) {
       changes[field] = {
         old: oldDoc[field],
         new: newDoc[field]

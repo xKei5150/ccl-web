@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { ClipboardList, Plus, Trash2, Calendar, MapPin, MessageCircle, Tag, AlignLeft, Users, FileText, X, Save } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import DynamicSupportingDocument from "@/components/fields/DynamicSupportingDocument";
 
 const reportSchema = z.object({
@@ -80,6 +81,13 @@ export default function ReportForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              <CardTitle>Report Information</CardTitle>
+            </div>
+            <Separator />
+          </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
@@ -87,7 +95,10 @@ export default function ReportForm({
                 name="title"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <AlignLeft className="h-4 w-4 text-muted-foreground" />
+                      Title
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter report title" />
                     </FormControl>
@@ -101,7 +112,10 @@ export default function ReportForm({
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      Date
+                    </FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -115,7 +129,10 @@ export default function ReportForm({
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      Location
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Enter location" />
                     </FormControl>
@@ -129,7 +146,10 @@ export default function ReportForm({
                 name="reportStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                      Status
+                    </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -152,7 +172,10 @@ export default function ReportForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                      Description
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -169,10 +192,16 @@ export default function ReportForm({
         </Card>
 
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <CardTitle>Involved Party</CardTitle>
+            </div>
+            <Separator />
+          </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Involved Party</h3>
+              <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="outline"
@@ -183,8 +212,9 @@ export default function ReportForm({
                     statement: "",
                     personalInfo: ""
                   })}
+                  className="flex items-center gap-2"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4" />
                   Add Person
                 </Button>
               </div>
@@ -198,7 +228,10 @@ export default function ReportForm({
                         name={`involvedPersons.${index}.name`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              Name
+                            </FormLabel>
                             <FormControl>
                               <Input {...field} placeholder="Enter person's name" />
                             </FormControl>
@@ -212,7 +245,10 @@ export default function ReportForm({
                         name={`involvedPersons.${index}.role`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Role</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-muted-foreground" />
+                              Role
+                            </FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
@@ -236,7 +272,10 @@ export default function ReportForm({
                         name={`involvedPersons.${index}.statement`}
                         render={({ field }) => (
                           <FormItem className="col-span-2">
-                            <FormLabel>Statement</FormLabel>
+                            <FormLabel className="flex items-center gap-2">
+                              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                              Statement
+                            </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
@@ -254,10 +293,10 @@ export default function ReportForm({
                       type="button"
                       variant="destructive"
                       size="sm"
-                      className="mt-4"
+                      className="mt-4 flex items-center gap-2"
                       onClick={() => removePerson(index)}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4" />
                       Remove Person
                     </Button>
                   </CardContent>
@@ -268,8 +307,14 @@ export default function ReportForm({
         </Card>
 
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle>Supporting Documents</CardTitle>
+            </div>
+            <Separator />
+          </CardHeader>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Supporting Documents</h3>
             <DynamicSupportingDocument control={form.control} />
           </CardContent>
         </Card>
@@ -279,14 +324,27 @@ export default function ReportForm({
             type="button"
             variant="outline"
             onClick={cancelRoute}
+            className="flex items-center gap-2"
           >
+            <X className="h-4 w-4" />
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
+            className="flex items-center gap-2"
           >
-            {isSubmitting ? "Submitting..." : submitText}
+            {isSubmitting ? (
+              <>
+                <span>Submitting...</span>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                {submitText}
+              </>
+            )}
           </Button>
         </div>
       </form>

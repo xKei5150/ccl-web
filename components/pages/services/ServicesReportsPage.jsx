@@ -15,6 +15,7 @@ import { FileDown, RefreshCw, Filter, SparklesIcon, InfoIcon, ChevronRightIcon, 
 import { toast } from "@/components/ui/use-toast";
 import ServicesAIInsights from "./ServicesAIInsights";
 import { calculateServiceReportData, exportServiceReportData } from "@/app/(app)/dashboard/services/actions";
+import ExportButton from "./ExportButton";
 
 // Updated modern color palette
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
@@ -240,10 +241,13 @@ export default function ServicesReportsPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={handleExport} disabled={!reportData} className="flex items-center gap-1">
-                    <DownloadIcon className="h-4 w-4" />
-                    Export
-                  </Button>
+                  <ExportButton 
+                    reportType={activeTab}
+                    year={selectedYear === "all" ? "" : selectedYear}
+                    serviceType={serviceType === "all_types" ? "" : serviceType}
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Export service data as CSV</p>

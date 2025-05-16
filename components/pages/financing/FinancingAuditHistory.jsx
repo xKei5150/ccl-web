@@ -39,13 +39,14 @@ export default function FinancingAuditHistory({ recordId }) {
     async function fetchAuditHistory() {
       if (!recordId) {
         console.log('No recordId provided, skipping audit history fetch');
+        setIsLoading(false);
         return;
       }
       
       try {
         console.log('Fetching audit history for recordId:', recordId);
         const history = await getFinancingAuditHistory(recordId);
-        console.log('Audit history fetched:', history.length, 'entries');
+        console.log('Audit history fetched:', history?.length || 0, 'entries');
         setAuditHistory(history || []);
       } catch (error) {
         console.error("Error fetching audit history:", error);
@@ -98,6 +99,8 @@ export default function FinancingAuditHistory({ recordId }) {
   }
 
   function formatChanges(entry) {
+    if (!entry) return null;
+    
     if (entry.action === 'state_change') {
       return formatStateChange(entry);
     }
@@ -119,6 +122,7 @@ export default function FinancingAuditHistory({ recordId }) {
       <div className="space-y-1">
         {Object.keys(entry.changes).map(field => {
           const change = entry.changes[field];
+          if (!change) return null;
           
           // Handle complex fields like groups
           if (field === 'groups' && change.changed) {
@@ -138,9 +142,12 @@ export default function FinancingAuditHistory({ recordId }) {
           }
           
           // Handle simple field changes
+          const oldValue = change.old !== undefined ? change.old : 'empty';
+          const newValue = change.new !== undefined ? change.new : 'empty';
+          
           return (
             <div key={field} className="text-sm">
-              <span className="font-medium">{field}:</span> Changed from &ldquo;{change.old || 'empty'}&rdquo; to &ldquo;{change.new || 'empty'}&rdquo;
+              <span className="font-medium">{field}:</span> Changed from &ldquo;{oldValue}&rdquo; to &ldquo;{newValue}&rdquo;
             </div>
           );
         })}
@@ -193,21 +200,21 @@ export default function FinancingAuditHistory({ recordId }) {
               {auditHistory.map((entry, index) => (
                 <TableRow key={index}>
                   <TableCell className="align-top whitespace-nowrap">
-                    {formatTimestamp(entry.timestamp)}
+                    {formatTimestamp(entry?.timestamp)}
                   </TableCell>
                   <TableCell className="align-top">
-                    {entry.user?.email || 'System'}
+                    {entry?.user?.email || entry?.user || 'System'}
                   </TableCell>
                   <TableCell className="align-top whitespace-nowrap">
-                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ActionColors[entry.action] || ""}`}>
-                      {ActionIcons[entry.action] || <BadgeAlert className="h-4 w-4 mr-2" />}
-                      {formatActionType(entry.action)}
+                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ActionColors[entry?.action] || ""}`}>
+                      {ActionIcons[entry?.action] || <BadgeAlert className="h-4 w-4 mr-2" />}
+                      {formatActionType(entry?.action)}
                     </div>
                   </TableCell>
                   <TableCell className="align-top">
                     {formatChanges(entry)}
                     
-                    {entry.notes && (
+                    {entry?.notes && (
                       <>
                         <Separator className="my-2" />
                         <div className="text-sm text-muted-foreground italic">

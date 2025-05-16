@@ -1,12 +1,13 @@
 'use client'
 
-import { ProjectForm } from './ProjectForm'
-import { getProjectById, updateProject } from '@/app/(app)/dashboard/projects/actions'
-import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
+import { useEffect, useState } from 'react'
+import { ProjectForm } from './ProjectForm'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { FilePenLine } from 'lucide-react'
+import { getProjectById, updateProject } from '@/app/(app)/dashboard/projects/actions'
+import { PenSquare, ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export function EditProjectPage({ id }) {
   const router = useRouter()
@@ -17,10 +18,13 @@ export function EditProjectPage({ id }) {
   useEffect(() => {
     async function fetchProject() {
       try {
+        setLoading(true)
         const response = await getProjectById(id)
+        
         if (!response.success) {
           throw new Error(response.message)
         }
+        
         setProject(response.data)
       } catch (error) {
         toast({
@@ -36,18 +40,21 @@ export function EditProjectPage({ id }) {
     fetchProject()
   }, [id, toast])
 
-  const onSubmit = async (data) => {
+  const handleSubmit = async (data) => {
     try {
       const response = await updateProject({ id, data })
+      
       if (!response.success) {
         throw new Error(response.message)
       }
+      
       toast({
         title: 'Success',
         description: 'Project updated successfully',
         variant: 'success',
       })
-      router.push('/dashboard/projects')
+      
+      router.push(`/dashboard/projects/${id}`)
     } catch (error) {
       toast({
         title: 'Error',
@@ -58,7 +65,7 @@ export function EditProjectPage({ id }) {
   }
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Loading project data...</div>
   }
 
   if (!project) {
@@ -66,18 +73,31 @@ export function EditProjectPage({ id }) {
   }
 
   return (
-    <div className="container py-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
       <PageHeader
         title="Edit Project"
-        subtitle="Update the form below to edit the project"
-        icon={<FilePenLine className="h-8 w-8" />}
-      />
-      <ProjectForm
-        initialData={project}
-        onSubmit={onSubmit}
-        submitText="Update Project"
-        cancelRoute={() => router.push('/dashboard/projects')}
-      />
+        subtitle="Update project information"
+        icon={<PenSquare className="h-8 w-8" />}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => router.push(`/dashboard/projects/${id}`)}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Project
+        </Button>
+      </PageHeader>
+      
+      <div className="max-w-6xl mx-auto">
+        <ProjectForm
+          initialData={project}
+          onSubmit={handleSubmit}
+          submitText="Update Project"
+          cancelRoute={() => router.push(`/dashboard/projects/${id}`)}
+        />
+      </div>
     </div>
   )
 } 

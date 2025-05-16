@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ClipboardList, PenSquare } from "lucide-react";
+import { ClipboardList, PenSquare, ArrowLeft, Calendar, MapPin, Tag, User, FileText, MessageCircle, Users } from "lucide-react";
 import { InfoItem } from "@/components/ui/info-item";
 import { cn } from "@/lib/utils";
 import DocumentPreview from "@/components/layout/DocumentPreview";
+import { Separator } from "@/components/ui/separator";
 
 function ViewReportPage({ data }) {
   const router = useRouter();
@@ -33,33 +34,64 @@ function ViewReportPage({ data }) {
         subtitle="Report Details"
         icon={<ClipboardList className="h-8 w-8" />}
       >
-        <Button
-          onClick={() => router.push(`/dashboard/reports/${data.id}/edit`)}
-          className="flex items-center gap-2"
-        >
-          <PenSquare className="h-4 w-4" />
-          Edit Report
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => router.push('/dashboard/reports')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to List
+          </Button>
+          
+          <Button
+            onClick={() => router.push(`/dashboard/reports/${data.id}/edit`)}
+            className="flex items-center gap-2"
+          >
+            <PenSquare className="h-4 w-4" />
+            Edit Report
+          </Button>
+        </div>
       </PageHeader>
 
       <main className="max-w-6xl mx-auto space-y-6">
         {/* Report Overview */}
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Report Overview</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
+              <CardTitle>Report Overview</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <InfoItem
-                label="Date"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Date</span>
+                  </div>
+                }
                 value={new Date(data.date).toLocaleDateString()}
               />
               <InfoItem
-                label="Location"
+                label={
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>Location</span>
+                  </div>
+                }
                 value={data.location}
               />
               <InfoItem
-                label="Status"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <span>Status</span>
+                  </div>
+                }
                 value={
                   <span
                     className={cn(
@@ -74,7 +106,10 @@ function ViewReportPage({ data }) {
             </div>
 
             <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
+              <h4 className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-2">
+                <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                Description
+              </h4>
               <p className="text-gray-900 whitespace-pre-wrap">{data.description}</p>
             </div>
           </CardContent>
@@ -83,8 +118,12 @@ function ViewReportPage({ data }) {
         {/* Involved Persons */}
         {data.involvedPersons?.length > 0 && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Involved Party</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle>Involved Party</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4">
@@ -93,23 +132,41 @@ function ViewReportPage({ data }) {
                     <CardContent className="p-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <InfoItem
-                          label="Name"
+                          label={
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span>Name</span>
+                            </div>
+                          }
                           value={person.name}
                         />
                         <InfoItem
-                          label="Role"
+                          label={
+                            <div className="flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-muted-foreground" />
+                              <span>Role</span>
+                            </div>
+                          }
                           value={<span className="capitalize">{person.role}</span>}
                         />
                         {person.personalInfo && (
                           <InfoItem
-                            label="Personal Information"
+                            label={
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span>Personal Information</span>
+                              </div>
+                            }
                             value={person.personalInfo}
                           />
                         )}
                       </div>
                       {person.statement && (
                         <div className="mt-4">
-                          <h4 className="text-sm font-medium text-gray-500 mb-1">Statement</h4>
+                          <h4 className="flex items-center gap-2 text-sm font-medium text-gray-500 mb-1">
+                            <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                            Statement
+                          </h4>
                           <p className="text-gray-900 whitespace-pre-wrap">{person.statement}</p>
                         </div>
                       )}
@@ -124,8 +181,12 @@ function ViewReportPage({ data }) {
         {/* Supporting Documents */}
         {data.supportingDocuments?.length > 0 && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Supporting Documents</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <CardTitle>Supporting Documents</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

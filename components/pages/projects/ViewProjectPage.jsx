@@ -10,8 +10,26 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { InfoItem } from '@/components/ui/info-item'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
-import { ClipboardList, Users } from 'lucide-react'
+import { 
+  ClipboardList, 
+  Users, 
+  ArrowLeft, 
+  Trash2, 
+  PenSquare, 
+  Calendar, 
+  Tag, 
+  MapPin, 
+  FileText, 
+  User, 
+  Briefcase, 
+  Building, 
+  Percent, 
+  Target, 
+  BarChart, 
+  BanknoteIcon 
+} from 'lucide-react'
 import Link from 'next/link'
+import { Separator } from '@/components/ui/separator'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -110,48 +128,86 @@ export function ViewProjectPage({ id }) {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
       <PageHeader
-        title="View Project"
-        subtitle="View details of a project"
+        title={project.title}
+        subtitle="Project Details"
         icon={<ClipboardList className="h-8 w-8" />}
-      />
-      <div className="grid gap-6">
+      >
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            onClick={() => router.push('/dashboard/projects')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to List
+          </Button>
+
+          <Button
+            onClick={() => router.push(`/dashboard/projects/${id}/edit`)}
+            className="flex items-center gap-2"
+          >
+            <PenSquare className="h-4 w-4" />
+            Edit Project
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive"
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this project? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </PageHeader>
+
+      <main className="max-w-6xl mx-auto space-y-6">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <div className="flex justify-between items-center">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-primary" />
               <CardTitle>Project Information</CardTitle>
-              <div className="flex gap-2">
-                <Button asChild>
-                  <Link href={`/dashboard/projects/${id}/edit`}>Edit</Link>
-                </Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive">Delete</Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Project</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this project? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
             </div>
+            <Separator />
           </CardHeader>
           <CardContent className="grid gap-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InfoItem label="Title" value={project.title} />
+              <InfoItem 
+                label={
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span>Title</span>
+                  </div>
+                } 
+                value={project.title} 
+              />
               <InfoItem
-                label="Status"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <span>Status</span>
+                  </div>
+                }
                 value={project.status?.replace('_', ' ')}
                 valueClassName={cn(
                   'inline-flex px-2 py-1 rounded-full text-xs font-medium capitalize',
@@ -159,21 +215,49 @@ export function ViewProjectPage({ id }) {
                 )}
               />
               <InfoItem
-                label="Type"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <span>Type</span>
+                  </div>
+                }
                 value={project.projectType?.replace('_', ' ')}
                 valueClassName="capitalize"
               />
               <InfoItem
-                label="Start Date"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Start Date</span>
+                  </div>
+                }
                 value={project.startDate ? format(new Date(project.startDate), 'PPP') : 'Not specified'}
               />
               <InfoItem
-                label="End Date"
+                label={
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>End Date</span>
+                  </div>
+                }
                 value={project.endDate ? format(new Date(project.endDate), 'PPP') : 'Not specified'}
               />
-              <InfoItem label="Location" value={project.location || 'Not specified'} />
+              <InfoItem 
+                label={
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>Location</span>
+                  </div>
+                } 
+                value={project.location || 'Not specified'} 
+              />
               <InfoItem
-                label="Description"
+                label={
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span>Description</span>
+                  </div>
+                }
                 value={project.description || 'No description provided'}
                 className="col-span-2"
               />
@@ -182,15 +266,30 @@ export function ViewProjectPage({ id }) {
         </Card>
 
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Team Information</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <CardTitle>Team Information</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent className="grid gap-6">
-            <InfoItem label="Project Lead" value={project.projectLead || 'Not specified'} />
+            <InfoItem 
+              label={
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span>Project Lead</span>
+                </div>
+              } 
+              value={project.projectLead || 'Not specified'} 
+            />
             
             {project.teamMembers && project.teamMembers.length > 0 ? (
               <div className="grid gap-4">
-                <h3 className="text-sm font-medium">Team Members</h3>
+                <h3 className="flex items-center gap-2 text-sm font-medium">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span>Team Members</span>
+                </h3>
                 <div className="grid gap-4">
                   {project.teamMembers.map((member, index) => (
                     <div
@@ -198,8 +297,24 @@ export function ViewProjectPage({ id }) {
                       className="flex items-center gap-4 p-4 rounded-lg border bg-muted/50"
                     >
                       <div className="flex-1 grid grid-cols-2 gap-4">
-                        <InfoItem label="Name" value={member.name} />
-                        <InfoItem label="Role" value={member.role} />
+                        <InfoItem 
+                          label={
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span>Name</span>
+                            </div>
+                          } 
+                          value={member.name} 
+                        />
+                        <InfoItem 
+                          label={
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="h-4 w-4 text-muted-foreground" />
+                              <span>Role</span>
+                            </div>
+                          } 
+                          value={member.role} 
+                        />
                       </div>
                     </div>
                   ))}
@@ -215,12 +330,21 @@ export function ViewProjectPage({ id }) {
         </Card>
 
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Related Financing</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <BanknoteIcon className="h-5 w-5 text-primary" />
+              <CardTitle>Related Financing</CardTitle>
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent>
             <InfoItem
-              label="Budget/Financing"
+              label={
+                <div className="flex items-center gap-2">
+                  <BanknoteIcon className="h-4 w-4 text-muted-foreground" />
+                  <span>Budget/Financing</span>
+                </div>
+              }
               value={financing ? financing.label : 'Not specified'}
             />
           </CardContent>
@@ -228,21 +352,40 @@ export function ViewProjectPage({ id }) {
 
         {project.projectType === 'event' && project.eventDetails && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Event Details</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                <CardTitle>Event Details</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent className="grid gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoItem
-                  label="Expected Attendees"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>Expected Attendees</span>
+                    </div>
+                  }
                   value={project.eventDetails.expectedAttendees || 'Not specified'}
                 />
                 <InfoItem
-                  label="Actual Attendees"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>Actual Attendees</span>
+                    </div>
+                  }
                   value={project.eventDetails.actualAttendees || 'Not specified'}
                 />
                 <InfoItem
-                  label="Attendee Notes"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span>Attendee Notes</span>
+                    </div>
+                  }
                   value={project.eventDetails.attendeeNotes || 'No notes provided'}
                   className="col-span-2"
                 />
@@ -253,17 +396,31 @@ export function ViewProjectPage({ id }) {
 
         {project.projectType === 'infrastructure' && project.infrastructureDetails && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Infrastructure Details</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Building className="h-5 w-5 text-primary" />
+                <CardTitle>Infrastructure Details</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent className="grid gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InfoItem
-                  label="Contractor"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <Building className="h-4 w-4 text-muted-foreground" />
+                      <span>Contractor</span>
+                    </div>
+                  }
                   value={project.infrastructureDetails.contractor || 'Not specified'}
                 />
                 <InfoItem
-                  label="Completion Percentage"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <Percent className="h-4 w-4 text-muted-foreground" />
+                      <span>Completion Percentage</span>
+                    </div>
+                  }
                   value={`${project.infrastructureDetails.completionPercentage || 0}%`}
                 />
               </div>
@@ -273,24 +430,38 @@ export function ViewProjectPage({ id }) {
 
         {project.projectType === 'program' && project.programDetails && (
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Program Details</CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                <CardTitle>Program Details</CardTitle>
+              </div>
+              <Separator />
             </CardHeader>
             <CardContent className="grid gap-6">
               <div className="grid gap-4">
                 <InfoItem
-                  label="Target Beneficiaries"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span>Target Beneficiaries</span>
+                    </div>
+                  }
                   value={project.programDetails.targetBeneficiaries || 'Not specified'}
                 />
                 <InfoItem
-                  label="Key Performance Indicators"
+                  label={
+                    <div className="flex items-center gap-2">
+                      <BarChart className="h-4 w-4 text-muted-foreground" />
+                      <span>Key Performance Indicators</span>
+                    </div>
+                  }
                   value={project.programDetails.keyPerformanceIndicators || 'Not specified'}
                 />
               </div>
             </CardContent>
           </Card>
         )}
-      </div>
-    </>
+      </main>
+    </div>
   )
 } 

@@ -16,6 +16,7 @@ import { Bar, BarChart, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveCont
 import { FileDown, RefreshCw, Filter, SparklesIcon, InfoIcon, ChevronRightIcon, HelpCircleIcon, DownloadIcon, WalletIcon, BarChart3Icon, LineChartIcon, BadgeCheckIcon, CalendarIcon, LayersIcon, CoinsIcon, TrendingUpIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import FinanceAIInsights from "./FinanceAIInsights";
+import ExportButton from "@/components/pages/finance/ExportButton";
 
 // Updated modern color palette
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
@@ -186,10 +187,11 @@ export default function FinancingReportsPage() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={handleExport} disabled={!reportData} className="flex items-center gap-1">
-                    <DownloadIcon className="h-4 w-4" />
-                    Export
-                  </Button>
+                  <ExportButton 
+                    analysisType={activeTab}
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Export financial data as CSV</p>

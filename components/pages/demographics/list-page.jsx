@@ -1,6 +1,6 @@
 "use client";
 
-import { UsersRound } from "lucide-react";
+import { UsersRound, Calendar, Users, Mars, Venus, HomeIcon, VoteIcon, Accessibility, PieChart, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { deleteDemographic } from "@/app/(app)/dashboard/demographics/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
@@ -10,42 +10,88 @@ const DemographicsListPage = ({ data }) => {
     {
       accessorKey: "year",
       header: "Year",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span>{row.year}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "totalPopulation",
       header: "Total Population",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <span>{row.totalPopulation}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "maleCount",
       header: "Male",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <Mars className="h-4 w-4 text-muted-foreground" />
+          <span>{row.maleCount}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "femaleCount",
       header: "Female",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <Venus className="h-4 w-4 text-muted-foreground" />
+          <span>{row.femaleCount}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "householdsCount",
       header: "Households",
-      cell: (row) => row.householdsCount || "N/A",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <HomeIcon className="h-4 w-4 text-muted-foreground" />
+          <span>{row.householdsCount || "N/A"}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "voterCount",
       header: "Voters",
-      cell: (row) => row.voterCount || "N/A",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <VoteIcon className="h-4 w-4 text-muted-foreground" />
+          <span>{row.voterCount || "N/A"}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "pwdCount",
       header: "PWD Count",
-      cell: (row) => row.pwdCount || "N/A",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5">
+          <Accessibility className="h-4 w-4 text-muted-foreground" />
+          <span>{row.pwdCount || "N/A"}</span>
+        </div>
+      ),
     },
     {
       accessorKey: "ageGroups",
       header: "Age Groups",
       cell: (row) => {
         const groups = row.ageGroups || [];
-        return groups.length > 0 
-          ? `${groups.length} ${groups.length === 1 ? 'group' : 'groups'}`
-          : 'None';
+        return (
+          <div className="flex items-center gap-1.5">
+            <PieChart className="h-4 w-4 text-muted-foreground" />
+            <span>
+              {groups.length > 0 
+                ? `${groups.length} ${groups.length === 1 ? 'group' : 'groups'}`
+                : 'None'}
+            </span>
+          </div>
+        );
       },
     },
     {
@@ -53,9 +99,16 @@ const DemographicsListPage = ({ data }) => {
       header: "Diseases",
       cell: (row) => {
         const diseases = row.chronicDiseases || [];
-        return diseases.length > 0 
-          ? `${diseases.length} ${diseases.length === 1 ? 'disease' : 'diseases'}`
-          : 'None';
+        return (
+          <div className="flex items-center gap-1.5">
+            <Activity className="h-4 w-4 text-muted-foreground" />
+            <span>
+              {diseases.length > 0 
+                ? `${diseases.length} ${diseases.length === 1 ? 'disease' : 'diseases'}`
+                : 'None'}
+            </span>
+          </div>
+        );
       },
     },
   ];

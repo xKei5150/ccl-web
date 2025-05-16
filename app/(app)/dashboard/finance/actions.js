@@ -512,4 +512,136 @@ function mapRecordToCategory(record) {
     default:
       return "Maintenance & Operations";
   }
+}
+
+/**
+ * Export finance data to CSV
+ * @param {Object} params - Parameters for the export
+ * @returns {Object} Success status and CSV data
+ */
+export async function exportFinanceData(params = {}) {
+  'use server';
+  
+  try {
+    const { analysisType = "trends" } = params;
+    let csvContent = "";
+    let filename = `finance-${analysisType}-report.csv`;
+    
+    // Get data based on analysis type
+    if (analysisType === "trends") {
+      const trendsData = await analyzeFinancialTrends();
+      
+      // Create CSV content for trends
+      csvContent = "FINANCIAL TRENDS ANALYSIS\n\n";
+      csvContent += `Trend,${trendsData.trend || "stable"}\n`;
+      csvContent += `Percentage Change,${trendsData.percentageChange || "0%"}\n\n`;
+      
+      csvContent += "DETAILED ANALYSIS\n";
+      csvContent += `${escapeCsvValue(trendsData.analysis || "No analysis available.")}\n\n`;
+      
+      csvContent += "FISCAL IMPACT\n";
+      csvContent += `${escapeCsvValue(trendsData.fiscalImpact || "No fiscal impact assessment available.")}\n\n`;
+      
+      csvContent += "KEY INSIGHTS\n";
+      if (trendsData.insights && trendsData.insights.length > 0) {
+        trendsData.insights.forEach((insight, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(insight)}\n`;
+        });
+      } else {
+        csvContent += "No insights available.\n";
+      }
+      csvContent += "\n";
+      
+      csvContent += "RECOMMENDATIONS\n";
+      if (trendsData.recommendations && trendsData.recommendations.length > 0) {
+        trendsData.recommendations.forEach((recommendation, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(recommendation)}\n`;
+        });
+      } else {
+        csvContent += "No recommendations available.\n";
+      }
+    } else if (analysisType === "forecast") {
+      const forecastData = await generateFinancialForecast();
+      
+      // Create CSV content for forecast
+      csvContent = "FINANCIAL FORECAST\n\n";
+      
+      csvContent += "MONTHLY PREDICTIONS\n";
+      csvContent += "Month,Amount\n";
+      if (forecastData.predictions && forecastData.predictions.length > 0) {
+        const currentMonth = new Date().getMonth();
+        forecastData.predictions.forEach((prediction, index) => {
+          const month = new Date(new Date().getFullYear(), currentMonth + index + 1, 1)
+            .toLocaleString('default', { month: 'long' });
+          csvContent += `${month},${prediction}\n`;
+        });
+      } else {
+        csvContent += "No monthly predictions available.\n";
+      }
+      csvContent += "\n";
+      
+      csvContent += "QUARTERLY PROJECTIONS\n";
+      csvContent += "Quarter,Amount\n";
+      if (forecastData.quarterlyProjections) {
+        csvContent += `Q1,${forecastData.quarterlyProjections.q1 || 0}\n`;
+        csvContent += `Q2,${forecastData.quarterlyProjections.q2 || 0}\n`;
+        csvContent += `Q3,${forecastData.quarterlyProjections.q3 || 0}\n`;
+        csvContent += `Q4,${forecastData.quarterlyProjections.q4 || 0}\n`;
+      } else {
+        csvContent += "No quarterly projections available.\n";
+      }
+    } else if (analysisType === "budget") {
+      const budgetData = await analyzeBudgetPerformance();
+      
+      // Create CSV content for budget analysis
+      csvContent = "BUDGET PERFORMANCE ANALYSIS\n\n";
+      csvContent += `Performance Rating,${budgetData.performanceRating || "unknown"}\n`;
+      csvContent += `Utilization Rate,${budgetData.utilizationRate || "0%"}\n\n`;
+      
+      csvContent += "DETAILED ANALYSIS\n";
+      csvContent += `${escapeCsvValue(budgetData.analysis || "No analysis available.")}\n\n`;
+      
+      csvContent += "PRIORITY AREAS\n";
+      if (budgetData.priorityAreas && budgetData.priorityAreas.length > 0) {
+        budgetData.priorityAreas.forEach((area, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(area)}\n`;
+        });
+      } else {
+        csvContent += "No priority areas identified.\n";
+      }
+      csvContent += "\n";
+      
+      csvContent += "RECOMMENDATIONS\n";
+      if (budgetData.recommendations && budgetData.recommendations.length > 0) {
+        budgetData.recommendations.forEach((recommendation, index) => {
+          csvContent += `${index + 1},${escapeCsvValue(recommendation)}\n`;
+        });
+      } else {
+        csvContent += "No recommendations available.\n";
+      }
+    }
+    
+    return {
+      success: true,
+      data: csvContent,
+      filename,
+      contentType: 'text/csv'
+    };
+  } catch (error) {
+    console.error("Error exporting finance data:", error);
+    return { error: "Failed to export finance data" };
+  }
+}
+
+// Helper function to escape CSV values
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) return '';
+  
+  const stringValue = String(value);
+  // If the value contains commas, quotes, or newlines, wrap it in quotes and escape any existing quotes
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  
+  return stringValue;
 } 

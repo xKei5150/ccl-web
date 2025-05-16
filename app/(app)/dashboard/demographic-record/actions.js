@@ -45,10 +45,87 @@ export async function calculateDemographicsReportData(params = {}) {
   };
 }
 
-// Placeholder for export
+// Export demographics data to CSV
 export async function exportDemographicsReportData(params = {}) {
-  // TODO: implement export logic
-  return { success: true, message: "Export successful (not implemented)" };
+  try {
+    const { year = "" } = params;
+    
+    // Fetch the data to export
+    const reportData = await calculateDemographicsReportData({ year });
+    
+    if (!reportData || (!reportData.population && !reportData.ageGroups && !reportData.chronicDiseases)) {
+      return { error: "No demographic data available to export" };
+    }
+    
+    // Create CSV content with multiple sections
+    let csvContent = "";
+    const selectedYear = year || (reportData.yearlyTrends?.length > 0 ? reportData.yearlyTrends[reportData.yearlyTrends.length - 1].year : "All");
+    let filename = `demographic-data-${selectedYear}.csv`;
+    
+    // Population overview section
+    if (reportData.population) {
+      csvContent += "POPULATION OVERVIEW\n";
+      csvContent += "Metric,Value\n";
+      csvContent += `Total Population,${reportData.population.total || 0}\n`;
+      csvContent += `Male,${reportData.population.male || 0}\n`;
+      csvContent += `Female,${reportData.population.female || 0}\n`;
+      csvContent += `Households,${reportData.population.households || 0}\n`;
+      csvContent += `Registered Voters,${reportData.population.voters || 0}\n`;
+      csvContent += `PWD Count,${reportData.population.pwd || 0}\n\n`;
+    }
+    
+    // Age groups section
+    if (reportData.ageGroups && reportData.ageGroups.length > 0) {
+      csvContent += "AGE GROUPS\n";
+      csvContent += "Age Range,Count\n";
+      reportData.ageGroups.forEach(group => {
+        csvContent += `${escapeCsvValue(group.ageRange)},${group.count || 0}\n`;
+      });
+      csvContent += "\n";
+    }
+    
+    // Chronic diseases section
+    if (reportData.chronicDiseases && reportData.chronicDiseases.length > 0) {
+      csvContent += "CHRONIC DISEASES\n";
+      csvContent += "Disease,Count\n";
+      reportData.chronicDiseases.forEach(disease => {
+        csvContent += `${escapeCsvValue(disease.diseaseName)},${disease.count || 0}\n`;
+      });
+      csvContent += "\n";
+    }
+    
+    // Yearly trends section
+    if (reportData.yearlyTrends && reportData.yearlyTrends.length > 0) {
+      csvContent += "YEARLY TRENDS\n";
+      csvContent += "Year,Total Population,Registered Voters\n";
+      reportData.yearlyTrends.forEach(trend => {
+        csvContent += `${trend.year},${trend.total || 0},${trend.voters || 0}\n`;
+      });
+    }
+    
+    return {
+      success: true,
+      data: csvContent,
+      filename,
+      contentType: 'text/csv'
+    };
+  } catch (error) {
+    console.error("Failed to export demographics data:", error);
+    return { error: "Failed to export demographics data" };
+  }
+}
+
+// Helper function to escape CSV values
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) return '';
+  
+  const stringValue = String(value);
+  // If the value contains commas, quotes, or newlines, wrap it in quotes and escape any existing quotes
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  
+  return stringValue;
 }
 
 // AI: Analyze population trends

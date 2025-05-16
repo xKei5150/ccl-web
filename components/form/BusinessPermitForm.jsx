@@ -1,7 +1,7 @@
 // BusinessPermitForm.jsx
 "use client";
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { businessPermitRequestSchema } from "@/lib/schema";
@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/select";
 import DynamicSupportingDocument from "@/components/fields/DynamicSupportingDocument";
 import { Combobox } from "../ui/combo-box";
+import { Building, Calendar, Receipt, User, BanknoteIcon, Tag, ClipboardList, FileText, X, Save } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+
 // Helper function to recursively convert nulls to empty strings or appropriate defaults
 const defaultNullValues = (obj) => {
   if (obj === null || obj === undefined) {
@@ -86,13 +89,23 @@ const BusinessForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Building className="h-5 w-5 text-primary" />
+                <CardTitle>Business Information</CardTitle>
+              </div>
+              <Separator />
+            </CardHeader>
             <CardContent className="p-6">
               <FormField
                 control={form.control}
                 name="business.id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Business: </FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Building className="h-4 w-4 text-muted-foreground" />
+                      Business
+                    </FormLabel>
                     <FormControl>
                       <Combobox
                         options={businesses.map((business) => ({
@@ -114,6 +127,13 @@ const BusinessForm = ({
             </CardContent>
           </Card>
           <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-primary" />
+                <CardTitle>Permit Details</CardTitle>
+              </div>
+              <Separator />
+            </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 gap-4"></div>
               {/* Business Information Section */}
@@ -123,7 +143,10 @@ const BusinessForm = ({
                   name="validity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Validity Date</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        Validity Date
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -153,7 +176,10 @@ const BusinessForm = ({
                   name="paymentDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Date</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        Payment Date
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -183,7 +209,10 @@ const BusinessForm = ({
                   name="officialReceiptNo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Official Receipt No.</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Receipt className="h-4 w-4 text-muted-foreground" />
+                        Official Receipt No.
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter receipt number" />
                       </FormControl>
@@ -198,7 +227,10 @@ const BusinessForm = ({
                   name="issuedTo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Issued To</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        Issued To
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter recipient name" />
                       </FormControl>
@@ -213,7 +245,10 @@ const BusinessForm = ({
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <BanknoteIcon className="h-4 w-4 text-muted-foreground" />
+                        Amount
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -235,7 +270,10 @@ const BusinessForm = ({
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-muted-foreground" />
+                        Status
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -259,17 +297,16 @@ const BusinessForm = ({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent>
-              {/* Supporting Documents Section */}
-              <div className="bg-white shadow p-6 rounded-md">
-                <h2 className="text-xl font-semibold mb-4">
-                  Supporting Documents
-                </h2>
-                <DynamicSupportingDocument
-                  control={form.control}
-                />
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <CardTitle>Supporting Documents</CardTitle>
               </div>
+              <Separator />
+            </CardHeader>
+            <CardContent className="p-6">
+              <DynamicSupportingDocument control={form.control} />
             </CardContent>
           </Card>
 
@@ -279,17 +316,22 @@ const BusinessForm = ({
               type="button"
               variant="outline"
               onClick={() => cancelRoute && cancelRoute()}
+              className="flex items-center gap-2"
             >
+              <X className="h-4 w-4" />
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="flex items-center gap-2">
               {isSubmitting ? (
                 <>
-                  <span className="mr-2">Submitting...</span>
+                  <span>Submitting...</span>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 </>
               ) : (
-                submitText
+                <>
+                  <Save className="h-4 w-4" />
+                  {submitText}
+                </>
               )}
             </Button>
           </div>
