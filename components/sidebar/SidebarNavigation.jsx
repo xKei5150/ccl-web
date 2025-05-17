@@ -18,7 +18,7 @@ const navigationWithPermissions = [
     title: "Dashboard",
     icon: LayoutDashboard,
     path: "/dashboard",
-    requiredPermissions: ["globals.site-settings.update"]
+    requiredPermissions: ["collections.posts.read"]
   },
   {
     title: "Announcements",
@@ -130,7 +130,7 @@ const navigationWithPermissions = [
     title: "Media Storage",
     icon: PackageOpen,
     path: "/dashboard/storage",
-    requiredPermissions: ["collections.storage-folders.read"]
+    requiredPermissions: ["globals.site-settings.update"]
   },
   {
     title: "Settings",

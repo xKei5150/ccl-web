@@ -160,17 +160,26 @@ export function DataTable({
                 {actions && (
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
-                      {actions.map((action, actionIndex) => (
-                        <Button
-                          key={actionIndex}
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => action.onClick(row)}
-                        >
-                          {action.icon}
-                          <span className="sr-only">{action.label}</span>
-                        </Button>
-                      ))}
+                      {actions.map((action, actionIndex) => {
+                        // Check showCondition if it exists
+                        const shouldShow = action.showCondition 
+                          ? action.showCondition(row) 
+                          : true;
+                        
+                        if (!shouldShow) return null;
+                        
+                        return (
+                          <Button
+                            key={actionIndex}
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => action.onClick(row)}
+                          >
+                            {action.icon}
+                            <span className="sr-only">{action.label}</span>
+                          </Button>
+                        );
+                      })}
                     </div>
                   </TableCell>
                 )}

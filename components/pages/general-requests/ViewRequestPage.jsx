@@ -5,15 +5,18 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { ClipboardList, PenSquare, Printer, UserCheck, FileText, Clock, BanknoteIcon, Calendar, ArrowLeft, Receipt, Tag } from "lucide-react";
+import { ClipboardList, PenSquare, Printer, UserCheck, FileText, Clock, BanknoteIcon, Calendar, ArrowLeft, Receipt, Tag, ExternalLink } from "lucide-react";
 import { InfoItem } from "@/components/ui/info-item";
 import { cn } from "@/lib/utils";
 import DocumentPreview from "@/components/layout/DocumentPreview";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
 
 const ViewRequestPage = ({ data }) => {
   const router = useRouter();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
   
   const requestTypeMap = {
     indigencyCertificate: "Indigency Certificate",
@@ -38,8 +41,12 @@ const ViewRequestPage = ({ data }) => {
     }
   };
 
-  // const canViewCertificate = data.status === "approved" || data.status === "completed";
-  const canViewCertificate = true;
+  // Check if user can view certificate (admin/staff only AND status is approved/completed)
+  const canViewCertificate = (data.status === "approved" || data.status === "completed") && hasAdminAccess;
+  
+  // Check if user can edit (can't edit if status is approved/completed)
+  const canEdit = !(data.status === "approved" || data.status === "completed") || hasAdminAccess;
+  
   const showCTCDetails = 
     (data.type === "barangayClearance" || data.type === "barangayResidency") && 
     data.certificateDetails?.ctcDetails;
@@ -72,13 +79,15 @@ const ViewRequestPage = ({ data }) => {
             </Button>
           )}
           
-          <Button
-            onClick={() => router.push(`/dashboard/general-requests/${data.id}/edit`)}
-            className="flex items-center gap-2"
-          >
-            <PenSquare className="h-4 w-4" />
-            Edit Request
-          </Button>
+          {canEdit && (
+            <Button
+              onClick={() => router.push(`/dashboard/general-requests/${data.id}/edit`)}
+              className="flex items-center gap-2"
+            >
+              <PenSquare className="h-4 w-4" />
+              Edit Request
+            </Button>
+          )}
         </div>
       </PageHeader>
 
@@ -183,7 +192,20 @@ const ViewRequestPage = ({ data }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <InfoItem
                 label="Full Name"
-                value={data.person.name.fullName}
+                value={
+                  hasAdminAccess && data.person?.id ? (
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-left font-normal hover:underline"
+                      onClick={() => router.push(`/dashboard/personal/${data.person.id}`)}
+                    >
+                      <span className="mr-1">{data.person.name.fullName}</span>
+                      <ExternalLink className="h-3 w-3 inline" />
+                    </Button>
+                  ) : (
+                    data.person.name.fullName
+                  )
+                }
               />
               <InfoItem
                 label="Contact Number"

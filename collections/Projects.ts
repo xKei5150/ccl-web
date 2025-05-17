@@ -38,7 +38,7 @@ const Projects: CollectionConfig = {
         group: 'Operations',
     },
     access: {
-        read: isLoggedIn,
+        read: isAdminOrStaff,
         update: isOwnerOrAdminOrStaff,
         create: isAdminOrStaff,
         delete: isAdminOrStaff,

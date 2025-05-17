@@ -3,18 +3,25 @@
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, PenSquare, Printer, Calendar, Receipt, User, Building, Tag, ArrowLeft, BanknoteIcon, ClipboardList } from "lucide-react";
+import { FileText, PenSquare, Printer, Calendar, Receipt, User, Building, Tag, ArrowLeft, BanknoteIcon, ClipboardList, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import DocumentPreview from "@/components/layout/DocumentPreview";
 import { InfoItem } from "@/components/ui/info-item";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ViewBusinessPermitPage({ data }) {
   const router = useRouter();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
 
-  const canViewCertificate = data.status === "approved";
+  // Only show certificate button when status is approved AND user has admin access
+  const canViewCertificate = data.status === "approved" && hasAdminAccess;
+  // Allow editing only if not approved, or if user has admin access
+  const canEdit = data.status !== "approved" || hasAdminAccess;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 animate-fade-in">
@@ -34,7 +41,7 @@ export default function ViewBusinessPermitPage({ data }) {
             Back to List
           </Button>
           
-          {canViewCertificate && (
+          {canViewCertificate ? (
             <Button
               onClick={() => router.push(`/certificate/${data.id}?type=business`)}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
@@ -42,15 +49,55 @@ export default function ViewBusinessPermitPage({ data }) {
               <Printer className="h-4 w-4" />
               View Certificate
             </Button>
-          )}
+          ) : data.status === "approved" ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      disabled
+                      className="flex items-center gap-2 bg-blue-600/50 cursor-not-allowed"
+                    >
+                      <Printer className="h-4 w-4" />
+                      View Certificate
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Only administrators can view the certificate</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
           
-          <Button
-            onClick={() => router.push(`/dashboard/business-permits/${data.id}/edit`)}
-            className="flex items-center gap-2"
-          >
-            <PenSquare className="h-4 w-4" />
-            Edit Permit
-          </Button>
+          {canEdit ? (
+            <Button
+              onClick={() => router.push(`/dashboard/business-permits/${data.id}/edit`)}
+              className="flex items-center gap-2"
+            >
+              <PenSquare className="h-4 w-4" />
+              Edit Permit
+            </Button>
+          ) : (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      disabled
+                      className="flex items-center gap-2 opacity-50 cursor-not-allowed"
+                    >
+                      <PenSquare className="h-4 w-4" />
+                      Edit Permit
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Approved permits cannot be edited by regular users</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       </PageHeader>
 
@@ -73,7 +120,16 @@ export default function ViewBusinessPermitPage({ data }) {
                     <span>Business Name</span>
                   </div>
                 }
-                value={data.business.businessName}
+                value={
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-left font-normal hover:underline"
+                    onClick={() => router.push(`/dashboard/business/${data.business.id}`)}
+                  >
+                    <span className="mr-1">{data.business.businessName}</span>
+                    <ExternalLink className="h-3 w-3 inline" />
+                  </Button>
+                }
               />
               <InfoItem
                 label={

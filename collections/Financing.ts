@@ -44,7 +44,7 @@ const Financing: CollectionConfig = {
   access: {
     read: isLoggedIn,
     update: isAdminOrHasCCLOrgAccess,
-    create: isLoggedIn,
+    create: isAdminOrHasCCLOrgAccess,
     delete: isAdminOrHasCCLOrgAccess,
   },
   fields: [

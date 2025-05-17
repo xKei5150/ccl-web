@@ -1,11 +1,18 @@
 "use client";
 
-import { Tickets, Printer } from "lucide-react";
+import { Tickets, Printer, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { deleteRequest } from "@/app/(app)/dashboard/general-requests/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const GeneralRequestsPage = ({ data }) => {
+  const router = useRouter();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
+  
   const requestTypeMap = {
     indigencyCertificate: "Indigency Certificate",
     barangayClearance: "Barangay Clearance",
@@ -16,6 +23,29 @@ const GeneralRequestsPage = ({ data }) => {
     {
       accessorKey: "person.name.fullName",
       header: "Name",
+      cell: (row) => {
+        const personId = row.person?.id;
+        const fullName = row.person?.name?.fullName || "Unknown";
+        
+        // Only make the name clickable for admin or staff
+        if (hasAdminAccess && personId) {
+          return (
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-left font-normal hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/dashboard/personal/${personId}`);
+              }}
+            >
+              <span className="mr-1">{fullName}</span>
+              <ExternalLink className="h-3 w-3 inline" />
+            </Button>
+          );
+        }
+        
+        return fullName;
+      },
     },
     {
       accessorKey: "type",
@@ -83,7 +113,21 @@ const GeneralRequestsPage = ({ data }) => {
       onClick: (row) => {
         window.location.href = `/certificate/${row.id}`;
       },
-      showCondition: (row) => row.status === "approved" || row.status === "completed",
+      showCondition: (row) => 
+        (row.status === "approved" || row.status === "completed") && hasAdminAccess,
+    },
+  ];
+
+  const defaultActions = [
+    {
+      label: "Edit",
+      icon: null,
+      showCondition: (row) => !(row.status === "approved" || row.status === "completed") || hasAdminAccess,
+    },
+    {
+      label: "Delete",
+      icon: null,
+      showCondition: () => hasAdminAccess,
     },
   ];
 
@@ -100,6 +144,8 @@ const GeneralRequestsPage = ({ data }) => {
       newButtonLabel="New Request"
       customFilters={customFilters}
       customActions={customActions}
+      defaultActions={defaultActions}
+      hideDeleteButton={!hasAdminAccess}
     />
   );
 };

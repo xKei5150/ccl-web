@@ -6,8 +6,12 @@ import LoadingSkeleton from "@/components/layout/LoadingSkeleton";
 import { Button } from "@/components/ui/button";
 import { Menu, Plus } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/use-auth";
 
 export function PostLayout({ posts, children }) {
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
+
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       <Suspense fallback={<LoadingSkeleton />}>
@@ -23,12 +27,14 @@ export function PostLayout({ posts, children }) {
               </Button>
 
               <div className="ml-auto">
-                <Button asChild>
-                  <Link href="/dashboard/posts/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Post
-                  </Link>
-                </Button>
+                {hasAdminAccess && (
+                  <Button asChild>
+                    <Link href="/dashboard/posts/new">
+                      <Plus className="mr-2 h-4 w-4" />
+                      New Post
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex-1 overflow-auto p-4 md:p-6">

@@ -3,12 +3,16 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { PenSquare } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const UserProfile = ({
   personalInfo,
   role
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const router = useRouter();
 
   if (!personalInfo) return null;
 
@@ -41,27 +45,38 @@ const UserProfile = ({
         </div>
 
         <div className="flex-1 space-y-4">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900 mb-2">
-              {fullName}
-            </h1>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="bg-gray-100/80 text-gray-600 hover:bg-gray-100">
-                {role}
-              </Badge>
-              {demographics?.maritalStatus && (
-                <Badge variant="outline">
-                  {demographics.maritalStatus.charAt(0).toUpperCase() + demographics.maritalStatus.slice(1)}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900 mb-2">
+                {fullName}
+              </h1>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary" className="bg-gray-100/80 text-gray-600 hover:bg-gray-100">
+                  {role}
                 </Badge>
-              )}
-              {status?.residencyStatus && (
-                <Badge variant="outline" className="bg-blue-50">
-                  {status.residencyStatus.split('-').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                  ).join(' ')}
-                </Badge>
-              )}
+                {demographics?.maritalStatus && (
+                  <Badge variant="outline">
+                    {demographics.maritalStatus.charAt(0).toUpperCase() + demographics.maritalStatus.slice(1)}
+                  </Badge>
+                )}
+                {status?.residencyStatus && (
+                  <Badge variant="outline" className="bg-blue-50">
+                    {status.residencyStatus.split('-').map(word => 
+                      word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ')}
+                  </Badge>
+                )}
+              </div>
             </div>
+            <Button
+              onClick={() => router.push('/dashboard/profile/edit')}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 self-start"
+            >
+              <PenSquare className="h-4 w-4" />
+              Edit Profile
+            </Button>
           </div>
           
           <div className="space-y-2 text-sm text-gray-600">

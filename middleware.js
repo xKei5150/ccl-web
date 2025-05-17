@@ -1,5 +1,6 @@
 // middleware.js
 import { NextResponse } from 'next/server';
+import { pathToRegexp } from 'path-to-regexp';
 
 // Paths that don't require authentication
 const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/admin'];
@@ -7,6 +8,8 @@ const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password', '
 // Paths that require specific roles
 const roleProtectedPaths = {
   // '/admin': ['admin', 'staff'],
+  '/dashboard/posts/[slug]/edit': ['admin', 'staff'],
+  '/dashboard/posts/new': ['admin', 'staff'],
   '/dashboard/staff': ['admin', 'staff'],
   '/dashboard/reports': ['admin', 'staff'],
   '/dashboard/site-settings': ['admin'],
@@ -19,10 +22,12 @@ const roleProtectedPaths = {
 
 // Paths that citizens can access - being explicit about exact paths
 const citizenAllowedPaths = [
+  '/dashboard',
   '/dashboard/posts',
   '/dashboard/general-requests',
-  '/dashboard/reports',
+  // '/dashboard/reports',
   '/dashboard/profile',
+  '/dashboard/financing',
 ];
 
 export const config = {
@@ -30,17 +35,46 @@ export const config = {
 };
 
 function validatePathAccess(pathname, role, roleProtectedPaths, citizenAllowedPaths) {
+  // Normalize pathname by removing trailing slash
+  const normalizedPathname = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+  // For citizens, check if the path starts with any allowed path
   if (role === 'citizen') {
-    return citizenAllowedPaths.some(path => pathname.startsWith(path));
+    return citizenAllowedPaths.some(path => 
+      normalizedPathname === path || normalizedPathname.startsWith(`${path}/`));
   }
 
-  // For protected paths, check if user's role has access
-  const protectedPath = Object.entries(roleProtectedPaths).find(([path]) => pathname.startsWith(path));
-  if (protectedPath) {
-    const [, allowedRoles] = protectedPath;
-    return allowedRoles.includes(role);
+  // Check for exact protected path matches first
+  if (roleProtectedPaths[normalizedPathname]) {
+    return roleProtectedPaths[normalizedPathname].includes(role);
   }
 
+  // Check for dynamic routes
+  for (const [pattern, allowedRoles] of Object.entries(roleProtectedPaths)) {
+    // Skip exact matches as they were handled above
+    if (pattern === normalizedPathname) continue;
+
+    // Check if this is a dynamic route pattern
+    if (pattern.includes('[')) {
+      // Convert Next.js dynamic path pattern to a regex pattern
+      const regexPattern = pattern
+        .replace(/\[([^\]]+)\]/g, '([^/]+)') // Replace [param] with a pattern matching any string except /
+        .replace(/\/\[\[\.\.\.[^\]]+\]\]/g, '(/.*)?'); // Handle [[...params]] catch-all routes
+      
+      const pathRegex = new RegExp(`^${regexPattern}$`);
+      
+      // Test against both with and without trailing slash
+      if (pathRegex.test(normalizedPathname) || pathRegex.test(`${normalizedPathname}/`)) {
+        return allowedRoles.includes(role);
+      }
+    } 
+    // For static paths, check if the current path starts with this protected path
+    else if (normalizedPathname === pattern || normalizedPathname.startsWith(`${pattern}/`)) {
+      return allowedRoles.includes(role);
+    }
+  }
+
+  // If no protected path matched, access is allowed
   return true;
 }
 
@@ -89,10 +123,12 @@ export async function middleware(request) {
     }
 
     // For dashboard routes, validate access if we have a role
-
     if (userRole) {
       const hasAccess = validatePathAccess(pathname, userRole, roleProtectedPaths, citizenAllowedPaths);
       if (!hasAccess) {
+        // Log for debugging
+        console.log(`[Middleware] Access denied to ${pathname} for role ${userRole}`);
+        
         // Redirect to appropriate dashboard based on role
         const redirectUrl = new URL(
           userRole === 'citizen' 

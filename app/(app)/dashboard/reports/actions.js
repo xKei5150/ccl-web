@@ -66,7 +66,42 @@ export async function createReport(data) {
 }
 
 export async function updateReport(newData, id) {
-  return genericUpdate("reports", id, newData, `/dashboard/reports/${id}`);
+  try {
+    // Make sure we have an ID
+    if (!id) {
+      return {
+        success: false,
+        message: "Report ID is required for update",
+        statusCode: 400,
+      };
+    }
+
+    // Clean up the newData object to ensure only valid fields are passed
+    const cleanData = {
+      title: newData.title,
+      date: newData.date,
+      description: newData.description,
+      location: newData.location,
+      reportStatus: newData.reportStatus,
+      involvedPersons: newData.involvedPersons || [],
+      supportingDocuments: newData.supportingDocuments || []
+    };
+
+    // Debug logging
+    if (DEBUG) {
+      console.log("Updating report with ID:", id);
+      console.log("Update data:", cleanData);
+    }
+
+    return genericUpdate("reports", id, cleanData, `/dashboard/reports/${id}`);
+  } catch (error) {
+    console.error("Error in updateReport:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to update report",
+      statusCode: 500,
+    };
+  }
 }
 
 export async function deleteReport(ids) {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
 import { Upload, Trash, X } from 'lucide-react';
@@ -20,7 +20,9 @@ const isFileObject = (obj) => {
 const isPayloadDocument = (obj) => {
   return obj && 
     typeof obj === 'object' && 
-    (obj.id || obj.filename || obj.mimeType);
+    (obj.id || obj.filename || obj.mimeType || 
+     // Handle string IDs that reference documents
+     (typeof obj === 'string' && obj.length > 0));
 };
 
 export const FileUpload = ({ 
@@ -30,11 +32,25 @@ export const FileUpload = ({
   onRemove = () => {},
   previewSize = "default" // Can be "small", "medium", or "default"
 }) => {
+  const [internalValue, setInternalValue] = useState(value);
+
+  // Update internal value when prop changes
+  useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
+
   const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles.length > 0) {
-      onFileSelect(acceptedFiles);
+      const newValue = acceptedFiles;
+      setInternalValue(newValue);
+      onFileSelect(newValue);
     }
   }, [onFileSelect]);
+
+  const handleRemove = () => {
+    setInternalValue(null);
+    onRemove();
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -53,9 +69,17 @@ export const FileUpload = ({
     }
   };
 
+  // Check if we have a document to display
+  const hasDocument = !!internalValue && (
+    isFileObject(internalValue) || 
+    isPayloadDocument(internalValue) || 
+    (Array.isArray(internalValue) && internalValue.length > 0) ||
+    typeof internalValue === 'string'
+  );
+
   return (
     <div className="space-y-4">
-      {!value && (
+      {!hasDocument && (
         <div
           {...getRootProps()}
           className={cn(
@@ -78,11 +102,11 @@ export const FileUpload = ({
         </div>
       )}
 
-      {value && (
+      {hasDocument && (
         <div className="relative bg-muted/20 rounded-lg overflow-hidden border">
           <button
             type="button"
-            onClick={onRemove}
+            onClick={handleRemove}
             className="absolute top-2 right-2 bg-background/80 text-destructive hover:text-destructive p-1 rounded-full hover:bg-background/90 z-10 transition-colors"
             aria-label="Remove file"
           >
@@ -92,24 +116,27 @@ export const FileUpload = ({
             "overflow-hidden",
             getPreviewSizeClasses()
           )}>
-            {Array.isArray(value) ? (
-              isFileObject(value[0]) && typeof value[0].arrayBuffer === 'function' ? (
-                <FilePreview file={value[0]} previewSize={previewSize} />
+            {Array.isArray(internalValue) ? (
+              isFileObject(internalValue[0]) && typeof internalValue[0].arrayBuffer === 'function' ? (
+                <FilePreview file={internalValue[0]} previewSize={previewSize} />
               ) : (
-                <DocumentPreview document={value[0] || {}} className={getPreviewSizeClasses()} />
+                <DocumentPreview document={internalValue[0] || {}} className={getPreviewSizeClasses()} />
               )
+            ) : typeof internalValue === 'string' ? (
+              // Handle string ID references to documents
+              <DocumentPreview document={{ id: internalValue }} className={getPreviewSizeClasses()} />
+            ) : isFileObject(internalValue) && typeof internalValue.arrayBuffer === 'function' ? (
+              <FilePreview file={internalValue} previewSize={previewSize} />
             ) : (
-              isFileObject(value) && typeof value.arrayBuffer === 'function' ? (
-                <FilePreview file={value} previewSize={previewSize} />
-              ) : (
-                <DocumentPreview document={value || {}} className={getPreviewSizeClasses()} />
-              )
+              <DocumentPreview document={internalValue || {}} className={getPreviewSizeClasses()} />
             )}
           </div>
           <div className="text-xs text-muted-foreground truncate p-2 bg-muted/30">
-            {Array.isArray(value) 
-              ? (value[0]?.name || value[0]?.filename || "Selected file") 
-              : (value?.name || value?.filename || "Selected file")
+            {Array.isArray(internalValue) 
+              ? (internalValue[0]?.name || internalValue[0]?.filename || "Existing file") 
+              : typeof internalValue === 'string'
+                ? "Existing file"
+                : (internalValue?.name || internalValue?.filename || "Existing file")
             }
           </div>
         </div>

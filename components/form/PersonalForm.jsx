@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ const formSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     middleName: z.string().optional(),
     lastName: z.string().min(1, "Last name is required"),
-    fullName: z.string(),
+    fullName: z.string().optional(),
   }),
   contact: z.object({
     emailAddress: z.string().email("Invalid email address"),
@@ -30,15 +30,16 @@ const formSchema = z.object({
     sex: z.enum(["male", "female", "other"], {
       required_error: "Please select a sex",
     }),
-    birthDate: z.string().min(1, "Birth date is required"),
+    birthDate: z.string().optional(),
     maritalStatus: z.enum(["single", "married", "divorced", "widowed"], {
       required_error: "Please select a marital status",
     }),
   }),
   status: z.object({
-    residencyStatus: z.enum(["renting", "own-mortgage", "own-outright"], {
+    residencyStatus: z.enum(["permanent", "temporary"], {
       required_error: "Please select a residency status",
-    }),
+    }).optional(),
+    lifeStatus: z.enum(["alive", "deceased"]).default("alive").optional(),
   }),
 });
 
@@ -47,9 +48,9 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: defaultValues || {
+  // Prepare default values with proper date formatting
+  const prepareDefaultValues = (data) => {
+    if (!data) return {
       name: {
         firstName: "",
         middleName: "",
@@ -69,8 +70,37 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
         residencyStatus: "",
         lifeStatus: "alive",
       },
-    },
+    };
+
+    // Format the date if it exists (YYYY-MM-DD for input type="date")
+    const formattedData = { ...data };
+    
+    if (data.demographics?.birthDate) {
+      // Handle ISO date string from the API
+      const date = new Date(data.demographics.birthDate);
+      if (!isNaN(date.getTime())) {
+        formattedData.demographics = {
+          ...formattedData.demographics,
+          birthDate: date.toISOString().split('T')[0],
+        };
+      }
+    }
+
+    return formattedData;
+  };
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: prepareDefaultValues(defaultValues),
   });
+
+  // Update form when defaultValues change (e.g., when navigating between records)
+  useEffect(() => {
+    if (defaultValues) {
+      const formattedValues = prepareDefaultValues(defaultValues);
+      form.reset(formattedValues);
+    }
+  }, [defaultValues, form]);
 
   const handleSubmit = async (data) => {
     setIsSubmitting(true);
@@ -220,7 +250,12 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                   <FormItem>
                     <FormLabel>Birth Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input 
+                        type="date" 
+                        {...field} 
+                        className="bg-white"
+                        value={field.value || ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -310,16 +345,15 @@ export default function PersonalForm({ defaultValues, onSubmit, submitText = "Su
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Residency Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                       <FormControl>
                         <SelectTrigger className="bg-white">
                           <SelectValue placeholder="Select residency status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="renting">Renting</SelectItem>
-                        <SelectItem value="own-mortgage">Own with Mortgage</SelectItem>
-                        <SelectItem value="own-outright">Own Outright</SelectItem>
+                        <SelectItem value="permanent">Permanent</SelectItem>
+                        <SelectItem value="temporary">Temporary</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

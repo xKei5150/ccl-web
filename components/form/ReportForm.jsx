@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,9 +56,20 @@ export default function ReportForm({
   submitText = "Submit Report",
   cancelRoute,
 }) {
+  // Normalize the defaultValues for proper initialization
+  const normalizedDefaultValues = {
+    ...defaultValues,
+    // Format date properly if it exists
+    date: defaultValues.date ? new Date(defaultValues.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    // Ensure involvedPersons is properly formatted
+    involvedPersons: Array.isArray(defaultValues.involvedPersons) ? defaultValues.involvedPersons : [],
+    // Ensure supportingDocuments is properly formatted
+    supportingDocuments: Array.isArray(defaultValues.supportingDocuments) ? defaultValues.supportingDocuments : [],
+  };
+
   const form = useForm({
     resolver: zodResolver(reportSchema),
-    defaultValues,
+    defaultValues: normalizedDefaultValues,
   });
 
   const { fields: involvedPersonFields, append: appendPerson, remove: removePerson } = useFieldArray({
@@ -68,10 +79,23 @@ export default function ReportForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Initialize involvedPersons if form is loaded for editing and there are none
+  useEffect(() => {
+    if (normalizedDefaultValues.id && !involvedPersonFields.length && normalizedDefaultValues.involvedPersons.length > 0) {
+      // Reset the form with the normalized values
+      form.reset(normalizedDefaultValues);
+    }
+  }, [normalizedDefaultValues, form, involvedPersonFields.length]);
+
   const handleSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      await onSubmit(data);
+      // When updating, ensure we maintain the original ID
+      const submitData = {
+        ...data,
+        id: defaultValues.id, // Keep the ID for updates
+      };
+      await onSubmit(submitData);
     } finally {
       setIsSubmitting(false);
     }

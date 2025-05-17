@@ -24,6 +24,7 @@ export default function DemographicsReportsPage() {
   const [reportData, setReportData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [availableYears, setAvailableYears] = useState([]);
+  const [yearlyTrendsData, setYearlyTrendsData] = useState(null);
 
   // Fetch data and available years
   const fetchReports = useCallback(async () => {
@@ -33,6 +34,14 @@ export default function DemographicsReportsPage() {
     setIsLoading(false);
   }, [selectedYear]);
 
+  // Fetch all yearly trends data (without year filter)
+  const fetchAllYearlyTrends = useCallback(async () => {
+    setIsLoading(true);
+    const data = await calculateDemographicsReportData({});
+    setYearlyTrendsData(data);
+    setIsLoading(false);
+  }, []);
+
   // Fetch available years on mount
   useEffect(() => {
     async function fetchYears() {
@@ -41,6 +50,9 @@ export default function DemographicsReportsPage() {
         const years = data.yearlyTrends.map(y => y.year).sort((a, b) => b - a);
         setAvailableYears(years);
         if (!selectedYear && years.length > 0) setSelectedYear(years[0].toString());
+        
+        // Initialize yearly trends data
+        setYearlyTrendsData(data);
       }
     }
     fetchYears();
@@ -49,6 +61,13 @@ export default function DemographicsReportsPage() {
   useEffect(() => {
     if (selectedYear) fetchReports();
   }, [selectedYear, fetchReports]);
+
+  // Update activeTab handling
+  useEffect(() => {
+    if (activeTab === "trends" && !yearlyTrendsData) {
+      fetchAllYearlyTrends();
+    }
+  }, [activeTab, yearlyTrendsData, fetchAllYearlyTrends]);
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -294,14 +313,14 @@ export default function DemographicsReportsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Yearly Trends</CardTitle>
-                <CardDescription>Population and voter trends over years</CardDescription>
+                <CardDescription>Population and voter trends over all years (unfiltered)</CardDescription>
               </CardHeader>
               <CardContent className="h-[350px]">
                 {isLoading ? (
                   <div className="flex h-full items-center justify-center">Loading...</div>
-                ) : Array.isArray(reportData?.yearlyTrends) && reportData.yearlyTrends.length > 0 ? (
+                ) : Array.isArray(yearlyTrendsData?.yearlyTrends) && yearlyTrendsData.yearlyTrends.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={reportData.yearlyTrends} margin={{ left: 35 }}>
+                    <LineChart data={yearlyTrendsData.yearlyTrends} margin={{ left: 35 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="year" axisLine={false} tickLine={false} />
                       <YAxis width={40} axisLine={false} tickLine={false} />
