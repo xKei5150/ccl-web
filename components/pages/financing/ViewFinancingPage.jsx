@@ -224,19 +224,21 @@ export default function ViewFinancingPage({ data }) {
           )}
         </div>
         
-        <div className="flex items-center space-x-2">
-          <ExportButton recordId={data.id} />
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/financing/${data.id}/edit`}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Link>
-          </Button>
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
-            <Delete className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-        </div>
+        {hasAdminAccess && (
+          <div className="flex items-center space-x-2">
+            <ExportButton recordId={data.id} />
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/financing/${data.id}/edit`}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Link>
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleDelete}>
+              <Delete className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </div>
+        )}
       </div>
       
       <Tabs defaultValue="overview" className="w-full">

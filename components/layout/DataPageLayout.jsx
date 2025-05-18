@@ -35,11 +35,17 @@ const DataPageLayout = ({
   const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, rows: [] });
   const [selectedRows, setSelectedRows] = useState([]);
 
+  // Determine if actions should be shown based on props
+  const shouldShowActions = !hideActions && newItemUrl !== null;
+  const canDelete = !hideDeleteButton && deleteAction !== null;
+
   const handleDelete = (rows) => {
+    if (!canDelete) return;
     setDeleteDialog({ isOpen: true, rows });
   };
 
   const confirmDelete = () => {
+    if (!canDelete) return;
     const rows = deleteDialog.rows;
     toast({
       title: "Deleting records",
@@ -67,28 +73,38 @@ const DataPageLayout = ({
       actionsToUse = defaultActions.map(action => {
         // Set default icons if not provided
         if (action.label === "Edit" && !action.icon) {
-          return { ...action, icon: <Edit2 className="h-4 w-4" />, onClick: action.onClick || ((row) => router.push(`${baseUrl}/${row.id}/edit`)) };
+          return { 
+            ...action, 
+            icon: <Edit2 className="h-4 w-4" />, 
+            onClick: action.onClick || ((row) => shouldShowActions && router.push(`${baseUrl}/${row.id}/edit`)),
+            disabled: !shouldShowActions 
+          };
         }
         if (action.label === "Delete" && !action.icon) {
-          return { ...action, icon: <Trash className="h-4 w-4" />, onClick: action.onClick || ((row) => handleDelete([row])) };
+          return { 
+            ...action, 
+            icon: <Trash className="h-4 w-4" />, 
+            onClick: action.onClick || ((row) => canDelete && handleDelete([row])),
+            disabled: !canDelete
+          };
         }
         return action;
       });
     } else {
       // Use default actions
-      actionsToUse = [
-    {
-      label: "Edit",
-      icon: <Edit2 className="h-4 w-4" />,
-      onClick: (row) => router.push(`${baseUrl}/${row.id}/edit`),
-        }
-      ];
-      
-      if (!hideDeleteButton) {
+      if (shouldShowActions) {
         actionsToUse.push({
-      label: "Delete",
-      icon: <Trash className="h-4 w-4" />,
-      onClick: (row) => handleDelete([row]),
+          label: "Edit",
+          icon: <Edit2 className="h-4 w-4" />,
+          onClick: (row) => router.push(`${baseUrl}/${row.id}/edit`),
+        });
+      }
+      
+      if (canDelete) {
+        actionsToUse.push({
+          label: "Delete",
+          icon: <Trash className="h-4 w-4" />,
+          onClick: (row) => handleDelete([row]),
         });
       }
     }
@@ -107,17 +123,13 @@ const DataPageLayout = ({
       <p className="text-sm text-gray-500 mb-4">
         {emptyMessage || `Get started by creating a new ${title.toLowerCase()}.`}
       </p>
-      <Button onClick={() => router.push(newItemUrl)}>
-        <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
-      </Button>
+      {shouldShowActions && newItemUrl && (
+        <Button onClick={() => router.push(newItemUrl)}>
+          <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
+        </Button>
+      )}
     </div>
   );
-
-  // Check if delete button should be shown in bulk actions
-  const showBulkDelete = !hideDeleteButton && 
-    (defaultActions 
-      ? defaultActions.some(action => action.label === "Delete")
-      : true);
 
   return (
     <>
@@ -125,10 +137,10 @@ const DataPageLayout = ({
         <PageHeader title={title} subtitle={subtitle} icon={Icon && <Icon />} />
         <div className="flex space-x-2 mb-8">
           {ExportComponent && <ExportComponent />}
-          {!hideActions && (
-          <Button onClick={() => router.push(newItemUrl)}>
-            <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
-          </Button>
+          {shouldShowActions && newItemUrl && (
+            <Button onClick={() => router.push(newItemUrl)}>
+              <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
+            </Button>
           )}
         </div>
       </div>
@@ -143,13 +155,13 @@ const DataPageLayout = ({
                   data={data}
                   columns={columns}
                   actions={actions}
-                  enableMultiSelect={!hideActions && showBulkDelete}
+                  enableMultiSelect={!hideActions && canDelete}
                   onSelectionChange={handleSelectionChange}
                   onPageChange={handlePageChange}
                   baseUrl={baseUrl}
                 />
-                {!hideActions && showBulkDelete && selectedRows.length > 0 && (
-                <div className="flex space-x-2 mt-4">
+                {!hideActions && canDelete && selectedRows.length > 0 && (
+                  <div className="flex space-x-2 mt-4">
                     <Button
                       variant="destructive"
                       onClick={() => handleDelete(selectedRows)}
@@ -157,12 +169,12 @@ const DataPageLayout = ({
                       <Trash className="mr-2 h-4 w-4" />
                       Delete Selected ({selectedRows.length})
                     </Button>
-                  {ExportComponent && data.length > 0 && (
-                    <div className="ml-auto">
-                      <ExportComponent />
-                    </div>
-                  )}
-                </div>
+                    {ExportComponent && data.length > 0 && (
+                      <div className="ml-auto">
+                        <ExportComponent />
+                      </div>
+                    )}
+                  </div>
                 )}
               </>
             )}

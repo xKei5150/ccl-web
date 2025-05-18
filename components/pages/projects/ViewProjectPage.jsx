@@ -78,7 +78,7 @@ export function ViewProjectPage({ id }) {
           )
           
           if (relatedFinancing) {
-            setFinancing(relatedFinancing)
+          setFinancing(relatedFinancing)
           } else {
             // If we couldn't find it in the options, create a basic entry from the data
             const financingData = typeof projectResponse.data.relatedFinancing === 'object' 
@@ -502,6 +502,49 @@ export function ViewProjectPage({ id }) {
             </CardContent>
           </Card>
         )}
+
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              <CardTitle>Objective</CardTitle>
+            </div>
+            <Separator />
+          </CardHeader>
+          <CardContent>
+            <InfoItem
+              label={
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                  <span>Objective</span>
+                </div>
+              }
+              value={project.objective}
+            />
+            {financing && (
+              <InfoItem
+                label={
+                  <div className="flex items-center gap-2">
+                    <BanknoteIcon className="h-4 w-4 text-muted-foreground" />
+                    <span>Related Financing</span>
+                  </div>
+                }
+                value={
+                  hasAdminAccess ? (
+                    <Link 
+                      href={`/dashboard/financing/${financing.value}`} 
+                      className="text-primary hover:underline flex items-center"
+                    >
+                      {financing.label} <ExternalLink className="ml-1 h-3 w-3" />
+                    </Link>
+                  ) : (
+                    financing.label
+                  )
+                }
+              />
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   )

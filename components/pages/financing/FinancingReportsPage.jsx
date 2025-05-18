@@ -13,8 +13,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { formatGovCurrency, ACCOUNT_TYPES, APPROVAL_STATES } from "@/lib/finance-utils";
 import { calculateReportData, exportReportData } from "@/app/(app)/dashboard/financing/actions";
 import { Bar, BarChart, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, Line, LineChart, CartesianGrid, Legend, PieChart, Pie, Cell } from 'recharts';
-import { FileDown, RefreshCw, Filter, SparklesIcon, InfoIcon, ChevronRightIcon, HelpCircleIcon, DownloadIcon, WalletIcon, BarChart3Icon, LineChartIcon, BadgeCheckIcon, CalendarIcon, LayersIcon, CoinsIcon, TrendingUpIcon } from "lucide-react";
+import { FileDown, RefreshCw, Filter, SparklesIcon, InfoIcon, ChevronRightIcon, HelpCircleIcon, DownloadIcon, WalletIcon, BarChart3Icon, LineChartIcon, BadgeCheckIcon, CalendarIcon, LayersIcon, CoinsIcon, TrendingUpIcon, ShieldIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 import FinanceAIInsights from "./FinanceAIInsights";
 import ExportButton from "@/components/pages/finance/ExportButton";
 
@@ -22,6 +24,35 @@ import ExportButton from "@/components/pages/finance/ExportButton";
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 export default function FinancingReportsPage() {
+  const router = useRouter();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
+  
+  // If user doesn't have admin access, redirect to financing list
+  useEffect(() => {
+    if (!hasAdminAccess) {
+      router.push('/dashboard/financing');
+    }
+  }, [hasAdminAccess, router]);
+  
+  // If not admin, show loading or access denied message
+  if (!hasAdminAccess) {
+    return (
+      <div className="container mx-auto py-20 text-center">
+        <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md border">
+          <ShieldIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Access Restricted</h1>
+          <p className="text-gray-600 mb-4">
+            You don't have permission to access financial reports and analytics.
+          </p>
+          <Button onClick={() => router.push('/dashboard/financing')}>
+            Back to Financing Records
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
   const [activeTab, setActiveTab] = useState("spending");
   const [showAIInsights, setShowAIInsights] = useState(false);
   

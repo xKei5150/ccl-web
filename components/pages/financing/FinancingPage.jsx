@@ -7,6 +7,7 @@ import DataPageLayout from "@/components/layout/DataPageLayout";
 import { Badge } from "@/components/ui/badge";
 import { formatGovCurrency, APPROVAL_STATES } from "@/lib/finance-utils";
 import ExportButton from "./ExportButton";
+import { useAuth } from "@/hooks/use-auth";
 
 // Approval state badge variants
 const approvalStateVariants = {
@@ -18,6 +19,9 @@ const approvalStateVariants = {
 };
 
 export default function FinancingPage({ data }) {
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
+
   const columns = [
     {
       accessorKey: "title",
@@ -69,10 +73,10 @@ export default function FinancingPage({ data }) {
       columns={columns}
       data={data}
       baseUrl="/dashboard/financing"
-      newItemUrl="/dashboard/financing/new"
-      deleteAction={deleteFinancingRecord}
-      newButtonLabel="New Financing Record"
-      exportComponent={ExportButton}
+      newItemUrl={hasAdminAccess ? "/dashboard/financing/new" : null}
+      deleteAction={hasAdminAccess ? deleteFinancingRecord : null}
+      newButtonLabel={hasAdminAccess ? "New Financing Record" : null}
+      exportComponent={hasAdminAccess ? ExportButton : null}
     />
   );
 }

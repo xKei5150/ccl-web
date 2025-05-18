@@ -4,11 +4,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Download } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import { exportFinanceData } from "@/app/(app)/dashboard/finance/actions";
 
 export default function ExportButton({ analysisType = "trends", variant = "outline", className }) {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
+
+  // If user doesn't have admin access, don't render the button
+  if (!hasAdminAccess) {
+    return null;
+  }
 
   // Function to trigger download by creating a temporary <a> element
   const triggerDownload = (data, filename, contentType) => {
