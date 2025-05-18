@@ -573,7 +573,7 @@ export interface FinancingAuditLog {
   timestamp: string;
   user: number | User;
   action: 'create' | 'update' | 'delete' | 'state_change';
-  record: number | Financing;
+  record?: (number | null) | Financing;
   /**
    * Stored for reference even if the record is deleted
    */

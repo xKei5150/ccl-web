@@ -70,7 +70,7 @@ function validatePathAccess(pathname, role, roleProtectedPaths, citizenAllowedPa
     } 
     // For static paths, check if the current path starts with this protected path
     else if (normalizedPathname === pattern || normalizedPathname.startsWith(`${pattern}/`)) {
-      return allowedRoles.includes(role);
+    return allowedRoles.includes(role);
     }
   }
 

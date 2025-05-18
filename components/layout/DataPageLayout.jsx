@@ -77,18 +77,18 @@ const DataPageLayout = ({
     } else {
       // Use default actions
       actionsToUse = [
-        {
-          label: "Edit",
-          icon: <Edit2 className="h-4 w-4" />,
-          onClick: (row) => router.push(`${baseUrl}/${row.id}/edit`),
+    {
+      label: "Edit",
+      icon: <Edit2 className="h-4 w-4" />,
+      onClick: (row) => router.push(`${baseUrl}/${row.id}/edit`),
         }
       ];
       
       if (!hideDeleteButton) {
         actionsToUse.push({
-          label: "Delete",
-          icon: <Trash className="h-4 w-4" />,
-          onClick: (row) => handleDelete([row]),
+      label: "Delete",
+      icon: <Trash className="h-4 w-4" />,
+      onClick: (row) => handleDelete([row]),
         });
       }
     }
@@ -126,13 +126,13 @@ const DataPageLayout = ({
         <div className="flex space-x-2 mb-8">
           {ExportComponent && <ExportComponent />}
           {!hideActions && (
-            <Button onClick={() => router.push(newItemUrl)}>
-              <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
-            </Button>
+          <Button onClick={() => router.push(newItemUrl)}>
+            <Plus className="mr-2 h-4 w-4" /> {newButtonLabel}
+          </Button>
           )}
         </div>
       </div>
-      <main className="max-w-6xl mx-auto space-y-6">
+      <main className="max-w-[90vw] mx-auto space-y-2">
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardContent className="p-6">
             {data.length === 0 ? (
@@ -149,7 +149,7 @@ const DataPageLayout = ({
                   baseUrl={baseUrl}
                 />
                 {!hideActions && showBulkDelete && selectedRows.length > 0 && (
-                  <div className="flex space-x-2 mt-4">
+                <div className="flex space-x-2 mt-4">
                     <Button
                       variant="destructive"
                       onClick={() => handleDelete(selectedRows)}
@@ -157,12 +157,12 @@ const DataPageLayout = ({
                       <Trash className="mr-2 h-4 w-4" />
                       Delete Selected ({selectedRows.length})
                     </Button>
-                    {ExportComponent && data.length > 0 && (
-                      <div className="ml-auto">
-                        <ExportComponent />
-                      </div>
-                    )}
-                  </div>
+                  {ExportComponent && data.length > 0 && (
+                    <div className="ml-auto">
+                      <ExportComponent />
+                    </div>
+                  )}
+                </div>
                 )}
               </>
             )}

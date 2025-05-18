@@ -50,6 +50,7 @@ const BusinessPermitsPage = ({ data }) => {
       accessorKey: "validity",
       header: "Validity",
       cell: (row) => new Date(row.validity).toLocaleDateString(),
+      enableSorting: true,
     },
     {
       accessorKey: "status",
@@ -67,6 +68,7 @@ const BusinessPermitsPage = ({ data }) => {
           {row.status}
         </span>
       ),
+      enableSorting: true,
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },

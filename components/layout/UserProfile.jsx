@@ -46,27 +46,27 @@ const UserProfile = ({
 
         <div className="flex-1 space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900 mb-2">
-                {fullName}
-              </h1>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="bg-gray-100/80 text-gray-600 hover:bg-gray-100">
-                  {role}
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900 mb-2">
+              {fullName}
+            </h1>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="bg-gray-100/80 text-gray-600 hover:bg-gray-100">
+                {role}
+              </Badge>
+              {demographics?.maritalStatus && (
+                <Badge variant="outline">
+                  {demographics.maritalStatus.charAt(0).toUpperCase() + demographics.maritalStatus.slice(1)}
                 </Badge>
-                {demographics?.maritalStatus && (
-                  <Badge variant="outline">
-                    {demographics.maritalStatus.charAt(0).toUpperCase() + demographics.maritalStatus.slice(1)}
-                  </Badge>
-                )}
-                {status?.residencyStatus && (
-                  <Badge variant="outline" className="bg-blue-50">
-                    {status.residencyStatus.split('-').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                    ).join(' ')}
-                  </Badge>
-                )}
-              </div>
+              )}
+              {status?.residencyStatus && (
+                <Badge variant="outline" className="bg-blue-50">
+                  {status.residencyStatus.split('-').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                  ).join(' ')}
+                </Badge>
+              )}
+            </div>
             </div>
             <Button
               onClick={() => router.push('/dashboard/profile/edit')}

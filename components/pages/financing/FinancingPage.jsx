@@ -25,21 +25,8 @@ export default function FinancingPage({ data }) {
       cell: ( row ) => (
         <div className="font-medium">{row.title}</div>
       ),
-    },
-    {
-      accessorKey: "approvalState",
-      header: "Status",
-      cell: ( row ) => {
-        const state = row.approvalState || APPROVAL_STATES.DRAFT;
-        const stateConfig = approvalStateVariants[state] || approvalStateVariants[APPROVAL_STATES.DRAFT];
-        return (
-          <Badge variant={stateConfig.variant} className="capitalize">
-            {stateConfig.icon}
-            {stateConfig.label}
-          </Badge>
-        );
+      enableSorting: true,
       },
-    },
     {
       accessorKey: "accountType",
       header: "Account Type",
@@ -48,16 +35,19 @@ export default function FinancingPage({ data }) {
           {row.accountType?.replace(/_/g, ' ') || 'N/A'}
         </span>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "fiscalYear",
       header: "Fiscal Year",
       cell: ( row ) => row.fiscalYear || 'N/A',
+      enableSorting: true,
     },
     {
       accessorKey: "budgetedAmount",
       header: "Budgeted",
       cell: ( row ) => formatGovCurrency(row.budgetedAmount || 0),
+      enableSorting: true,
     },
     {
       accessorKey: "createdBy",
@@ -68,6 +58,7 @@ export default function FinancingPage({ data }) {
       accessorKey: "createdAt",
       header: "Created Date",
       cell: ( row ) => row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'N/A',
+      enableSorting: true,
     },
   ];
   return (

@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { InfoItem } from '@/components/ui/info-item'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { useAuth } from '@/hooks/use-auth'
 import { 
   ClipboardList, 
   Users, 
@@ -26,7 +27,8 @@ import {
   Percent, 
   Target, 
   BarChart, 
-  BanknoteIcon 
+  BanknoteIcon,
+  ExternalLink 
 } from 'lucide-react'
 import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
@@ -45,6 +47,8 @@ import {
 export function ViewProjectPage({ id }) {
   const router = useRouter()
   const { toast } = useToast()
+  const { isAdmin, isStaff } = useAuth()
+  const hasAdminAccess = isAdmin || isStaff
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [financing, setFinancing] = useState(null)
@@ -64,10 +68,30 @@ export function ViewProjectPage({ id }) {
         setProject(projectResponse.data)
         
         if (projectResponse.data.relatedFinancing) {
+          // Check if relatedFinancing is a string ID or an object with an id
+          const financingId = typeof projectResponse.data.relatedFinancing === 'string' 
+            ? projectResponse.data.relatedFinancing 
+            : projectResponse.data.relatedFinancing.id;
+
           const relatedFinancing = financingOptions.find(
-            option => option.value === projectResponse.data.relatedFinancing
+            option => option.value === financingId
           )
-          setFinancing(relatedFinancing)
+          
+          if (relatedFinancing) {
+            setFinancing(relatedFinancing)
+          } else {
+            // If we couldn't find it in the options, create a basic entry from the data
+            const financingData = typeof projectResponse.data.relatedFinancing === 'object' 
+              ? projectResponse.data.relatedFinancing
+              : null;
+            
+            if (financingData) {
+              setFinancing({
+                label: `${financingData.title || 'Unknown'} ${financingData.fiscalYear ? `(${financingData.fiscalYear})` : ''}`,
+                value: financingData.id
+              });
+            }
+          }
         }
       } catch (error) {
         toast({
@@ -345,7 +369,24 @@ export function ViewProjectPage({ id }) {
                   <span>Budget/Financing</span>
                 </div>
               }
-              value={financing ? financing.label : 'Not specified'}
+              value={
+                hasAdminAccess && financing?.value ? (
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-left font-normal hover:underline"
+                    onClick={() => router.push(`/dashboard/financing/${financing.value}`)}
+                  >
+                    <span className="mr-1">{financing.label}</span>
+                    <ExternalLink className="h-3 w-3 inline" />
+                  </Button>
+                ) : (
+                  financing ? financing.label : (
+                    project.relatedFinancing && typeof project.relatedFinancing === 'object' && project.relatedFinancing.title
+                    ? `${project.relatedFinancing.title} ${project.relatedFinancing.fiscalYear ? `(${project.relatedFinancing.fiscalYear})` : ''}`
+                    : 'Not specified'
+                  )
+                )
+              }
             />
           </CardContent>
         </Card>

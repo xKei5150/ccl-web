@@ -17,10 +17,10 @@ export default function ProfilePage() {
       />
       
       <div className="max-w-4xl mx-auto">
-        <UserProfile 
-          personalInfo={user?.personalInfo}
-          role={role}
-        />
+      <UserProfile 
+        personalInfo={user?.personalInfo}
+        role={role}
+      />
       </div>
     </div>
   );

@@ -71,13 +71,13 @@ export default function ViewBusinessPermitPage({ data }) {
           ) : null}
           
           {canEdit ? (
-            <Button
-              onClick={() => router.push(`/dashboard/business-permits/${data.id}/edit`)}
-              className="flex items-center gap-2"
-            >
-              <PenSquare className="h-4 w-4" />
-              Edit Permit
-            </Button>
+          <Button
+            onClick={() => router.push(`/dashboard/business-permits/${data.id}/edit`)}
+            className="flex items-center gap-2"
+          >
+            <PenSquare className="h-4 w-4" />
+            Edit Permit
+          </Button>
           ) : (
             <TooltipProvider>
               <Tooltip>

@@ -22,6 +22,7 @@ export default function HouseholdPage({ data }) {
     {
       header: "Family Name",
       accessorKey: "familyName",
+      enableSorting: true,
     },
     {
       header: "Local Address",
@@ -31,6 +32,7 @@ export default function HouseholdPage({ data }) {
       header: "Members",
       accessorKey: "members",
       cell: (row) => row.members?.length || 0,
+      enableSorting: true,
     },
     {
       header: "Residency Date",
@@ -39,6 +41,7 @@ export default function HouseholdPage({ data }) {
         const date = row.residencyDate;
         return date ? format(new Date(date), 'PP') : 'Not specified';
       },
+      enableSorting: true,
     },
     {
       header: "Status",
@@ -51,6 +54,7 @@ export default function HouseholdPage({ data }) {
           {row.status}
         </span>
       ),
+      enableSorting: true,
     },
   ];
 

@@ -21,6 +21,7 @@ import {
 } from "@/lib/finance-utils";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import FinancingAuditHistory from "./FinancingAuditHistory";
 import ExportButton from "./ExportButton";
 
@@ -44,6 +45,8 @@ const approvalStateVariants = {
 
 export default function ViewFinancingPage({ data }) {
   const router = useRouter();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
   const [calculatedTotal, setCalculatedTotal] = useState(0);
   const [groupSubtotals, setGroupSubtotals] = useState([]);
   const [expandedGroups, setExpandedGroups] = useState({});
@@ -237,10 +240,14 @@ export default function ViewFinancingPage({ data }) {
       </div>
       
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className={`grid w-full ${hasAdminAccess ? 'grid-cols-3' : 'grid-cols-1'}`}>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="calculations">Calculations</TabsTrigger>
-          <TabsTrigger value="audit">Audit Trail</TabsTrigger>
+          {hasAdminAccess && (
+            <>
+              <TabsTrigger value="calculations">Calculations</TabsTrigger>
+              <TabsTrigger value="audit">Audit Trail</TabsTrigger>
+            </>
+          )}
         </TabsList>
         
         <TabsContent value="overview" className="mt-6">
@@ -507,76 +514,80 @@ export default function ViewFinancingPage({ data }) {
           </div>
         </TabsContent>
         
-        <TabsContent value="calculations" className="mt-6">
-          <div className="space-y-6">
-            {/* Group Subtotals Summary */}
-            <Card>
-              <CardHeader className="bg-gray-50 border-b">
-                <CardTitle>Group Subtotals</CardTitle>
-              </CardHeader>
-              <CardContent className="py-0">
-                {data.groups && data.groups.length > 0 ? (
-                  <div className="divide-y">
-                    {data.groups.map((group, index) => (
-                      <div key={index} className="py-3 px-1 flex justify-between items-center">
-                        <span className="font-medium">{group.title}</span>
-                        <Badge variant="outline" className="font-mono">
-                          {formatGovCurrency(groupSubtotals[index])}
-                        </Badge>
+        {hasAdminAccess && (
+          <>
+            <TabsContent value="calculations" className="mt-6">
+              <div className="space-y-6">
+                {/* Group Subtotals Summary */}
+                <Card>
+                  <CardHeader className="bg-gray-50 border-b">
+                    <CardTitle>Group Subtotals</CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-0">
+                    {data.groups && data.groups.length > 0 ? (
+                      <div className="divide-y">
+                        {data.groups.map((group, index) => (
+                          <div key={index} className="py-3 px-1 flex justify-between items-center">
+                            <span className="font-medium">{group.title}</span>
+                            <Badge variant="outline" className="font-mono">
+                              {formatGovCurrency(groupSubtotals[index])}
+                            </Badge>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-4 text-center text-gray-500">No groups to display</div>
-                )}
-              </CardContent>
-            </Card>
+                    ) : (
+                      <div className="py-4 text-center text-gray-500">No groups to display</div>
+                    )}
+                  </CardContent>
+                </Card>
+                
+                {/* Calculation Steps Card */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center">
+                        <Calculator className="h-5 w-5 mr-2" />
+                        Calculation Steps
+                      </CardTitle>
+                      <CardDescription>
+                        Step-by-step breakdown of the calculation process
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowCalculationSteps(!showCalculationSteps)}
+                    >
+                      {showCalculationSteps ? "Hide Steps" : "Show Steps"}
+                    </Button>
+                  </CardHeader>
+                  {showCalculationSteps && (
+                    <CardContent>
+                      {renderCalculationSteps()}
+                    </CardContent>
+                  )}
+                </Card>
+              </div>
+            </TabsContent>
             
-            {/* Calculation Steps Card */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
+            <TabsContent value="audit" className="mt-6">
+              <Card>
+                <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Calculator className="h-5 w-5 mr-2" />
-                    Calculation Steps
+                    <History className="h-5 w-5 mr-2" />
+                    Audit Trail
                   </CardTitle>
                   <CardDescription>
-                    Step-by-step breakdown of the calculation process
+                    Complete history of changes to this record
                   </CardDescription>
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowCalculationSteps(!showCalculationSteps)}
-                >
-                  {showCalculationSteps ? "Hide Steps" : "Show Steps"}
-                </Button>
-              </CardHeader>
-              {showCalculationSteps && (
+                </CardHeader>
                 <CardContent>
-                  {renderCalculationSteps()}
+                  <FinancingAuditHistory recordId={data.id} />
                 </CardContent>
-              )}
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="audit" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <History className="h-5 w-5 mr-2" />
-                Audit Trail
-              </CardTitle>
-              <CardDescription>
-                Complete history of changes to this record
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FinancingAuditHistory recordId={data.id} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </Card>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   );

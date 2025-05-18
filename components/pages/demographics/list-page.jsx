@@ -16,6 +16,7 @@ const DemographicsListPage = ({ data }) => {
           <span>{row.year}</span>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "totalPopulation",
@@ -26,6 +27,7 @@ const DemographicsListPage = ({ data }) => {
           <span>{row.totalPopulation}</span>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "maleCount",
@@ -36,6 +38,7 @@ const DemographicsListPage = ({ data }) => {
           <span>{row.maleCount}</span>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "femaleCount",
@@ -46,6 +49,7 @@ const DemographicsListPage = ({ data }) => {
           <span>{row.femaleCount}</span>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "householdsCount",
@@ -66,6 +70,7 @@ const DemographicsListPage = ({ data }) => {
           <span>{row.voterCount || "N/A"}</span>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "pwdCount",
@@ -76,6 +81,7 @@ const DemographicsListPage = ({ data }) => {
           <span>{row.pwdCount || "N/A"}</span>
         </div>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "ageGroups",
@@ -110,6 +116,7 @@ const DemographicsListPage = ({ data }) => {
           </div>
         );
       },
+      enableSorting: true,
     },
   ];
 

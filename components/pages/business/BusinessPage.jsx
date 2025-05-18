@@ -19,10 +19,12 @@ const BusinessPage = ({ data }) => {
       accessorKey: "registrationDate",
       header: "Registration Date",
       cell: (row) => new Date(row.registrationDate).toLocaleDateString(),
+      enableSorting: true,
     },
     {
       accessorKey: "businessEmailAddress",
       header: "Business Email",
+      enableSorting: true,
     },
   ];
 

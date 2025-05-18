@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const PersonalPage = ({ data }) => {
   const columns = [
     {
-      accessorKey: "photo",
+      accessorKey: "Photo",
       header: "",
       cell: (row) => {
         const photoUrl = row.photo?.url;
@@ -40,11 +40,13 @@ const PersonalPage = ({ data }) => {
     {
       accessorKey: "name.fullName",
       header: "Full Name",
+      enableSorting: true,
     },
     {
       accessorKey: "demographics.birthDate",
       header: "Birth Date",
       cell: (row) => row.demographics?.birthDate ? new Date(row.demographics.birthDate).toLocaleDateString() : 'N/A',
+      enableSorting: true,
     },
     {
       accessorKey: "demographics.sex",
@@ -54,6 +56,7 @@ const PersonalPage = ({ data }) => {
           {row.demographics?.sex || 'N/A'}
         </span>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "contact.emailAddress",
@@ -68,6 +71,7 @@ const PersonalPage = ({ data }) => {
           {row.demographics?.maritalStatus || 'N/A'}
         </span>
       ),
+      enableSorting: true,
     },
     {
       accessorKey: "status.residencyStatus",

@@ -34,6 +34,7 @@ export function ProjectsPage({ data }) {
           {row.projectType?.replace('_', ' ') || 'N/A'}
         </span>
       ),
+      enableSorting: true,
     },
     {
       header: 'Status',
@@ -48,16 +49,19 @@ export function ProjectsPage({ data }) {
           {row.status?.replace('_', ' ') || 'N/A'}
         </span>
       ),
+      enableSorting: true,
     },
     {
       header: 'Start Date',
       accessorKey: 'startDate',
       cell: (row) => row.startDate ? new Date(row.startDate).toLocaleDateString() : 'N/A',
+      enableSorting: true,
     },
     {
       header: 'End Date',
       accessorKey: 'endDate',
       cell: (row) => row.endDate ? new Date(row.endDate).toLocaleDateString() : 'N/A',
+      enableSorting: true,
     },
     {
       header: 'Location',

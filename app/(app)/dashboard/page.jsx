@@ -26,7 +26,7 @@ export default async function Dashboard() {
             className="absolute inset-0 z-0"
             style={{
               backgroundImage: `url(${siteSettings.heroImage.url})`,
-              backgroundSize: 'cover',
+              backgroundSize: 'contain',
               backgroundPosition: 'center',
               filter: 'brightness(0.6)',
               opacity: 0.9

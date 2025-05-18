@@ -15,10 +15,12 @@ const ReportsPage = ({ data }) => {
       accessorKey: "date",
       header: "Date",
       cell: (row) => new Date(row.date).toLocaleDateString(),
+      enableSorting: true,
     },
     {
       accessorKey: "location",
       header: "Location",
+      enableSorting: true,
     },
     {
       accessorKey: "reportStatus",

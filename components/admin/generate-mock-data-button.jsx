@@ -24,7 +24,7 @@ export default function GenerateMockDataButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [errorDetails, setErrorDetails] = useState(null)
   const [recoveryOption, setRecoveryOption] = useState(null)
-  const [recordCount, setRecordCount] = useState(5)
+  const [recordCount, setRecordCount] = useState(20)
 
   async function handleGenerateMockData() {
     try {

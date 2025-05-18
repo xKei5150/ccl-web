@@ -38,7 +38,7 @@ function BarangayResidencyCertificate({ requestData = {}, settings = {} }) {
   const barangayName = settings?.barangayDetails?.barangayName || 'Malabanban Norte';
   const municipality = settings?.barangayDetails?.municipality || 'Candelaria';
   const province = settings?.barangayDetails?.province || 'Quezon';
-  const applicantAddress = contact.localAddress ? `${contact.localAddress}, ${barangayName} ${municipality}, ${province}` : `${barangayName} ${municipality}, ${province}`;
+  const applicantAddress = contact.localAddress ? `${contact.localAddress}` : `${barangayName}, ${municipality}, ${province}`;
   
   // Get certificate text from settings
   const certificateTitle = settings?.certificateTypes?.residency?.title || 'BARANGAY RESIDENCY';

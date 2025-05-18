@@ -29,13 +29,19 @@ export async function deleteProject(ids) {
 }
 
 export async function getFinancingOptions() {
-  const response = await genericFind("financing", 1, 100);
-  if (!response) {
+  try {
+    const response = await genericFind("financing", 1, 100);
+    if (!response || !response.docs || !Array.isArray(response.docs)) {
+      console.log('Invalid financing response', response);
+      return [];
+    }
+    
+    return response.docs.map(record => ({
+      label: `${record.title}${record.fiscalYear ? ` (${record.fiscalYear})` : ''}`,
+      value: record.id
+    }));
+  } catch (error) {
+    console.error('Error fetching financing options:', error);
     return [];
   }
-  console.log('financing response', response.docs);
-  return response.docs.map(record => ({
-    label: `${record.title} (${record.fiscalYear})`,
-    value: record.id
-  }));
 } 

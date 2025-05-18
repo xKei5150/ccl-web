@@ -80,13 +80,13 @@ const ViewRequestPage = ({ data }) => {
           )}
           
           {canEdit && (
-            <Button
-              onClick={() => router.push(`/dashboard/general-requests/${data.id}/edit`)}
-              className="flex items-center gap-2"
-            >
-              <PenSquare className="h-4 w-4" />
-              Edit Request
-            </Button>
+          <Button
+            onClick={() => router.push(`/dashboard/general-requests/${data.id}/edit`)}
+            className="flex items-center gap-2"
+          >
+            <PenSquare className="h-4 w-4" />
+            Edit Request
+          </Button>
           )}
         </div>
       </PageHeader>

@@ -16,7 +16,10 @@ const FinancingAuditLog: CollectionConfig = {
     },
     create: () => false, // Only created via hooks
     update: () => false, // Immutable
-    delete: () => false, // Immutable
+    delete: ({ req: { user } }) => {
+      if (user?.role === 'admin') return true;
+      return false;
+    },
   },
   fields: [
     {
@@ -50,7 +53,10 @@ const FinancingAuditLog: CollectionConfig = {
       name: 'record',
       type: 'relationship',
       relationTo: 'financing',
-      required: true,
+      // admin: {
+      //   condition: ({ data }) => data?.action !== 'delete', // Hide for delete actions
+      //   description: 'Reference to the financing record (not available for deleted records)'
+      // }
     },
     {
       name: 'financingTitle',
@@ -113,6 +119,21 @@ const FinancingAuditLog: CollectionConfig = {
         };
       },
     ],
+    beforeValidate: [
+      ({ data }) => {
+        // Skip record validation for delete actions
+        if (data.action === 'delete') {
+          return data;
+        }
+        
+        // For other actions, ensure record is provided
+        if (!data.record) {
+          throw new Error('Record is required for non-delete actions');
+        }
+        
+        return data;
+      }
+    ]
   },
 };
 

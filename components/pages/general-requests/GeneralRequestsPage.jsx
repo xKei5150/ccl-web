@@ -46,11 +46,13 @@ const GeneralRequestsPage = ({ data }) => {
         
         return fullName;
       },
+      enableSorting: true,
     },
     {
       accessorKey: "type",
       header: "Type",
       cell: (row) => requestTypeMap[row.type] || row.type,
+      enableSorting: true,
     },
     {
       accessorKey: "purpose",
@@ -81,11 +83,13 @@ const GeneralRequestsPage = ({ data }) => {
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
+      enableSorting: true,
     },
     {
       accessorKey: "createdAt",
       header: "Date Submitted",
       cell: (row) => new Date(row.createdAt).toLocaleDateString(),
+      enableSorting: true,
     },
   ];
 
