@@ -132,6 +132,25 @@ export async function updateReport(newData, id) {
   }
 }
 
+export async function updateReportStatus(id, statusData) {
+  try {
+    if (!id) {
+      throw new Error("Report ID is required");
+    }
+
+    const result = await genericUpdate("reports", id, statusData);
+    
+    if (result.success) {
+      revalidatePath("/dashboard/reports");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Error updating report status:", error);
+    throw error;
+  }
+}
+
 export async function deleteReport(ids) {
   return genericDelete("reports", ids, `/dashboard/reports`);
 }

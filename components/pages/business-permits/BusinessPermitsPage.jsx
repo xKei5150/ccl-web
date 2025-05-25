@@ -3,7 +3,7 @@
 
 import { Tickets, Printer, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { deleteBusinessPermit } from "@/app/(app)/dashboard/business-permits/actions";
+import { deleteBusinessPermit, updateBusinessPermitStatus } from "@/app/(app)/dashboard/business-permits/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
@@ -112,6 +112,17 @@ const BusinessPermitsPage = ({ data }) => {
     },
   ];
 
+  const statusConfig = {
+    field: "status",
+    options: [
+      { label: "Pending", value: "pending" },
+      { label: "Approved", value: "approved" },
+      { label: "Rejected", value: "rejected" },
+    ],
+    updateAction: updateBusinessPermitStatus,
+    showCondition: () => hasAdminAccess, // Only admin/staff can change status
+  };
+
   return (
     <DataPageLayout
       title="Business Permits"
@@ -127,6 +138,7 @@ const BusinessPermitsPage = ({ data }) => {
       defaultActions={defaultActions}
       customFilters={customFilters}
       hideDeleteButton={!hasAdminAccess}
+      statusConfig={statusConfig}
     />
   );
 };

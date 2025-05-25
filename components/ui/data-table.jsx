@@ -389,6 +389,16 @@ export function DataTable({
                           
                           if (!shouldShow) return null;
                           
+                          // If action has a custom component, render it
+                          if (action.component) {
+                            return (
+                              <div key={actionIndex}>
+                                {action.component(row)}
+                              </div>
+                            );
+                          }
+                          
+                          // Otherwise render the default button
                           return (
                             <Button
                               key={actionIndex}

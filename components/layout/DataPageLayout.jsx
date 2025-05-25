@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryParams } from "@/hooks/use-query-parans";
 import { ConfirmationDialog } from "@/components/layout/ConfirmationDialog";
 import { useState } from "react";
+import StatusAction from "@/components/ui/status-action";
 
 const DataPageLayout = ({
   title,
@@ -28,6 +29,8 @@ const DataPageLayout = ({
   exportComponent: ExportComponent,
   hideActions = false,
   hideDeleteButton = false,
+  // Status action props
+  statusConfig = null, // { field: "status", options: [...], updateAction: fn, showCondition: fn }
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -108,6 +111,23 @@ const DataPageLayout = ({
         });
       }
     }
+  }
+
+  // Add status action if configured
+  if (statusConfig && statusConfig.updateAction && statusConfig.options?.length > 0) {
+    actionsToUse.push({
+      label: "Status",
+      component: (row) => (
+        <StatusAction
+          row={row}
+          statusField={statusConfig.field || "status"}
+          statusOptions={statusConfig.options}
+          updateAction={statusConfig.updateAction}
+          disabled={statusConfig.showCondition ? !statusConfig.showCondition(row) : false}
+        />
+      ),
+      showCondition: statusConfig.showCondition || (() => true),
+    });
   }
 
   // Combine with any custom actions

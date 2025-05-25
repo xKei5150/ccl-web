@@ -2,7 +2,7 @@
 
 import { FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { deleteReport } from "@/app/(app)/dashboard/reports/actions";
+import { deleteReport, updateReportStatus } from "@/app/(app)/dashboard/reports/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -70,6 +70,18 @@ const ReportsPage = ({ data }) => {
     },
   ];
 
+  const statusConfig = {
+    field: "reportStatus",
+    options: [
+      { label: "Open", value: "open" },
+      { label: "In Progress", value: "inProgress" },
+      { label: "Requires Presence at Barangay", value: "requiresPresence" },
+      { label: "Closed", value: "closed" },
+    ],
+    updateAction: updateReportStatus,
+    showCondition: () => hasAdminAccess, // Only admin/staff can change status
+  };
+
   return (
     <DataPageLayout
       title="Reports"
@@ -84,6 +96,7 @@ const ReportsPage = ({ data }) => {
       defaultActions={defaultActions}
       hideDeleteButton={!hasAdminAccess}
       hideCreateButton={!hasAdminAccess}
+      statusConfig={statusConfig}
     />
   );
 };

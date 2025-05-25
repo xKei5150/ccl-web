@@ -2,7 +2,7 @@
 
 import { Tickets, Printer, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { deleteRequest } from "@/app/(app)/dashboard/general-requests/actions";
+import { deleteRequest, updateRequestStatus } from "@/app/(app)/dashboard/general-requests/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -135,6 +135,19 @@ const GeneralRequestsPage = ({ data }) => {
     },
   ];
 
+  const statusConfig = {
+    field: "status",
+    options: [
+      { label: "Pending", value: "pending" },
+      { label: "Processing", value: "processing" },
+      { label: "Approved", value: "approved" },
+      { label: "Rejected", value: "rejected" },
+      { label: "Completed", value: "completed" },
+    ],
+    updateAction: updateRequestStatus,
+    showCondition: () => hasAdminAccess, // Only admin/staff can change status
+  };
+
   return (
     <DataPageLayout
       title="General Requests"
@@ -150,6 +163,7 @@ const GeneralRequestsPage = ({ data }) => {
       customActions={customActions}
       defaultActions={defaultActions}
       hideDeleteButton={!hasAdminAccess}
+      statusConfig={statusConfig}
     />
   );
 };

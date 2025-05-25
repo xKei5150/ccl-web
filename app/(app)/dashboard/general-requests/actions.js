@@ -9,6 +9,7 @@ import {
 } from "@/lib/services/PayloadDataService";
 import { payload } from "@/lib/payload";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 export async function getRequests(page = 1, limit = 10) {
   try {
@@ -64,6 +65,25 @@ export async function createRequest(data) {
 
 export async function updateRequest(newData, id) {
   return genericUpdate("requests", id, newData, `/dashboard/general-requests/${id}`);
+}
+
+export async function updateRequestStatus(id, statusData) {
+  try {
+    if (!id) {
+      throw new Error("Request ID is required");
+    }
+
+    const result = await genericUpdate("requests", id, statusData);
+    
+    if (result.success) {
+      revalidatePath("/dashboard/general-requests");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Error updating request status:", error);
+    throw error;
+  }
 }
 
 export async function deleteRequest(ids) {
