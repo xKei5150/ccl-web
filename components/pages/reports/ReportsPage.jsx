@@ -4,8 +4,11 @@ import { FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { deleteReport } from "@/app/(app)/dashboard/reports/actions";
 import DataPageLayout from "@/components/layout/DataPageLayout";
+import { useAuth } from "@/hooks/use-auth";
 
 const ReportsPage = ({ data }) => {
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
   const columns = [
     {
       accessorKey: "title",
@@ -31,11 +34,14 @@ const ReportsPage = ({ data }) => {
             "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize",
             row.reportStatus === "open" ? "bg-blue-100 text-blue-800" :
             row.reportStatus === "inProgress" ? "bg-yellow-100 text-yellow-800" :
+            row.reportStatus === "requiresPresence" ? "bg-orange-100 text-orange-800" :
             row.reportStatus === "closed" ? "bg-green-100 text-green-800" :
             "bg-gray-100 text-gray-800"
           )}
         >
-          {row.reportStatus === "inProgress" ? "In Progress" : row.reportStatus}
+          {row.reportStatus === "inProgress" ? "In Progress" : 
+           row.reportStatus === "requiresPresence" ? "Requires Presence" : 
+           row.reportStatus}
         </span>
       ),
     },
@@ -51,6 +57,19 @@ const ReportsPage = ({ data }) => {
     },
   ];
 
+  const defaultActions = [
+    {
+      label: "Edit",
+      icon: null,
+      showCondition: () => hasAdminAccess,
+    },
+    {
+      label: "Delete",
+      icon: null,
+      showCondition: () => hasAdminAccess,
+    },
+  ];
+
   return (
     <DataPageLayout
       title="Reports"
@@ -59,9 +78,12 @@ const ReportsPage = ({ data }) => {
       columns={columns}
       data={data}
       baseUrl="/dashboard/reports"
-      newItemUrl="/dashboard/reports/new"
+      newItemUrl={hasAdminAccess ? "/dashboard/reports/new" : null}
       deleteAction={deleteReport}
       newButtonLabel="New Report"
+      defaultActions={defaultActions}
+      hideDeleteButton={!hasAdminAccess}
+      hideCreateButton={!hasAdminAccess}
     />
   );
 };

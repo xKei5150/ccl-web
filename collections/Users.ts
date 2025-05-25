@@ -53,7 +53,7 @@ const Users: CollectionConfig = {
       if (user?.role === 'admin') return true;
       return false;
     },
-    admin: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
+    // admin: ({ req: { user } }) => user && ['admin', 'staff'].includes(user.role),
   },
 };
 

@@ -23,15 +23,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClipboardList, Plus, Trash2, Calendar, MapPin, MessageCircle, Tag, AlignLeft, Users, FileText, X, Save } from "lucide-react";
+import { ClipboardList, Plus, Trash2, Calendar, MapPin, MessageCircle, Tag, AlignLeft, Users, FileText, X, Save, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import DynamicSupportingDocument from "@/components/fields/DynamicSupportingDocument";
+import { PersonalInfoSelect } from "./PersonalInfoSelect";
 
 const reportSchema = z.object({
   title: z.string().min(1, "Title is required"),
   date: z.string().min(1, "Date is required"),
   description: z.string().min(1, "Description is required"),
   location: z.string().min(1, "Location is required"),
+  reportedBy: z.number(),
   involvedPersons: z.array(z.object({
     name: z.string().min(1, "Name is required"),
     role: z.string().min(1, "Role is required"),
@@ -39,7 +41,7 @@ const reportSchema = z.object({
     personalInfo: z.string().optional(),
   })),
   supportingDocuments: z.array(z.any()),
-  reportStatus: z.enum(["open", "inProgress", "closed"]).default("open"),
+  reportStatus: z.enum(["open", "inProgress", "requiresPresence", "closed"]).default("open"),
 });
 
 export default function ReportForm({
@@ -48,6 +50,7 @@ export default function ReportForm({
     date: new Date().toISOString().split('T')[0],
     description: "",
     location: "",
+    reportedBy: "",
     involvedPersons: [],
     supportingDocuments: [],
     reportStatus: "open"
@@ -167,6 +170,26 @@ export default function ReportForm({
 
               <FormField
                 control={form.control}
+                name="reportedBy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      Reported By
+                    </FormLabel>
+                    <FormControl>
+                      <PersonalInfoSelect 
+                        onSelect={field.onChange} 
+                        defaultValue={field.value} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="reportStatus"
                 render={({ field }) => (
                   <FormItem>
@@ -183,6 +206,7 @@ export default function ReportForm({
                       <SelectContent>
                         <SelectItem value="open">Open</SelectItem>
                         <SelectItem value="inProgress">In Progress</SelectItem>
+                        <SelectItem value="requiresPresence">Requires Presence at Barangay</SelectItem>
                         <SelectItem value="closed">Closed</SelectItem>
                       </SelectContent>
                     </Select>

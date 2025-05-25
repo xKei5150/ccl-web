@@ -25,7 +25,7 @@ const citizenAllowedPaths = [
   '/dashboard',
   '/dashboard/posts',
   '/dashboard/general-requests',
-  // '/dashboard/reports',
+  '/dashboard/reports',
   '/dashboard/profile',
   '/dashboard/financing',
 ];

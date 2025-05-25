@@ -20,18 +20,45 @@ export async function getReports(page = 1, limit = 10) {
         const headersList = await headers();
         const { user } = await payload.auth({ headers: headersList });
         
-        // If user is not admin/staff, only show their requests
+        // If user is not admin/staff, filter based on their involvement
         const query = {
           where: {}
         };
         
         if (user && !['admin', 'staff'].includes(user.role)) {
-          query.where = {
-            'submittedBy': {
-              equals: user.id
-            }
-          };
+          // For debugging: log the user object to see what's available
+          console.log('User object in getReports:', JSON.stringify(user, null, 2));
+          
+          // Citizens can see reports they submitted or reports where they are the reporter
+          if (user.personalInfo) {
+            const personalInfoId = typeof user.personalInfo === 'object' ? user.personalInfo.id : user.personalInfo;
+            console.log('Personal Info ID:', personalInfoId);
+            query.where = {
+              or: [
+                {
+                  submittedBy: {
+                    equals: user.id
+                  }
+                },
+                {
+                  reportedBy: {
+                    equals: personalInfoId
+                  }
+                }
+              ]
+            };
+          } else {
+            console.log('User has no personalInfo linked');
+            // Fallback: only show reports they submitted
+            query.where = {
+              submittedBy: {
+                equals: user.id
+              }
+            };
+          }
         }
+        
+        console.log('Final query for reports:', JSON.stringify(query, null, 2));
     return genericFind("reports", page, limit, query);
   } catch (e) {
     console.error("Error fetching reports:", e);
@@ -83,6 +110,7 @@ export async function updateReport(newData, id) {
       description: newData.description,
       location: newData.location,
       reportStatus: newData.reportStatus,
+      reportedBy: newData.reportedBy,
       involvedPersons: newData.involvedPersons || [],
       supportingDocuments: newData.supportingDocuments || []
     };

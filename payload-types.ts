@@ -362,6 +362,10 @@ export interface Report {
   date: string;
   description: string;
   location: string;
+  /**
+   * Select the person who reported this incident
+   */
+  reportedBy: number | PersonalInformation;
   involvedPersons?:
     | {
         name: string;
@@ -372,7 +376,7 @@ export interface Report {
       }[]
     | null;
   supportingDocuments?: (number | SupportingDocument)[] | null;
-  reportStatus?: ('open' | 'inProgress' | 'closed') | null;
+  reportStatus?: ('open' | 'inProgress' | 'requiresPresence' | 'closed') | null;
   submittedBy: number | User;
   updatedAt: string;
   createdAt: string;
@@ -1028,6 +1032,7 @@ export interface ReportsSelect<T extends boolean = true> {
   date?: T;
   description?: T;
   location?: T;
+  reportedBy?: T;
   involvedPersons?:
     | T
     | {

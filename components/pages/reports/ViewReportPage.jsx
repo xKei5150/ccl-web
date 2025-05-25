@@ -10,9 +10,12 @@ import { InfoItem } from "@/components/ui/info-item";
 import { cn } from "@/lib/utils";
 import DocumentPreview from "@/components/layout/DocumentPreview";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/use-auth";
 
 function ViewReportPage({ data }) {
   const router = useRouter();
+  const { isAdmin, isStaff } = useAuth();
+  const hasAdminAccess = isAdmin || isStaff;
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -45,13 +48,15 @@ function ViewReportPage({ data }) {
             Back to List
           </Button>
           
-          <Button
-            onClick={() => router.push(`/dashboard/reports/${data.id}/edit`)}
-            className="flex items-center gap-2"
-          >
-            <PenSquare className="h-4 w-4" />
-            Edit Report
-          </Button>
+          {hasAdminAccess && (
+            <Button
+              onClick={() => router.push(`/dashboard/reports/${data.id}/edit`)}
+              className="flex items-center gap-2"
+            >
+              <PenSquare className="h-4 w-4" />
+              Edit Report
+            </Button>
+          )}
         </div>
       </PageHeader>
 
